@@ -3336,6 +3336,75 @@ a:hover {
     color: #e5e7eb;
 }
 
+/* === ONAY (CONFIRM) MODALI – ZORLA ORTAYA AL === */
+
+/* Arka plan perdesi */
+#confirmOverlay,
+.confirm-overlay,
+#confirmDialogOverlay {
+    position: fixed !important;
+    inset: 0 !important; /* top/right/bottom/left hepsi 0 */
+    display: flex !important;
+    align-items: center !important;      /* dikey ortala */
+    justify-content: center !important;  /* yatay ortala */
+    padding: 1rem !important;
+    background: rgba(15, 23, 42, 0.65) !important;
+    z-index: var(--z-modal-backdrop);
+}
+
+/* Kartın kendisi */
+#confirmDialog,
+.confirm-dialog,
+.confirm-modal {
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    background: var(--bg, #ffffff) !important;
+    border-radius: 1rem !important;
+    box-shadow: var(--shadow-xl) !important;
+    border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    color: var(--text-primary) !important;
+    padding: 1rem 1.25rem 0.9rem !important;
+}
+
+/* Başlık & mesaj (varsa bu class’larla kullan) */
+.confirm-dialog-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.confirm-dialog-message {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.9rem;
+}
+
+/* Butonlar */
+.confirm-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.confirm-dialog-actions .btn {
+    border-radius: var(--radius-full);
+    padding-inline: 1.1rem;
+    font-size: 0.85rem;
+}
+
+/* Dark tema */
+[data-theme="dark"] #confirmDialog,
+[data-theme="dark"] .confirm-dialog,
+[data-theme="dark"] .confirm-modal {
+    background: rgba(15, 23, 42, 0.98) !important;
+    border-color: rgba(30, 64, 175, 0.7) !important;
+    color: #e5e7eb !important;
+}
+
+
 
 
 
