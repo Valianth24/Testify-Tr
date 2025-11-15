@@ -336,15 +336,133 @@ const Utils = {
     },
 
     /**
-     * Confirm dialog gösterir
+     * Modern confirm dialog
+     * @param {string} message - Mesaj
+     * @param {string} title - Başlık
+     * @returns {Promise<boolean>} - Kullanıcı onayı
+     */
+    async showConfirm(message, title = 'Onay') {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('customConfirmModal');
+            const titleEl = document.getElementById('confirmTitle');
+            const messageEl = document.getElementById('confirmMessage');
+            const okBtn = document.getElementById('confirmOkBtn');
+            const cancelBtn = document.getElementById('confirmCancelBtn');
+
+            if (!modal || !titleEl || !messageEl || !okBtn || !cancelBtn) {
+                // Fallback: modal yoksa tarayıcı confirm'i kullan
+                resolve(confirm(message));
+                return;
+            }
+
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            modal.style.display = 'flex';
+
+            const cleanup = () => {
+                modal.style.display = 'none';
+                okBtn.onclick = null;
+                cancelBtn.onclick = null;
+            };
+
+            okBtn.onclick = () => {
+                cleanup();
+                resolve(true);
+            };
+
+            cancelBtn.onclick = () => {
+                cleanup();
+                resolve(false);
+            };
+
+            // ESC tuşu ile kapat
+            const escHandler = (e) => {
+                if (e.key === 'Escape') {
+                    cleanup();
+                    resolve(false);
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+        });
+    },
+
+    /**
+     * Modern prompt dialog
+     * @param {string} message - Mesaj
+     * @param {string} title - Başlık
+     * @param {string} defaultValue - Varsayılan değer
+     * @returns {Promise<string|null>} - Kullanıcı girişi
+     */
+    async showPrompt(message, title = 'Giriş', defaultValue = '') {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('customPromptModal');
+            const titleEl = document.getElementById('promptTitle');
+            const messageEl = document.getElementById('promptMessage');
+            const inputEl = document.getElementById('promptInput');
+            const okBtn = document.getElementById('promptOkBtn');
+            const cancelBtn = document.getElementById('promptCancelBtn');
+
+            if (!modal || !titleEl || !messageEl || !inputEl || !okBtn || !cancelBtn) {
+                // Fallback: modal yoksa tarayıcı prompt'u kullan
+                resolve(prompt(message, defaultValue));
+                return;
+            }
+
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            inputEl.value = defaultValue;
+            modal.style.display = 'flex';
+            
+            // Input'a focus
+            setTimeout(() => inputEl.focus(), 100);
+
+            const cleanup = () => {
+                modal.style.display = 'none';
+                okBtn.onclick = null;
+                cancelBtn.onclick = null;
+                inputEl.onkeypress = null;
+            };
+
+            okBtn.onclick = () => {
+                const value = inputEl.value.trim();
+                cleanup();
+                resolve(value || null);
+            };
+
+            cancelBtn.onclick = () => {
+                cleanup();
+                resolve(null);
+            };
+
+            // Enter tuşu ile onayla
+            inputEl.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    const value = inputEl.value.trim();
+                    cleanup();
+                    resolve(value || null);
+                }
+            };
+
+            // ESC tuşu ile kapat
+            const escHandler = (e) => {
+                if (e.key === 'Escape') {
+                    cleanup();
+                    resolve(null);
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+        });
+    },
+
+    /**
+     * Geriye uyumluluk için eski confirm fonksiyonu
      * @param {string} message - Mesaj
      * @returns {Promise<boolean>} - Kullanıcı onayı
      */
     async confirm(message) {
-        return new Promise((resolve) => {
-            const result = window.confirm(message);
-            resolve(result);
-        });
+        return this.showConfirm(message, 'Onay');
     },
 
     /**
