@@ -78,7 +78,7 @@ const App = {
             }
             
             if (streak) {
-                const streakText = window.t ? t('header.streak', 'Gün') : 'Gün';
+                const streakText = t('header.streak', 'Gün');
                 const streakSpan = streak.querySelector('span[data-i18n="header.streak"]');
                 if (streakSpan) {
                     streak.innerHTML = `${userData.stats.streak} <span data-i18n="header.streak">${streakText}</span>`;
@@ -88,7 +88,7 @@ const App = {
             }
             
             if (totalPoints) {
-                const xpText = window.t ? t('header.points', 'XP') : 'XP';
+                const xpText = t('header.points', 'XP');
                 const xpSpan = totalPoints.querySelector('span[data-i18n="header.points"]');
                 if (xpSpan) {
                     totalPoints.innerHTML = `${userData.stats.xp} <span data-i18n="header.points">${xpText}</span>`;
@@ -201,7 +201,7 @@ const App = {
     },
 
     /**
-     * ✅ DÜZELTME: Tab navigasyonu - Library kontrolü + sayfa/advert yenileme
+     * Tab navigasyonu - Library kontrolü + sayfa/advert yenileme
      */
     switchTab(tabName, options = {}) {
         try {
@@ -220,15 +220,13 @@ const App = {
                 content.classList.toggle('active', content.id === tabName);
             });
 
-            // ✅ Tab'a özel yüklemeler
-            switch(tabName) {
+            // Tab'a özel yüklemeler
+            switch (tabName) {
                 case 'library':
-                    // ✅ DÜZELTME: LibraryManager kontrolü
                     if (window.LibraryManager && typeof LibraryManager.loadLibrary === 'function') {
                         LibraryManager.loadLibrary();
                     } else {
                         console.warn('⚠️ LibraryManager henüz yüklenmedi');
-                        // Biraz bekleyip tekrar dene
                         setTimeout(() => {
                             if (window.LibraryManager) {
                                 LibraryManager.loadLibrary();
@@ -322,9 +320,7 @@ const App = {
             if (!activityList) return;
 
             if (activities.length === 0) {
-                const emptyText = window.t 
-                    ? t('dashboard.empty', 'Henüz aktivite yok. Test çözerek başla!')
-                    : 'Henüz aktivite yok. Test çözerek başla!';
+                const emptyText = t('dashboard.empty', 'Henüz aktivite yok. Test çözerek başla!');
                 
                 activityList.innerHTML = `
                     <div class="empty-state">
@@ -360,11 +356,11 @@ const App = {
      */
     getActivityTitle(activity) {
         const titles = {
-            'test_completed': '✅ ' + (window.t ? t('activity.testCompleted', 'Test Tamamlandı') : 'Test Tamamlandı'),
-            'test_saved': '💾 ' + (window.t ? t('activity.testSaved', 'Test Kaydedildi') : 'Test Kaydedildi'),
-            'test_exported': '📥 ' + (window.t ? t('activity.testExported', 'Test İndirildi') : 'Test İndirildi'),
-            'note_created': '📝 ' + (window.t ? t('activity.noteCreated', 'Not Oluşturuldu') : 'Not Oluşturuldu'),
-            'level_up': '🎉 ' + (window.t ? t('activity.levelUp', 'Level Atlandı') : 'Level Atlandı')
+            'test_completed': '✅ ' + t('activity.testCompleted', 'Test Tamamlandı'),
+            'test_saved': '💾 ' + t('activity.testSaved', 'Test Kaydedildi'),
+            'test_exported': '📥 ' + t('activity.testExported', 'Test İndirildi'),
+            'note_created': '📝 ' + t('activity.noteCreated', 'Not Oluşturuldu'),
+            'level_up': '🎉 ' + t('activity.levelUp', 'Level Atlandı')
         };
         return titles[activity.type] || 'Aktivite';
     },
@@ -373,7 +369,7 @@ const App = {
      * Aktivite açıklaması
      */
     getActivityDescription(activity) {
-        switch(activity.type) {
+        switch (activity.type) {
             case 'test_completed':
                 return `${activity.data.correctAnswers}/${activity.data.totalQuestions} doğru - %${activity.data.successRate} başarı`;
             case 'test_saved':
@@ -400,9 +396,7 @@ const App = {
             if (!tbody) return;
 
             if (leaderboard.length === 0) {
-                const emptyText = window.t 
-                    ? t('leaderboard.empty', 'Henüz veri bulunmuyor')
-                    : 'Henüz veri bulunmuyor';
+                const emptyText = t('leaderboard.empty', 'Henüz veri bulunmuyor');
                 
                 tbody.innerHTML = `
                     <tr>
@@ -455,9 +449,7 @@ const App = {
             if (!notesList) return;
 
             if (notes.length === 0) {
-                const emptyText = window.t 
-                    ? t('notes.empty', 'Henüz not eklemedin')
-                    : 'Henüz not eklemedin';
+                const emptyText = t('notes.empty', 'Henüz not eklemedin');
                 
                 notesList.innerHTML = `
                     <div class="empty-state">
@@ -469,8 +461,8 @@ const App = {
             }
 
             notesList.innerHTML = notes.map(note => {
-                const editText = window.t ? t('notes.edit', 'Düzenle') : 'Düzenle';
-                const deleteText = window.t ? t('notes.delete', 'Sil') : 'Sil';
+                const editText = t('notes.edit', 'Düzenle');
+                const deleteText = t('notes.delete', 'Sil');
                 
                 return `
                     <div class="note-card">
@@ -501,8 +493,8 @@ const App = {
      */
     async addNote() {
         try {
-            const titlePrompt = window.t ? t('notes.titlePrompt', 'Not Başlığı:') : 'Not Başlığı:';
-            const contentPrompt = window.t ? t('notes.contentPrompt', 'Not İçeriği:') : 'Not İçeriği:';
+            const titlePrompt = t('notes.titlePrompt', 'Not Başlığı:');
+            const contentPrompt = t('notes.contentPrompt', 'Not İçeriği:');
             
             const title = prompt(titlePrompt);
             if (!title) return;
@@ -534,8 +526,8 @@ const App = {
             
             if (!note) return;
 
-            const titlePrompt = window.t ? t('notes.titlePrompt', 'Not Başlığı:') : 'Not Başlığı:';
-            const contentPrompt = window.t ? t('notes.contentPrompt', 'Not İçeriği:') : 'Not İçeriği:';
+            const titlePrompt = t('notes.titlePrompt', 'Not Başlığı:');
+            const contentPrompt = t('notes.contentPrompt', 'Not İçeriği:');
             
             const title = prompt(titlePrompt, note.title);
             if (title === null) return;
@@ -560,10 +552,7 @@ const App = {
      */
     async deleteNote(noteId) {
         try {
-            const confirmMsg = window.t 
-                ? t('notes.deleteConfirm', 'Bu notu silmek istediğinizden emin misiniz?')
-                : 'Bu notu silmek istediğinizden emin misiniz?';
-            
+            const confirmMsg = t('notes.deleteConfirm', 'Bu notu silmek istediğinizden emin misiniz?');
             const confirmed = await Utils.confirm(confirmMsg);
             
             if (confirmed && StorageManager.deleteNote(noteId)) {
@@ -587,9 +576,7 @@ const App = {
             if (!analysisContent) return;
 
             if (stats.totalTests === 0) {
-                const emptyText = window.t 
-                    ? t('analysis.empty', 'Analiz için daha fazla test çöz')
-                    : 'Analiz için daha fazla test çöz';
+                const emptyText = t('analysis.empty', 'Analiz için daha fazla test çöz');
                 
                 analysisContent.innerHTML = `
                     <div class="empty-state">
@@ -603,11 +590,11 @@ const App = {
             const successRate = Math.round((stats.correctAnswers / stats.totalQuestions) * 100);
             const avgTime = Math.round(stats.totalTime / stats.totalTests);
 
-            const avgSuccessText = window.t ? t('analysis.avgSuccess', 'Ortalama Başarı') : 'Ortalama Başarı';
-            const avgTimeText = window.t ? t('analysis.avgTime', 'Ortalama Süre') : 'Ortalama Süre';
-            const totalCorrectText = window.t ? t('analysis.totalCorrect', 'Toplam Doğru') : 'Toplam Doğru';
-            const totalWrongText = window.t ? t('analysis.totalWrong', 'Toplam Yanlış') : 'Toplam Yanlış';
-            const evaluationText = window.t ? t('analysis.evaluation', 'Performans Değerlendirmesi') : 'Performans Değerlendirmesi';
+            const avgSuccessText = t('analysis.avgSuccess', 'Ortalama Başarı');
+            const avgTimeText = t('analysis.avgTime', 'Ortalama Süre');
+            const totalCorrectText = t('analysis.totalCorrect', 'Toplam Doğru');
+            const totalWrongText = t('analysis.totalWrong', 'Toplam Yanlış');
+            const evaluationText = t('analysis.evaluation', 'Performans Değerlendirmesi');
 
             analysisContent.innerHTML = `
                 <div class="stats-grid">
@@ -680,7 +667,7 @@ const App = {
     },
 
     /**
-     * ✅ DÜZELTME: Ayarları kaydeder - Validation ile
+     * Ayarları kaydeder - Validation ile
      */
     saveSettings(event) {
         event.preventDefault();
@@ -690,7 +677,7 @@ const App = {
             const usernameInput = form.username;
             const emailInput = form.email;
 
-            // ✅ Validation
+            // Validation
             const isUsernameValid = Utils.validateInput(usernameInput, 'username');
             const isEmailValid = Utils.validateInput(emailInput, 'email');
 
@@ -701,7 +688,6 @@ const App = {
             const username = usernameInput.value.trim();
             const email = emailInput.value.trim();
 
-            // Kaydet
             const settings = {
                 username: username,
                 email: email,
@@ -717,11 +703,11 @@ const App = {
             userData.settings.notifications = settings.notifications;
 
             if (StorageManager.updateUserData(userData)) {
-                const successMsg = window.t ? t('msg.saved', 'Başarıyla kaydedildi!') : 'Başarıyla kaydedildi!';
+                const successMsg = t('msg.saved', 'Başarıyla kaydedildi!');
                 Utils.showToast(successMsg, 'success');
                 this.loadUserData();
             } else {
-                const errorMsg = window.t ? t('msg.error', 'Bir hata oluştu!') : 'Bir hata oluştu!';
+                const errorMsg = t('msg.error', 'Bir hata oluştu!');
                 Utils.showToast(errorMsg, 'error');
             }
         } catch (error) {
@@ -735,21 +721,27 @@ const App = {
      */
     async resetSettings() {
         try {
-            const confirmMsg = window.t 
-                ? t('settings.resetConfirm', 'Ayarlar varsayılan değerlere dönecek. Emin misiniz?')
-                : 'Ayarlar varsayılan değerlere dönecek. Emin misiniz?';
+            const confirmMsg = t(
+                'settings.resetConfirm',
+                'Ayarlar varsayılan değerlere dönecek. Emin misiniz?'
+            );
             
             const confirmed = await Utils.confirm(confirmMsg);
             
             if (!confirmed) return;
 
             const userData = StorageManager.getUserData();
-            document.getElementById('username').value = userData.username;
-            document.getElementById('email').value = userData.email || '';
-            document.getElementById('emailNotif').checked = true;
-            document.getElementById('pushNotif').checked = false;
+            const usernameEl = document.getElementById('username');
+            const emailEl = document.getElementById('email');
+            const emailNotifEl = document.getElementById('emailNotif');
+            const pushNotifEl = document.getElementById('pushNotif');
 
-            const infoMsg = window.t ? t('msg.reset', 'Ayarlar sıfırlandı') : 'Ayarlar sıfırlandı';
+            if (usernameEl) usernameEl.value = userData.username;
+            if (emailEl) emailEl.value = userData.email || '';
+            if (emailNotifEl) emailNotifEl.checked = true;
+            if (pushNotifEl) pushNotifEl.checked = false;
+
+            const infoMsg = t('msg.reset', 'Ayarlar sıfırlandı');
             Utils.showToast(infoMsg, 'info');
         } catch (error) {
             console.error('Ayar sıfırlama hatası:', error);
@@ -758,7 +750,7 @@ const App = {
     },
 
     /**
-     * ✅ DÜZELTME: Dosya yükleme - Validation ile
+     * Dosya yükleme - Validation ile
      */
     handleFileUpload(event) {
         try {
@@ -767,7 +759,7 @@ const App = {
 
             // Dosya boyutu kontrolü
             if (file.size > Config.FILE_UPLOAD.MAX_SIZE) {
-                const errorMsg = window.t ? t('error.fileSize', 'Dosya boyutu çok büyük') : 'Dosya boyutu çok büyük';
+                const errorMsg = t('error.fileSize', 'Dosya boyutu çok büyük');
                 Utils.showToast(errorMsg, 'error');
                 return;
             }
@@ -775,7 +767,7 @@ const App = {
             // Dosya türü kontrolü
             const ext = file.name.split('.').pop().toLowerCase();
             if (!Config.FILE_UPLOAD.ALLOWED_TYPES.includes(ext)) {
-                const errorMsg = window.t ? t('error.fileType', 'Desteklenmeyen dosya türü') : 'Desteklenmeyen dosya türü';
+                const errorMsg = t('error.fileType', 'Desteklenmeyen dosya türü');
                 Utils.showToast(errorMsg, 'error');
                 return;
             }
@@ -801,7 +793,7 @@ const App = {
                 notesInput.value = `${baseText}Bu test için yüklenen dosya: ${file.name} (${Utils.formatFileSize(file.size)}).`;
             }
 
-            const successMsg = window.t ? t('msg.fileUploaded', 'Dosya yüklendi!') : 'Dosya yüklendi!';
+            const successMsg = t('msg.fileUploaded', 'Dosya yüklendi!');
             Utils.showToast(successMsg, 'success');
         } catch (error) {
             console.error('Dosya yükleme hatası:', error);
@@ -814,6 +806,16 @@ const App = {
      */
     attachEventListeners() {
         try {
+            // LOGO → DASHBOARD (ana sayfa)
+            const logoLink = document.getElementById('logoLink');
+            if (logoLink) {
+                logoLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.switchTab('dashboard');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
             // Tab navigasyonu
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
@@ -854,7 +856,7 @@ const App = {
                 addNoteBtn.addEventListener('click', () => this.addNote());
             }
 
-            // Tema değiştir
+            // Tema değiştir - HTML'den erişim için
             window.themeManager = this.themeManager;
 
             console.log('✅ Event listener\'lar eklendi');
@@ -870,7 +872,7 @@ document.addEventListener('DOMContentLoaded', () => {
     App.init();
     App.handleInitialTabFromHash();
 
-    // TestifyAI'yi başlat (varsa init fonksiyonu)
+    // TestifyAI'yi başlat (varsa)
     try {
         if (typeof TestifyAI !== 'undefined' && TestifyAI && typeof TestifyAI.init === 'function') {
             TestifyAI.init();
@@ -900,7 +902,7 @@ window.addEventListener('popstate', (event) => {
     }
 });
 
-// SPA helper
+// Eski örnekteki gibi kullanmak istersen: SPA içinde sekme değiştirme helper'ı
 window.navigateTo = function(tabName) {
     if (!tabName) return;
     if (!document.getElementById(tabName)) return;
