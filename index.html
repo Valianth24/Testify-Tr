@@ -51,15 +51,15 @@
     <!-- jsPDF for PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
+    <!-- TestifyAI -->
     <script src="testify-core.js"></script>   <!-- window.TestifyAI burada tanımlanmalı -->
     <script>
-        // Gerçek TestifyAI nesnesini body sonundaki scriptte atayacağız.
+        // Gerçek TestifyAI nesnesi sonradan gelmezse en azından undefined olmasın
         window.TestifyAI = window.TestifyAI || { __placeholder: true };
     </script>
     <script src="testify-ai.js"></script>
     <script src="chat-bridge.v11.js"></script>
 
-    
     <!-- Schema.org Markup -->
     <script type="application/ld+json">
     {
@@ -71,8 +71,7 @@
     }
     </script>
     
-
-        <!-- Floating Testfy Assistant Styles (YENİ) -->
+    <!-- Floating Testfy Assistant Styles (YENİ) -->
     <style>
         /* AI mesaj içi formatlama */
         .message-content strong {
@@ -180,11 +179,11 @@
             justify-content:space-between;
             background:linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,64,175,0.95));
             color:#f9fafb;
-            cursor:grab;                /* 🔹 move yerine grab */
-            user-select:none;           /* 🔹 metin seçilmesin */
+            cursor:grab;
+            user-select:none;
             -webkit-user-select:none;
         }
-        .chat-header.dragging{          /* 🔹 sürüklerken el işareti */
+        .chat-header.dragging{
             cursor:grabbing;
         }
         .chat-title{
@@ -257,7 +256,6 @@
             }
         }
     </style>
-
 </head>
 <body>
     <!-- Skip to Main Content (Accessibility) -->
@@ -267,7 +265,8 @@
     <header class="header" role="banner">
         <div class="header-content">
             <div class="header-top">
-                <a href="/" class="logo" aria-label="Testify Ana Sayfa">
+                <!-- LOGO: id="logoLink" EKLENDİ -->
+                <a href="/" id="logoLink" class="logo" aria-label="Testify Ana Sayfa">
                     <span role="img" aria-label="Eğitim ikonu">🎓</span>
                     <span data-i18n="app.name">Testify</span>
                 </a>
@@ -450,8 +449,7 @@
                                 ← <span data-i18n="quiz.prev">Önceki</span>
                             </button>
                             <button class="btn btn-primary" id="nextBtn" aria-label="Sonraki soru">
-                                <span data-i18n="quiz.next">Sonraki</span> →
-                            </button>
+                                <span data-i18n="quiz.next">Sonraki</span> →</button>
                             <button class="btn btn-primary" id="submitBtn" style="display:none" aria-label="Testi bitir" data-i18n="quiz.finish">
                                 Testi Bitir
                             </button>
@@ -693,7 +691,8 @@
 
     <!-- Floating Testfy Assistant -->
     <div class="chat-widget-wrapper" aria-live="polite">
-        <button id="chatToggleBtn" class="chat-toggle-btn" type="button" aria-label="Testfy asistanını aç">
+        <!-- Başlangıçta chat açık olsun diye toggle butonu gizli -->
+        <button id="chatToggleBtn" class="chat-toggle-btn chat-toggle-btn--hidden" type="button" aria-label="Testfy asistanını aç">
             <span class="chat-toggle-initial">T</span>
             <span class="chat-toggle-text">Testfy</span>
         </button>
@@ -761,13 +760,199 @@
     <script src="sorular.js"></script>
     <script src="language.js"></script>
     <script src="library.js"></script>
-    <!-- AdSense Manager JS (yni sistem) -->
+    <!-- AdSense Manager JS (yeni sistem) -->
     <script src="adsense-manager.js"></script>
 
-    <!-- APP + QUIZ JS (ayrı dosyalar) -->
+    <!-- APP + QUIZ JS -->
     <script src="app.js"></script>
     <script src="quiz-manager.js"></script>
 
+    <!-- Chat drag (sürükleme + el işareti) -->
     <script src="chat-drag.js"></script>
+
+    <!-- Chat UI: aç/kapa, küçült, mesaj gönder + TestifyAI entegrasyon denemesi -->
+    <script>
+    (function () {
+        'use strict';
+
+        function normalizeAIResponse(res) {
+            if (res == null) return '';
+            if (typeof res === 'string') return res;
+            if (typeof res === 'object') {
+                if (res.text) return res.text;
+                if (res.reply) return res.reply;
+                if (res.message) return res.message;
+                if (res.content) return res.content;
+            }
+            try {
+                return JSON.stringify(res);
+            } catch {
+                return String(res);
+            }
+        }
+
+        async function sendToAI(message) {
+            const ai =
+                (window.aiChat && !window.aiChat.__placeholder ? window.aiChat : null) ||
+                (window.TestifyAI && !window.TestifyAI.__placeholder ? window.TestifyAI : null);
+
+            if (!ai) {
+                return 'Şu anda yapay zeka bağlantısı hazır değil görünüyor. Lütfen sayfayı yenileyip tekrar deneyin.';
+            }
+
+            const candidates = [
+                { name: 'chat', args: [message, { source: 'floating-chat' }] },
+                { name: 'sendMessage', args: [message] },
+                { name: 'ask', args: [message] },
+                { name: 'handleChatMessage', args: [message] },
+                { name: 'handleUserPrompt', args: [message, { source: 'floating-chat' }] }
+            ];
+
+            for (const c of candidates) {
+                if (typeof ai[c.name] === 'function') {
+                    const res = await ai[c.name](...c.args);
+                    return normalizeAIResponse(res);
+                }
+            }
+
+            return 'Yapay zeka modülü yüklü ancak sohbet fonksiyonu bulunamadı. chat-bridge.v11.js içindeki fonksiyon adını bu dosyadaki sendToAI() listesine eklemen yeterli.';
+        }
+
+        function initChatUI() {
+            const widget = document.getElementById('chatWidget');
+            const toggleBtn = document.getElementById('chatToggleBtn');
+            const minimizeBtn = document.getElementById('chatMinimizeBtn');
+            const closeBtn = document.getElementById('chatCloseBtn');
+            const input = document.getElementById('aiInput');
+            const sendBtn = document.getElementById('aiSendBtn');
+            const chatLog = document.getElementById('aiChat');
+
+            if (!widget || !toggleBtn || !chatLog) return;
+
+            let isOpen = widget.classList.contains('chat-widget--open');
+            let isMinimized = widget.classList.contains('chat-widget--minimized');
+            let isSending = false;
+
+            function syncAria() {
+                widget.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+            }
+
+            function openWidget() {
+                if (isOpen) return;
+                isOpen = true;
+                isMinimized = false;
+                widget.classList.add('chat-widget--open');
+                widget.classList.remove('chat-widget--minimized');
+                toggleBtn.classList.add('chat-toggle-btn--hidden');
+                syncAria();
+                setTimeout(() => {
+                    if (input) input.focus();
+                }, 100);
+            }
+
+            function closeWidget() {
+                if (!isOpen) return;
+                isOpen = false;
+                isMinimized = false;
+                widget.classList.remove('chat-widget--open', 'chat-widget--minimized');
+                toggleBtn.classList.remove('chat-toggle-btn--hidden');
+                syncAria();
+            }
+
+            function toggleMinimize() {
+                if (!isOpen) {
+                    openWidget();
+                    return;
+                }
+                isMinimized = !isMinimized;
+                widget.classList.toggle('chat-widget--minimized', isMinimized);
+            }
+
+            toggleBtn.addEventListener('click', openWidget);
+            if (closeBtn) closeBtn.addEventListener('click', closeWidget);
+            if (minimizeBtn) minimizeBtn.addEventListener('click', toggleMinimize);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && isOpen) {
+                    closeWidget();
+                }
+            });
+
+            function appendMessage(role, text, opts = {}) {
+                const msg = document.createElement('div');
+                msg.className = 'chat-message chat-message--' + role;
+                if (opts.thinking) msg.classList.add('chat-message--thinking');
+
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-message-bubble';
+
+                const content = document.createElement('div');
+                content.className = 'message-content';
+                content.textContent = text;
+
+                bubble.appendChild(content);
+                msg.appendChild(bubble);
+                chatLog.appendChild(msg);
+                chatLog.scrollTop = chatLog.scrollHeight;
+
+                return {
+                    element: msg,
+                    update(newText) {
+                        content.textContent = newText;
+                        msg.classList.remove('chat-message--thinking');
+                        chatLog.scrollTop = chatLog.scrollHeight;
+                    }
+                };
+            }
+
+            async function handleSend() {
+                if (!input || !input.value.trim() || isSending) return;
+                const text = input.value.trim();
+                input.value = '';
+                appendMessage('user', text);
+                isSending = true;
+
+                const thinking = appendMessage('assistant', 'Yazıyor...', { thinking: true });
+
+                try {
+                    const reply = await sendToAI(text);
+                    thinking.update(reply || 'Herhangi bir yanıt alınamadı.');
+                } catch (err) {
+                    console.error('AI chat error:', err);
+                    thinking.update('Bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+                } finally {
+                    isSending = false;
+                }
+            }
+
+            if (sendBtn) sendBtn.addEventListener('click', handleSend);
+            if (input) {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSend();
+                    }
+                });
+            }
+
+            // İlk açıldığında karşılama mesajı
+            if (chatLog && chatLog.children.length === 0) {
+                appendMessage(
+                    'assistant',
+                    'Merhaba, ben Testfy yapay zeka asistanıyım. Test, soru ve analiz konularında sana yardımcı olabilirim. ✨'
+                );
+            }
+
+            // Başlangıçtaki aria durumu
+            syncAria();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initChatUI);
+        } else {
+            initChatUI();
+        }
+    })();
+    </script>
 </body>
 </html>
