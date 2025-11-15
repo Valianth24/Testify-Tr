@@ -16,7 +16,7 @@
 'use strict';
 
 const TestifyAI = {
-    version: '12.0.0-PROFESSIONAL',
+    version: '12.0.1-PROFESSIONAL',
     name: 'Testify AI - Professional Education System',
     
     /**
@@ -48,6 +48,21 @@ const TestifyAI = {
         isGenerating: false,
         lastRequest: 0,
         currentTest: null
+    },
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * UI STATE (Aç / Kapa / Küçült)
+     * ═══════════════════════════════════════════════════════════════════
+     */
+    ui: {
+        isOpen: true,
+        isMinimized: false,
+        panel: null,
+        toggleBtn: null,
+        closeBtn: null,
+        minimizeBtn: null,
+        expandBtn: null
     },
     
     /**
@@ -215,6 +230,149 @@ const TestifyAI = {
             testTab.classList.add('highlight-pulse');
             setTimeout(() => testTab.classList.remove('highlight-pulse'), 3000);
         }
+    },
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * PANEL UI KONTROLLERİ (Aç / Kapa / Küçült)
+     * ═══════════════════════════════════════════════════════════════════
+     */
+
+    initUI() {
+        try {
+            // Panel
+            const panel = document.querySelector(
+                '[data-ai-panel], #aiPanel, #aiAssistantPanel, #aiChatPanel'
+            );
+            this.ui.panel = panel;
+
+            // Butonlar
+            const toggleBtn = document.querySelector(
+                '[data-ai-toggle], #aiToggleBtn, #openAiPanelBtn'
+            );
+            const closeBtn = document.querySelector(
+                '[data-ai-close], #aiCloseBtn'
+            );
+            const minimizeBtn = document.querySelector(
+                '[data-ai-minimize], #aiMinimizeBtn'
+            );
+            const expandBtn = document.querySelector(
+                '[data-ai-expand], #aiExpandBtn'
+            );
+
+            this.ui.toggleBtn = toggleBtn;
+            this.ui.closeBtn = closeBtn;
+            this.ui.minimizeBtn = minimizeBtn;
+            this.ui.expandBtn = expandBtn;
+
+            if (!panel) {
+                console.warn('⚠️ AI panel bulunamadı (data-ai-panel / #aiPanel / #aiAssistantPanel / #aiChatPanel)');
+            } else {
+                // Başlangıçta açık
+                panel.classList.add('ai-panel--open');
+                panel.classList.remove('ai-panel--closed');
+                panel.classList.remove('ai-panel--minimized');
+                this.ui.isOpen = true;
+                this.ui.isMinimized = false;
+            }
+
+            // Eventler
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.togglePanel();
+                });
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.closePanel();
+                });
+            }
+
+            if (minimizeBtn) {
+                minimizeBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.toggleMinimize();
+                });
+            }
+
+            if (expandBtn) {
+                expandBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.expandPanel();
+                });
+            }
+
+            console.log('✅ TestifyAI UI kontrolleri hazır (aç/kapa/küçült)');
+
+        } catch (error) {
+            console.error('❌ TestifyAI UI init hatası:', error);
+        }
+    },
+
+    openPanel() {
+        const panel = this.ui.panel;
+        if (!panel) return;
+
+        panel.classList.add('ai-panel--open');
+        panel.classList.remove('ai-panel--closed');
+        panel.classList.remove('ai-panel--minimized');
+
+        this.ui.isOpen = true;
+        this.ui.isMinimized = false;
+    },
+
+    closePanel() {
+        const panel = this.ui.panel;
+        if (!panel) return;
+
+        panel.classList.remove('ai-panel--open');
+        panel.classList.add('ai-panel--closed');
+        panel.classList.remove('ai-panel--minimized');
+
+        this.ui.isOpen = false;
+        this.ui.isMinimized = false;
+    },
+
+    togglePanel() {
+        if (this.ui.isOpen) {
+            this.closePanel();
+        } else {
+            this.openPanel();
+        }
+    },
+
+    toggleMinimize() {
+        const panel = this.ui.panel;
+        if (!panel) return;
+
+        this.ui.isMinimized = !this.ui.isMinimized;
+
+        if (this.ui.isMinimized) {
+            panel.classList.add('ai-panel--minimized');
+            panel.classList.add('ai-panel--open');   // görünür ama küçük
+            panel.classList.remove('ai-panel--closed');
+            this.ui.isOpen = true;
+        } else {
+            panel.classList.remove('ai-panel--minimized');
+            panel.classList.add('ai-panel--open');
+            panel.classList.remove('ai-panel--closed');
+            this.ui.isOpen = true;
+        }
+    },
+
+    expandPanel() {
+        const panel = this.ui.panel;
+        if (!panel) return;
+
+        panel.classList.remove('ai-panel--minimized');
+        panel.classList.add('ai-panel--open');
+        panel.classList.remove('ai-panel--closed');
+
+        this.ui.isMinimized = false;
+        this.ui.isOpen = true;
     },
     
     /**
@@ -870,19 +1028,36 @@ Sadece geçerli JSON döndür.`;
             console.error('❌ Test yüklenemedi:', error);
         }
         return null;
+    },
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * PUBLIC INIT
+     * ═══════════════════════════════════════════════════════════════════
+     */
+    init() {
+        console.log('🚀 TestifyAI.init() çağrıldı');
+        this.initUI();
+        this.loadSavedTest();
     }
 };
 
 // Export globally
 window.TestifyAI = TestifyAI;
 
+// Eski inline fonksiyon isimlerine destek (varsa)
+window.openAiPanel = () => window.TestifyAI && TestifyAI.openPanel();
+window.closeAiPanel = () => window.TestifyAI && TestifyAI.closePanel();
+window.toggleAiPanel = () => window.TestifyAI && TestifyAI.togglePanel();
+window.minimizeAiPanel = () => window.TestifyAI && TestifyAI.toggleMinimize();
+
 /**
  * ═══════════════════════════════════════════════════════════════════════
- * INITIALIZATION
+ * INITIALIZATION LOGS
  * ═══════════════════════════════════════════════════════════════════════
  */
 console.log('\n' + '═'.repeat(80));
-console.log('🎓 TESTIFY AI v12.0 PROFESSIONAL');
+console.log('🎓 TESTIFY AI v12.0.1 PROFESSIONAL');
 console.log('═'.repeat(80));
 console.log('\n📚 Model: GPT-4o-mini');
 console.log('🎯 Quality: Professional Academic Standard');
@@ -890,5 +1065,5 @@ console.log('🔬 Framework: Research-Based Pedagogy');
 console.log('🔢 Format: 5 Options (A, B, C, D, E)');
 console.log('🎲 Answers: Balanced randomized distribution\n');
 console.log('━'.repeat(80));
-console.log('✨ Testify AI hazır!');
+console.log('✨ Testify AI hazır (UI + Test üretimi)!');
 console.log('━'.repeat(80) + '\n');
