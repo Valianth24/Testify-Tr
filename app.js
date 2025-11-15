@@ -861,15 +861,6 @@ const App = {
             // Tema değiştir
             window.themeManager = this.themeManager;
 
-            // Logo tıklama eventi - Dashboard'a dön
-const logo = document.querySelector('.logo');
-if (logo) {
-    logo.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.switchTab('dashboard');
-    });
-}
-
             console.log('✅ Event listener\'lar eklendi');
         } catch (error) {
             console.error('Event listener hatası:', error);
