@@ -453,7 +453,7 @@ const App = {
                 
                 notesList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">📚</div>
+                        <div class="empty-state-icon">📝</div>
                         <p>${emptyText}</p>
                     </div>
                 `;
@@ -489,18 +489,24 @@ const App = {
     },
 
     /**
-     * Not ekler
+     * Not ekler – ÖNCE modalı kullanır, yoksa prompt’a düşer
      */
     async addNote() {
         try {
+            // Yeni modal sistemimiz varsa onu kullan
+            if (window.NoteModal && typeof window.NoteModal.openCreate === 'function') {
+                window.NoteModal.openCreate();
+                return;
+            }
+
+            // Fallback: tarayıcı prompt (teoride artık kullanılmayacak)
             const titlePrompt = t('notes.titlePrompt', 'Not Başlığı:');
             const contentPrompt = t('notes.contentPrompt', 'Not İçeriği:');
             
             const title = prompt(titlePrompt);
             if (!title) return;
 
-            const content = prompt(contentPrompt);
-            if (!content) return;
+            const content = prompt(contentPrompt) || '';
 
             const note = {
                 title: title,
@@ -517,7 +523,7 @@ const App = {
     },
 
     /**
-     * Not düzenler
+     * Not düzenler – modal varsa onu kullanır
      */
     async editNote(noteId) {
         try {
@@ -526,6 +532,13 @@ const App = {
             
             if (!note) return;
 
+            // Modal sistemimiz varsa onu kullan
+            if (window.NoteModal && typeof window.NoteModal.openEdit === 'function') {
+                window.NoteModal.openEdit(note);
+                return;
+            }
+
+            // Fallback: eski prompt tabanlı düzenleme
             const titlePrompt = t('notes.titlePrompt', 'Not Başlığı:');
             const contentPrompt = t('notes.contentPrompt', 'Not İçeriği:');
             
@@ -807,7 +820,10 @@ const App = {
     attachEventListeners() {
         try {
             // LOGO → DASHBOARD (ana sayfa)
-            const logoLink = document.getElementById('logoLink');
+            let logoLink = document.getElementById('logoLink');
+            if (!logoLink) {
+                logoLink = document.querySelector('.header .logo');
+            }
             if (logoLink) {
                 logoLink.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -850,10 +866,13 @@ const App = {
                 });
             }
 
-            // Not ekleme butonu
+            // Not ekleme butonu → App.addNote (içeride modal açıyor)
             const addNoteBtn = document.getElementById('addNoteBtn');
             if (addNoteBtn) {
-                addNoteBtn.addEventListener('click', () => this.addNote());
+                addNoteBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.addNote();
+                });
             }
 
             // Tema değiştir - HTML'den erişim için
@@ -924,4 +943,180 @@ window.navigateTo = function(tabName) {
             console.log('📊 Kullanıcı sayfaya geri döndü');
         }
     });
+})();
+
+/* === NOT EKLE / DÜZENLE MODALI ===
+   HTML tarafında:
+   - #noteModalOverlay
+   - #noteModal
+   - #noteTitleInput
+   - #noteContentInput
+   - #noteCancelBtn
+   - #noteSaveBtn
+   elementleri olmalı (sana verdiğim HTML ile uyumlu) */
+(function () {
+    'use strict';
+
+    let initialized = false;
+    let overlay, modal, titleInput, contentInput, cancelBtn, saveBtn, modalTitle, messageEl;
+    let mode = 'create'; // 'create' | 'edit'
+    let editingNoteId = null;
+
+    function init() {
+        if (initialized) return;
+
+        overlay      = document.getElementById('noteModalOverlay');
+        modal        = document.getElementById('noteModal');
+        titleInput   = document.getElementById('noteTitleInput');
+        contentInput = document.getElementById('noteContentInput');
+        cancelBtn    = document.getElementById('noteCancelBtn');
+        saveBtn      = document.getElementById('noteSaveBtn');
+        modalTitle   = document.getElementById('noteModalTitle');
+        messageEl    = modal ? modal.querySelector('.confirm-dialog-message') : null;
+
+        if (!overlay || !modal || !titleInput || !contentInput || !cancelBtn || !saveBtn) {
+            // Not modalı HTML'de yoksa sessizce çık
+            return;
+        }
+
+        // Kapat butonu
+        cancelBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModal();
+        });
+
+        // Kaydet butonu
+        saveBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveNoteFromModal();
+        });
+
+        // Overlay boş alanına tıklayınca kapat
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal();
+            }
+        });
+
+        // Title input'ta Enter → kaydet
+        titleInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveNoteFromModal();
+            }
+        });
+
+        initialized = true;
+    }
+
+    function openCreate() {
+        if (!initialized) init();
+        if (!overlay) return;
+
+        mode = 'create';
+        editingNoteId = null;
+
+        if (modalTitle) {
+            modalTitle.textContent = t('notes.newNoteTitle', 'Yeni Not');
+        }
+        if (messageEl) {
+            messageEl.textContent = t(
+                'notes.newNoteMessage',
+                'Notun için bir başlık ve içerik ekle.'
+            );
+        }
+
+        titleInput.value = '';
+        contentInput.value = '';
+
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        setTimeout(() => titleInput.focus(), 10);
+    }
+
+    function openEdit(note) {
+        if (!initialized) init();
+        if (!overlay || !note) return;
+
+        mode = 'edit';
+        editingNoteId = note.id;
+
+        if (modalTitle) {
+            modalTitle.textContent = t('notes.editNoteTitle', 'Notu Düzenle');
+        }
+        if (messageEl) {
+            messageEl.textContent = t(
+                'notes.editNoteMessage',
+                'Not başlığını ve içeriğini güncelleyebilirsin.'
+            );
+        }
+
+        titleInput.value = note.title || '';
+        contentInput.value = note.content || '';
+
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        setTimeout(() => titleInput.focus(), 10);
+    }
+
+    function closeModal() {
+        if (!overlay) return;
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+        mode = 'create';
+        editingNoteId = null;
+    }
+
+    function saveNoteFromModal() {
+        if (!initialized || !overlay) return;
+
+        const title = titleInput.value.trim();
+        const content = contentInput.value.trim();
+
+        if (!title) {
+            titleInput.focus();
+            return;
+        }
+
+        let note = {
+            title,
+            content
+        };
+
+        // Düzenleme modundaysa id'yi ekle
+        if (mode === 'edit' && editingNoteId) {
+            note.id = editingNoteId;
+        }
+
+        if (StorageManager.saveNote(note)) {
+            // Aktivite kaydı (özellikle yeni not için)
+            try {
+                StorageManager.saveActivity({
+                    type: 'note_created',
+                    data: { title },
+                    timestamp: Date.now()
+                });
+            } catch (e) {
+                console.warn('Aktivite kaydı yapılamadı:', e);
+            }
+
+            if (window.App && typeof window.App.updateNotes === 'function') {
+                window.App.updateNotes();
+            }
+
+            closeModal();
+        }
+    }
+
+    // DOM yüklendikten sonra modalı hazırla
+    document.addEventListener('DOMContentLoaded', init);
+
+    // Global erişim için
+    window.NoteModal = {
+        openCreate,
+        openEdit,
+        close: closeModal
+    };
 })();
