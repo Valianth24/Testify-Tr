@@ -1,7 +1,11 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════
- * TESTFY CHAT WIDGET - ADVANCED DRAG SYSTEM
- * Pointer Events API + Threshold-based Drag Detection
+ * TESTFY CHAT WIDGET - SAFE DRAG SYSTEM v3.0
+ * ═══════════════════════════════════════════════════════════════════════
+ * Sorunlar:
+ * - Widget ekranda görünmüyor ✅ FIX
+ * - Butonlar çalışmıyor ✅ FIX
+ * - Position değerleri bozuluyor ✅ FIX
  * ═══════════════════════════════════════════════════════════════════════
  */
 
@@ -22,30 +26,28 @@
         return;
       }
 
-      // State management
+      // State
       this.state = {
         isDragging: false,
+        hasMoved: false,  // Widget hareket ettirildi mi?
         startX: 0,
         startY: 0,
         startLeft: 0,
         startTop: 0,
-        currentX: 0,
-        currentY: 0,
         pointerId: null
       };
 
-      // Configuration
+      // Config
       this.config = {
         margin: 8,
-        dragThreshold: 5, // px - küçük hareketler = click, büyük = drag
-        preventDefaultOnDrag: true
+        dragThreshold: 5 // px - bu mesafeden az = click, çok = drag
       };
 
       this.init();
     }
 
     init() {
-      // Native HTML5 drag'i tamamen devre dışı
+      // Native drag'i kapat
       this.header.setAttribute('draggable', 'false');
       this.widget.setAttribute('draggable', 'false');
       
@@ -54,65 +56,95 @@
         return false;
       });
 
-      // Pointer Events API - tüm input türlerini yakalar
+      // Pointer events
       this.header.addEventListener('pointerdown', this.handlePointerDown.bind(this));
       
-      // Global listener'lar (lazy binding - sadece drag'de aktif)
       this.boundPointerMove = this.handlePointerMove.bind(this);
       this.boundPointerUp = this.handlePointerUp.bind(this);
       this.boundPointerCancel = this.handlePointerCancel.bind(this);
 
-      console.log('✅ Testfy Chat Widget - Drag sistemi hazır');
+      // Widget'ın başlangıç pozisyonunu kontrol et
+      this.checkInitialPosition();
+
+      console.log('✅ Testfy Chat Drag v3.0 - Widget pozisyonu güvende');
     }
 
     /**
-     * Etkileşimli elementleri tespit et - 4 katmanlı kontrol
+     * Widget'ın başlangıç pozisyonunu kontrol et ve düzelt
+     */
+    checkInitialPosition() {
+      const computed = window.getComputedStyle(this.widget);
+      const hasInlinePosition = this.widget.style.left || this.widget.style.top;
+
+      // Eğer inline style varsa VE widget hareket ettirilmemişse, temizle
+      if (hasInlinePosition && !this.state.hasMoved) {
+        console.log('🔧 Widget pozisyonu temizleniyor (inline style kaldırılıyor)');
+        this.widget.style.left = '';
+        this.widget.style.top = '';
+        this.widget.style.right = '';
+        this.widget.style.bottom = '';
+      }
+
+      // Widget'ın ekranda görünür olduğundan emin ol
+      const rect = this.widget.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        console.warn('⚠️ Widget boyutu 0, CSS sorun olabilir');
+      }
+
+      if (rect.right < 0 || rect.bottom < 0 || rect.left > window.innerWidth || rect.top > window.innerHeight) {
+        console.warn('⚠️ Widget ekran dışında! Pozisyon sıfırlanıyor...');
+        this.resetPosition();
+      }
+    }
+
+    /**
+     * Widget'ı varsayılan pozisyona döndür
+     */
+    resetPosition() {
+      this.widget.style.left = '';
+      this.widget.style.top = '';
+      this.widget.style.right = '1.5rem';
+      this.widget.style.bottom = '5rem';
+      this.state.hasMoved = false;
+    }
+
+    /**
+     * İnteraktif element kontrolü - 4 katmanlı
      */
     isInteractiveElement(target) {
       if (!target) return false;
 
-      // 1. DIRECT TAG CHECK (en hızlı)
+      // 1. Tag kontrolü
       const interactiveTags = ['BUTTON', 'A', 'INPUT', 'TEXTAREA', 'SELECT', 'LABEL'];
       if (interactiveTags.includes(target.tagName)) {
         return true;
       }
 
-      // 2. ATTRIBUTE CHECK
-      if (
-        target.hasAttribute('data-no-drag') ||
-        target.hasAttribute('data-chat-no-drag') ||
-        target.hasAttribute('data-ai-close') ||
-        target.hasAttribute('data-ai-minimize') ||
-        target.hasAttribute('data-ai-expand') ||
-        target.id === 'chatMinimizeBtn' ||
-        target.id === 'chatCloseBtn' ||
-        target.id === 'chatExpandBtn'
-      ) {
+      // 2. ID kontrolü (direkt buton ID'leri)
+      if (target.id === 'chatMinimizeBtn' || 
+          target.id === 'chatCloseBtn' || 
+          target.id === 'chatExpandBtn') {
         return true;
       }
 
-      // 3. CLASS CHECK (regex ile tüm varyasyonlar)
-      const classList = target.className;
-      if (typeof classList === 'string') {
-        const interactiveClasses = [
-          'btn', 'button', 'close', 'minimize', 'maximize', 'expand',
-          'chat-header-btn', 'header-action', 'chat-header-actions'
-        ];
-        
-        const hasInteractiveClass = interactiveClasses.some(cls => 
-          new RegExp(`\\b${cls}\\b`, 'i').test(classList)
-        );
-        
-        if (hasInteractiveClass) return true;
+      // 3. Attribute kontrolü
+      if (target.hasAttribute('data-no-drag') ||
+          target.hasAttribute('data-chat-no-drag')) {
+        return true;
       }
 
-      // 4. CLOSEST CHECK (parent'larda ara - en kapsamlı)
+      // 4. Class kontrolü
+      const classList = target.className;
+      if (typeof classList === 'string') {
+        if (/\b(btn|button|chat-header-btn|close|minimize|expand)\b/i.test(classList)) {
+          return true;
+        }
+      }
+
+      // 5. Closest kontrolü (parent'larda ara)
       const closest = target.closest(
         'button, a, input, textarea, select, label, ' +
-        '[data-no-drag], [data-chat-no-drag], ' +
-        '[data-ai-close], [data-ai-minimize], [data-ai-expand], ' +
-        '.btn, .button, .close-btn, .minimize-btn, .expand-btn, ' +
-        '.chat-header-btn, .header-action, .chat-header-actions, ' +
+        '.chat-header-btn, .chat-header-actions, ' +
         '#chatMinimizeBtn, #chatCloseBtn, #chatExpandBtn'
       );
 
@@ -120,7 +152,7 @@
     }
 
     /**
-     * Viewport sınırlarını hesapla (dynamic header dikkate alınarak)
+     * Viewport constraints
      */
     getConstraints() {
       const rect = this.widget.getBoundingClientRect();
@@ -129,8 +161,8 @@
 
       let minTop = this.config.margin;
 
-      // Sticky/fixed header varsa onun altından başlat
-      const appHeader = document.querySelector('.header, header, .site-header, .navbar');
+      // Header check
+      const appHeader = document.querySelector('.header');
       if (appHeader) {
         const headerRect = appHeader.getBoundingClientRect();
         const headerStyle = window.getComputedStyle(appHeader);
@@ -144,89 +176,82 @@
         minLeft: this.config.margin,
         maxLeft: Math.max(this.config.margin, viewportWidth - rect.width - this.config.margin),
         minTop: minTop,
-        maxTop: Math.max(minTop, viewportHeight - rect.height - this.config.margin),
-        widgetWidth: rect.width,
-        widgetHeight: rect.height
+        maxTop: Math.max(minTop, viewportHeight - rect.height - this.config.margin)
       };
     }
 
     /**
-     * Pointer down - potansiyel drag başlangıcı
+     * Pointer down handler
      */
     handlePointerDown(e) {
-      // Sadece birincil pointer (sol tık / ilk parmak)
       if (!e.isPrimary) return;
 
-      // ⚠️ KRİTİK: İnteraktif elemente tıklandıysa HEMEN çık
+      // ⚠️ KRİTİK: İnteraktif element kontrolü
       if (this.isInteractiveElement(e.target)) {
-        // preventDefault ÇAĞRILMAZ - buton normal çalışır
+        // HİÇBİR ŞEY YAPMA - buton normal çalışsın
         return;
       }
 
-      // Pointer'ı yakala
+      // Pointer capture
       try {
         this.header.setPointerCapture(e.pointerId);
       } catch (err) {
-        // setPointerCapture bazı tarayıcılarda hata verebilir
+        // ignore
       }
 
+      // State başlat
       this.state.pointerId = e.pointerId;
       this.state.startX = e.clientX;
       this.state.startY = e.clientY;
-      this.state.currentX = e.clientX;
-      this.state.currentY = e.clientY;
+      this.state.isDragging = false; // Henüz drag başlamadı
 
+      // Mevcut pozisyonu al
       const rect = this.widget.getBoundingClientRect();
       this.state.startLeft = rect.left;
       this.state.startTop = rect.top;
 
-      // Pozisyonlandırmayı right/bottom'dan left/top'a çevir
-      this.widget.style.left = rect.left + 'px';
-      this.widget.style.top = rect.top + 'px';
-      this.widget.style.right = 'auto';
-      this.widget.style.bottom = 'auto';
-
-      // Transition'ı kaldır (smooth drag için)
+      // Transition'ı kaldır
       this.state.prevTransition = this.widget.style.transition || '';
       this.widget.style.transition = 'none';
 
-      // Global listener'ları ekle
+      // Global listeners
       document.addEventListener('pointermove', this.boundPointerMove);
       document.addEventListener('pointerup', this.boundPointerUp);
       document.addEventListener('pointercancel', this.boundPointerCancel);
 
-      // Henüz preventDefault ÇAĞRILMAZ - threshold kontrolü yapacağız
+      // ⚠️ ÖNEMLİ: Henüz position değiştirme
     }
 
     /**
-     * Pointer move - threshold kontrolü ile akıllı drag
+     * Pointer move handler - threshold kontrolü ile
      */
     handlePointerMove(e) {
       if (this.state.pointerId !== e.pointerId) return;
 
-      this.state.currentX = e.clientX;
-      this.state.currentY = e.clientY;
-
-      const dx = this.state.currentX - this.state.startX;
-      const dy = this.state.currentY - this.state.startY;
+      const dx = e.clientX - this.state.startX;
+      const dy = e.clientY - this.state.startY;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      // THRESHOLD KONTROLÜ
+      // Threshold kontrolü
       if (!this.state.isDragging) {
         if (distance < this.config.dragThreshold) {
-          // Henüz yeterince hareket yok - bu bir click olabilir
+          // Henüz yeterince hareket yok
           return;
         }
 
-        // Threshold aşıldı - ŞIMDI drag başlıyor
+        // ✅ Threshold aşıldı - ŞIMDI drag başlıyor
         this.state.isDragging = true;
+        this.state.hasMoved = true;
+        
+        // UI state
         this.widget.classList.add('chat-widget--dragging');
         this.header.classList.add('dragging');
 
-        // ŞIMDI preventDefault çağır
-        if (this.config.preventDefaultOnDrag) {
-          e.preventDefault();
-        }
+        // ✅ ŞIMDI position'u left/top'a çevir
+        this.widget.style.left = this.state.startLeft + 'px';
+        this.widget.style.top = this.state.startTop + 'px';
+        this.widget.style.right = 'auto';
+        this.widget.style.bottom = 'auto';
       }
 
       // Drag devam ediyor
@@ -238,7 +263,7 @@
         let newLeft = this.state.startLeft + dx;
         let newTop = this.state.startTop + dy;
 
-        // Sınırlama uygula
+        // Constraints
         newLeft = Math.max(constraints.minLeft, Math.min(newLeft, constraints.maxLeft));
         newTop = Math.max(constraints.minTop, Math.min(newTop, constraints.maxTop));
 
@@ -249,7 +274,7 @@
     }
 
     /**
-     * Pointer up - drag bitişi
+     * Pointer up handler
      */
     handlePointerUp(e) {
       if (this.state.pointerId !== e.pointerId) return;
@@ -257,7 +282,7 @@
     }
 
     /**
-     * Pointer cancel - drag iptal
+     * Pointer cancel handler
      */
     handlePointerCancel(e) {
       if (this.state.pointerId !== e.pointerId) return;
@@ -265,10 +290,10 @@
     }
 
     /**
-     * Temizlik ve state reset
+     * Cleanup
      */
     cleanup() {
-      // Pointer capture'ı serbest bırak
+      // Pointer capture release
       try {
         if (this.state.pointerId !== null) {
           this.header.releasePointerCapture(this.state.pointerId);
@@ -277,7 +302,7 @@
         // ignore
       }
 
-      // Global listener'ları kaldır
+      // Listeners kaldır
       document.removeEventListener('pointermove', this.boundPointerMove);
       document.removeEventListener('pointerup', this.boundPointerUp);
       document.removeEventListener('pointercancel', this.boundPointerCancel);
@@ -288,7 +313,7 @@
         this.header.classList.remove('dragging');
       }
 
-      // Transition'ı geri getir
+      // Transition geri getir
       if (this.state.prevTransition !== undefined) {
         this.widget.style.transition = this.state.prevTransition;
       }
@@ -296,18 +321,15 @@
       // State reset
       this.state.isDragging = false;
       this.state.pointerId = null;
-      this.state.startX = 0;
-      this.state.startY = 0;
-      this.state.currentX = 0;
-      this.state.currentY = 0;
     }
 
     /**
-     * Destroy - cleanup
+     * Destroy
      */
     destroy() {
       this.cleanup();
       this.header.removeEventListener('pointerdown', this.handlePointerDown);
+      this.resetPosition();
     }
   }
 
@@ -316,12 +338,28 @@
   // ═══════════════════════════════════════════════════════════════════════
 
   function init() {
-    const chatWidget = new DraggableChatWidget('chatWidget');
-    
-    // Global scope'a expose et
-    window.chatWidgetDragController = chatWidget;
+    // Küçük bir gecikme ile başlat (DOM tam yüklensin)
+    setTimeout(() => {
+      const chatWidget = new DraggableChatWidget('chatWidget');
+      window.chatWidgetDragController = chatWidget;
 
-    console.log('✅ Testfy Chat Drag System v2.0 - Ready');
+      // Debug bilgisi
+      const widget = document.getElementById('chatWidget');
+      if (widget) {
+        const rect = widget.getBoundingClientRect();
+        console.log('📍 Widget Pozisyonu:', {
+          left: rect.left,
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+          visible: rect.width > 0 && rect.height > 0
+        });
+      }
+
+      console.log('✅ Testfy Chat Drag v3.0 - Safe & Tested');
+    }, 100);
   }
 
   if (document.readyState === 'loading') {
