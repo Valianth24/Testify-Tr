@@ -1,0 +1,129 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════
+ * TESTIFY ADS STYLES v1.0
+ * Dashboard 6-slot layout (masaüstü + mobil)
+ * 
+ * Not:
+ * - Navbar / logo barına dokunmaz, sadece #dashboard içindeki alanı düzenler.
+ * - Tam ekran reklam yok; kenar ve banner tarzı alanlar.
+ * ═══════════════════════════════════════════════════════════════════════
+ */
+
+/* Ana grid layout: sol reklam - içerik - sağ reklam */
+.dashboard-layout-with-ads {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 1120px) 1fr;
+  grid-template-rows: auto auto auto auto;
+  grid-template-areas:
+    "top    top    top"
+    "left1  main   right1"
+    "left2  main   right2"
+    "bottom bottom bottom";
+  gap: 16px;
+  padding: 20px 16px 24px;
+}
+
+/* Grid alanları */
+.ad-slot--top     { grid-area: top; }
+.ad-slot--bottom  { grid-area: bottom; }
+
+.ad-slot--left-1  { grid-area: left1; }
+.ad-slot--left-2  { grid-area: left2; }
+.ad-slot--right-1 { grid-area: right1; }
+.ad-slot--right-2 { grid-area: right2; }
+
+.dashboard-main {
+  grid-area: main;
+  background: var(--bg-primary, #050608);
+  border-radius: 16px;
+  padding: 24px 24px 28px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+}
+
+/* Reklam kutuları (genel görünüm) */
+.ad-slot {
+  background: radial-gradient(circle at top, #23232a, #050609 65%);
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sol-sağ kolonlar masaüstünde uzun olsun */
+.ad-slot--left,
+.ad-slot--right {
+  min-height: 260px;
+}
+
+/* Placeholder yazısı (test için, sonra kaldırılabilir) */
+.ad-placeholder {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #a0a0b8);
+  opacity: 0.7;
+}
+
+/* Küçük "Reklam" etiketi */
+.ad-slot::after {
+  content: "Reklam";
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Hafif hover efekti (rahatsız etmeyen) */
+.ad-slot:hover {
+  border-color: rgba(187, 134, 252, 0.45);
+  box-shadow: 0 0 0 1px rgba(187, 134, 252, 0.28);
+}
+
+/* ─────────────────────────────── */
+/* MOBİL TASARIM (≤ 768px)        */
+/* ─────────────────────────────── */
+
+@media (max-width: 768px) {
+  .dashboard-layout-with-ads {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "top"       /* Reklam 1 */
+      "main"      /* Dashboard */
+      "left1"     /* Reklam 2 */
+      "right1"    /* Reklam 3 */
+      "left2"     /* Reklam 4 */
+      "right2"    /* Reklam 5 */
+      "bottom";   /* Reklam 6 */
+    gap: 12px;
+    padding: 10px 8px 16px;
+  }
+
+  .dashboard-main {
+    padding: 18px 14px 20px;
+    border-radius: 14px;
+  }
+
+  .ad-slot {
+    min-height: 90px;       /* Tam ekranı kaplamadan banner gibi */
+    border-radius: 12px;
+  }
+
+  .ad-slot--left,
+  .ad-slot--right {
+    min-height: 110px;      /* Biraz büyük ama yine de rahat scroll */
+  }
+}
+
+/* Daha geniş ekranlarda biraz nefes alanı verelim */
+@media (min-width: 1280px) {
+  .dashboard-layout-with-ads {
+    grid-template-columns: minmax(0, 260px) minmax(0, 1120px) minmax(0, 260px);
+    padding-inline: 32px;
+  }
+}
