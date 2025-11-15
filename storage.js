@@ -1,9 +1,4 @@
-Aşağıya **mevcut `window.questionBank` dizininin altına ekleyebileceğin** şekilde, aynı formatta **30 yeni soru** yazdım.
-Hepsi 5 şıklı, cevaplar karışık, açıklamalar uzun ve “vize sorusu tadında”.
 
-İstersen direkt şöyle ekleyebilirsin:
-
-```js
 // ==== EK 30 SORU – WEB TASARIM TEMELLERİ 1–6. HAFTA ====
 window.questionBank = window.questionBank.concat([
     {
@@ -568,4 +563,4 @@ window.questionBank = window.questionBank.concat([
         explanation: "Öğrencinin notu ve standart HTML kullanımına göre <div>, sayfayı bölümlere (kutulara) ayıran blok seviye bir etikettir. Layout ve stil işlemlerinde sık kullanılır. Diğer seçenekler div'in işlevini farklı alanlara kaydırarak hatalı anlatır."
     }
 ]);
-```
+
