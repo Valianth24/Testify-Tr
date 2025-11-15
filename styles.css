@@ -2968,263 +2968,30 @@ a:hover {
     scroll-behavior:smooth;
 }
 
-/* Mobil */
-@media (max-width:768px){
-    .chat-widget-wrapper{
-        right:1rem;
-        bottom:1rem;
+/* =========================
+   MOBİL – CHAT WIDGET
+   ========================= */
+@media (max-width: 768px) {
+    .chat-widget-wrapper {
+        right: 1rem;
+        bottom: 1rem;
     }
-    .chat-widget{
-        right:0.5rem;
-        left:0.5rem;
-        bottom:0.75rem;
-        width:auto;
-        max-width:none;
-        max-height:80vh;
-        border-radius:1rem;
-    }
-}
 
-/* === Toast Bildirimleri (Utils.showToast için) === */
-
-.toast-container {
-    position: fixed;
-    right: 1.5rem;
-    bottom: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    z-index: 1000;
-    pointer-events: none; /* tıklamalar alttaki elementlere geçsin, sadece toast'a tıklanınca işlem */
-}
-
-.toast {
-    position: relative;
-    max-width: min(360px, 100vw - 2rem);
-    padding: 0.75rem 0.9rem 0.75rem 0.95rem;
-    border-radius: 0.8rem;
-    background: radial-gradient(circle at top left,
-        rgba(15, 23, 42, 0.96),
-        rgba(15, 23, 42, 0.98)
-    );
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid var(--border-soft);
-    color: var(--text-primary);
-    font-size: 0.85rem;
-    line-height: 1.4;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    box-shadow: var(--shadow-soft);
-    pointer-events: auto; /* sadece toast tıklanabilir */
-    overflow: hidden;
-    animation: toast-slide-in 0.25s ease-out;
-}
-
-/* Solda renk şeridi */
-.toast::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0.1rem;
-    bottom: 0.1rem;
-    width: 3px;
-    border-radius: 999px;
-    background: var(--primary-soft);
-}
-
-/* Başlık + metin (eğer Utils ileride ayrı başlık basmak isterse) */
-.toast-title {
-    font-weight: 600;
-    margin-bottom: 0.15rem;
-    font-size: 0.82rem;
-}
-
-.toast-message {
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-}
-
-/* Kapatma butonu (Utils.showToast içine eklersen diye hazır) */
-.toast-close-btn {
-    margin-left: auto;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    cursor: pointer;
-    padding: 0.1rem;
-}
-
-/* Tip bazlı renkler */
-.toast--success::before {
-    background: linear-gradient(180deg, #22c55e, #16a34a);
-}
-.toast--error::before {
-    background: linear-gradient(180deg, #ef4444, #b91c1c);
-}
-.toast--warning::before {
-    background: linear-gradient(180deg, #f97316, #ea580c);
-}
-.toast--info::before {
-    background: linear-gradient(180deg, #38bdf8, #0ea5e9);
-}
-
-/* Light tema için hafif tonlar */
-[data-theme="light"] .toast {
-    background: rgba(255, 255, 255, 0.96);
-    border-color: rgba(148, 163, 184, 0.5);
-    color: #111827;
-    box-shadow: 0 14px 35px rgba(15, 23, 42, 0.28);
-}
-
-[data-theme="light"] .toast-message {
-    color: #4b5563;
-}
-
-/* Giriş / çıkış animasyonu */
-@keyframes toast-slide-in {
-    from {
-        opacity: 0;
-        transform: translateY(10px) translateX(5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) translateX(0);
+    .chat-widget {
+        right: 1rem;
+        left: auto; /* sola yapışmayı engelle */
+        bottom: 4.5rem;
+        width: min(420px, 100vw - 2rem);
+        max-height: 80vh;
+        border-radius: 1rem;
     }
 }
 
-.toast-container {
-    position: fixed;
-    right: 1.25rem;
-    bottom: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    max-width: 320px;
-    z-index: var(--z-tooltip);
-    pointer-events: none; /* sadece toast'lar tıklanabilir */
-}
+/* =========================
+   GERİ BUTONU + ÇIKIŞ BUTONU
+   ========================= */
 
-.toast {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    background: var(--bg-elevated-soft);
-    border-radius: 0.75rem;
-    padding: 0.55rem 0.85rem;
-    box-shadow: var(--shadow-soft);
-    border: 1px solid var(--border-soft);
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    pointer-events: auto;
-    animation: toast-in var(--transition-base) forwards;
-}
-
-.toast-icon {
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 1rem;
-}
-
-.toast-message {
-    line-height: 1.4;
-}
-
-.toast-close {
-    margin-left: auto;
-    border: none;
-    background: transparent;
-    color: var(--text-tertiary);
-    cursor: pointer;
-    padding: 0.1rem;
-    font-size: 0.9rem;
-}
-
-.toast-close:hover {
-    color: var(--text-secondary);
-}
-
-/* Tip bazlı renkler (Utils.showToast(..., 'success') ile uyumlu) */
-.toast--success {
-    border-color: rgba(16, 185, 129, 0.35);
-}
-.toast--success .toast-icon {
-    background: rgba(16, 185, 129, 0.12);
-    color: #059669;
-}
-
-.toast--error {
-    border-color: rgba(239, 68, 68, 0.4);
-}
-.toast--error .toast-icon {
-    background: rgba(239, 68, 68, 0.12);
-    color: #b91c1c;
-}
-
-.toast--warning {
-    border-color: rgba(245, 158, 11, 0.45);
-}
-.toast--warning .toast-icon {
-    background: rgba(245, 158, 11, 0.12);
-    color: #b45309;
-}
-
-.toast--info {
-    border-color: rgba(59, 130, 246, 0.45);
-}
-.toast--info .toast-icon {
-    background: rgba(59, 130, 246, 0.12);
-    color: #1d4ed8;
-}
-
-/* Animasyonlar */
-@keyframes toast-in {
-    from {
-        opacity: 0;
-        transform: translateY(8px) scale(0.98);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes toast-out {
-    from {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: translateY(8px) scale(0.98);
-    }
-}
-
-.toast--closing {
-    animation: toast-out var(--transition-base) forwards;
-}
-
-/* Dark tema için toast */
-[data-theme="dark"] .toast {
-    background: rgba(15, 23, 42, 0.98);
-    border-color: rgba(30, 64, 175, 0.6);
-    color: #e5e7eb;
-}
-
-@media (max-width: 640px) {
-    .toast-container {
-        left: 0.75rem;
-        right: 0.75rem;
-        bottom: 0.75rem;
-    }
-}
+/* Üstteki geri butonu (ör: sonuçlardan teste dön vb.) */
 .btn-back {
     display: inline-flex;
     align-items: center;
@@ -3237,51 +3004,91 @@ a:hover {
     font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast);
 }
 
 .btn-back:hover {
     background: var(--bg-hover);
-    border-color: var(--primary-soft-2);
+    border-color: var(--primary-soft-2, var(--primary));
     color: var(--primary-dark);
     transform: translateY(-1px);
 }
 
-/* === Confirm / Onay Modalı === */
-
-/* Arka plan perdesi (overlay) */
-.confirm-overlay,
-#confirmOverlay,
-#confirmDialogOverlay {
-    position: fixed;
-    inset: 0; /* top:0; right:0; bottom:0; left:0 */
-    display: flex;
-    align-items: center;      /* dikeyde ortala */
-    justify-content: center;  /* yatayda ortala */
-    background: rgba(15, 23, 42, 0.65); /* hafif karartma */
-    z-index: var(--z-modal-backdrop);
-    padding: 1rem;
+/* Test ekranındaki "❌ Çıkış" butonu */
+.btn-exit-quiz {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.85rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 0.83rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast);
 }
 
-/* Eski hâli alttan çıkıyorsa muhtemelen align-items:flex-end idi.
-   Bu kod onu tamamen override edecek. */
+.btn-exit-quiz:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary-soft-2, var(--primary));
+    color: var(--primary-dark);
+    transform: translateY(-1px);
+}
 
-/* Asıl kutu */
-.confirm-dialog,
+[data-theme="dark"] .btn-exit-quiz,
+[data-theme="dark"] .btn-back {
+    background: rgba(15, 23, 42, 0.92);
+    border-color: rgba(148, 163, 184, 0.45);
+    color: var(--text-secondary);
+}
+
+/* =========================
+   ONAY (CONFIRM) MODALI
+   ========================= */
+
+/* Arka plan perdesi (overlay) – HER ZAMAN ORTADA */
+#confirmOverlay,
+.confirm-overlay,
+#confirmDialogOverlay {
+    position: fixed !important;
+    inset: 0 !important;               /* top/right/bottom/left = 0 */
+    display: flex !important;
+    align-items: center !important;    /* dikey ortala */
+    justify-content: center !important;/* yatay ortala */
+    padding: 1rem !important;
+    background: rgba(15, 23, 42, 0.65) !important;
+    z-index: var(--z-modal-backdrop);
+}
+
+/* Kartın kendisi */
 #confirmDialog,
+.confirm-dialog,
 .confirm-modal {
-    max-width: 480px;
-    width: 100%;
-    background: var(--bg-elevated-soft, #ffffff);
-    border-radius: 1rem;
-    padding: 1rem 1.25rem 0.9rem;
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    background: var(--bg-elevated-soft, var(--card-bg));
+    border-radius: 1rem !important;
     box-shadow: var(--shadow-xl);
     border: 1px solid var(--border-soft, rgba(148, 163, 184, 0.35));
     color: var(--text-primary);
+    padding: 1rem 1.25rem 0.9rem !important;
     z-index: var(--z-modal);
 }
 
-/* Başlık + mesaj */
+/* Başlık & mesaj */
 .confirm-dialog-title {
     font-size: 0.95rem;
     font-weight: 600;
@@ -3303,99 +3110,13 @@ a:hover {
     margin-top: 0.5rem;
 }
 
-/* Mevcut .btn sınıfların zaten var ama
-   spesifik olarak burada biraz daha yuvarlak dursun: */
 .confirm-dialog-actions .btn {
     border-radius: var(--radius-full);
     padding-inline: 1.1rem;
     font-size: 0.85rem;
 }
 
-/* Mobilde biraz daha boşluk */
-@media (max-width: 640px) {
-    .confirm-overlay,
-    #confirmOverlay,
-    #confirmDialogOverlay {
-        padding: 0.75rem;
-    }
-
-    .confirm-dialog,
-    #confirmDialog,
-    .confirm-modal {
-        border-radius: 0.85rem;
-        padding: 0.9rem 1rem 0.8rem;
-    }
-}
-
-/* Dark tema için ufak iyileştirme */
-[data-theme="dark"] .confirm-dialog,
-[data-theme="dark"] #confirmDialog,
-[data-theme="dark"] .confirm-modal {
-    background: rgba(15, 23, 42, 0.98);
-    border-color: rgba(30, 64, 175, 0.7);
-    color: #e5e7eb;
-}
-
-/* === ONAY (CONFIRM) MODALI – ZORLA ORTAYA AL === */
-
-/* Arka plan perdesi */
-#confirmOverlay,
-.confirm-overlay,
-#confirmDialogOverlay {
-    position: fixed !important;
-    inset: 0 !important; /* top/right/bottom/left hepsi 0 */
-    display: flex !important;
-    align-items: center !important;      /* dikey ortala */
-    justify-content: center !important;  /* yatay ortala */
-    padding: 1rem !important;
-    background: rgba(15, 23, 42, 0.65) !important;
-    z-index: var(--z-modal-backdrop);
-}
-
-/* Kartın kendisi */
-#confirmDialog,
-.confirm-dialog,
-.confirm-modal {
-    width: 100% !important;
-    max-width: 480px !important;
-    margin: 0 auto !important;
-    background: var(--bg, #ffffff) !important;
-    border-radius: 1rem !important;
-    box-shadow: var(--shadow-xl) !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
-    color: var(--text-primary) !important;
-    padding: 1rem 1.25rem 0.9rem !important;
-}
-
-/* Başlık & mesaj (varsa bu class’larla kullan) */
-.confirm-dialog-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    color: var(--text-primary);
-}
-
-.confirm-dialog-message {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.9rem;
-}
-
-/* Butonlar */
-.confirm-dialog-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-}
-
-.confirm-dialog-actions .btn {
-    border-radius: var(--radius-full);
-    padding-inline: 1.1rem;
-    font-size: 0.85rem;
-}
-
-/* Dark tema */
+/* Dark tema için kart */
 [data-theme="dark"] #confirmDialog,
 [data-theme="dark"] .confirm-dialog,
 [data-theme="dark"] .confirm-modal {
@@ -3404,7 +3125,27 @@ a:hover {
     color: #e5e7eb !important;
 }
 
-/* === Toast / Bildirimleri Tamamen Gizle === */
+/* Küçük ekranlarda biraz daha sıkı padding */
+@media (max-width: 640px) {
+    #confirmOverlay,
+    .confirm-overlay,
+    #confirmDialogOverlay {
+        padding: 0.75rem !important;
+    }
+
+    #confirmDialog,
+    .confirm-dialog,
+    .confirm-modal {
+        border-radius: 0.85rem !important;
+        padding: 0.9rem 1rem 0.8rem !important;
+    }
+}
+
+/* =========================
+   TOAST / BİLDİRİMLERİ KAPAT
+   ========================= */
+
+/* Utils.showToast ile çıkan tüm mini bildirimleri komple gizle */
 #toastContainer,
 .toast-container,
 .toast {
@@ -3412,6 +3153,7 @@ a:hover {
     opacity: 0 !important;
     pointer-events: none !important;
 }
+
 
 
 
