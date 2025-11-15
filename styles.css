@@ -3216,6 +3216,92 @@ a:hover {
     color: #e5e7eb;
 }
 
+/* ============================================
+   MOBİL QUIZ SIKILAŞTIRMA (soru + şıklar)
+   ============================================ */
+
+/* 768px altı – çoğu telefon */
+@media (max-width: 767px) {
+
+  /* Quiz gövdesi ekrana daha iyi otursun */
+  .quiz-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+
+  /* Üst bilgi + süre + soru sayısı daha kompakt */
+  .quiz-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  /* Soru kartı: daha az padding, daha az boşluk */
+  .question-card {
+    padding: var(--spacing-lg) var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Soru yazısı: font biraz küçülsün, alt boşluk azalsın */
+  .question-text {
+    font-size: 1.05rem;
+    line-height: 1.45;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  /* Şıklar arası boşluk azalt */
+  .options-list {
+    gap: var(--spacing-sm);
+  }
+
+  /* Şık kutuları: daha ince ve kompakt */
+  .option-item {
+    padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--spacing-sm);
+    /* taşmayı önle */
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  /* Şık harfi balonu biraz küçülsün */
+  .option-letter {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    font-size: 0.85rem;
+  }
+
+  /* Quiz butonları altta yığılınca daha derli toplu görünsün */
+  .quiz-actions {
+    margin-top: var(--spacing-xl);
+    gap: var(--spacing-sm);
+  }
+}
+
+/* 640px altı – küçük ekranlar için biraz daha sıkı */
+@media (max-width: 639px) {
+
+  .quiz-container {
+    padding: var(--spacing-md) var(--spacing-xs);
+  }
+
+  .question-card {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+
+  .question-text {
+    font-size: 1rem;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .option-item {
+    padding: var(--spacing-sm) var(--spacing-sm);
+  }
+}
+
 
 
 
