@@ -22,22 +22,74 @@ const QuizManager = {
     },
 
     /**
+     * Doğru cevabın index'ini bulur (A/B/C veya tam metin destekli)
+     */
+    getCorrectIndex(question) {
+        if (!question || !Array.isArray(question.o)) return -1;
+
+        const letters = ['A', 'B', 'C', 'D', 'E'];
+        const a = question.a;
+
+        // Eğer doğrudan index saklandıysa
+        if (typeof question.answerIndex === 'number') {
+            return question.answerIndex;
+        }
+        if (typeof a === 'number') {
+            return a;
+        }
+
+        if (typeof a === 'string') {
+            const trimmed = a.trim();
+
+            // Case 1: sadece harf (A, B, C...)
+            if (/^[A-E]$/i.test(trimmed)) {
+                return letters.indexOf(trimmed.toUpperCase());
+            }
+
+            // Case 2: "C) ..." veya tam metin
+            const normalizedAnswer = trimmed.replace(/^\s*[A-E]\)\s*/i, '').trim();
+
+            return question.o.findIndex(opt => {
+                if (!opt) return false;
+                const str = String(opt);
+                const normalizedOpt = str.replace(/^\s*[A-E]\)\s*/i, '').trim();
+                return (
+                    normalizedOpt === normalizedAnswer ||
+                    str.trim() === trimmed
+                );
+            });
+        }
+
+        return -1;
+    },
+
+    /**
      * AI TARAFINDAN OLUŞTURULAN TESTİ YÜKLE
      */
     loadAIGeneratedTest() {
         try {
-            const aiTest = localStorage.getItem('testify_generated_test');
-            if (!aiTest) {
+            // Önce yeni key, yoksa eski key'ten dene
+            let raw = localStorage.getItem('testify_generated_test') 
+                   || localStorage.getItem('testify_current_test');
+
+            if (!raw) {
                 console.log('ℹ️ AI testi bulunamadı');
                 return null;
             }
             
-            const testData = JSON.parse(aiTest);
+            const testData = JSON.parse(raw);
             
-            // Süresi dolmuş mu kontrol et (24 saat)
+            // Expiry yoksa şimdi ekle (24 saat)
+            if (!testData.expiresAt) {
+                testData.expiresAt = Date.now() + 24 * 60 * 60 * 1000;
+                localStorage.setItem('testify_generated_test', JSON.stringify(testData));
+            }
+            
+            // Süresi dolmuş mu kontrol et
             if (testData.expiresAt && Date.now() > testData.expiresAt) {
                 console.log('⏰ AI testi süresi dolmuş');
                 localStorage.removeItem('testify_generated_test');
+                localStorage.removeItem('testify_current_test');
                 return null;
             }
             
@@ -304,6 +356,7 @@ const QuizManager = {
         optionsList.innerHTML = '';
 
         const letters = ['A', 'B', 'C', 'D', 'E'];
+        const correctIndex = this.getCorrectIndex(question);
 
         question.o.forEach((option, index) => {
             const optionDiv = document.createElement('div');
@@ -312,7 +365,6 @@ const QuizManager = {
             optionDiv.setAttribute('aria-checked', 'false');
             optionDiv.setAttribute('tabindex', '0');
             
-            // Seçilmiş mi kontrol et
             const isSelected = this.state.answers[this.state.currentIndex] === index;
             if (isSelected) {
                 optionDiv.classList.add('selected');
@@ -322,8 +374,7 @@ const QuizManager = {
             // Review modundaysa doğru/yanlış göster
             if (this.state.isReviewing) {
                 optionDiv.classList.add('disabled');
-                const correctAnswer = question.a;
-                const isCorrect = option === correctAnswer;
+                const isCorrect = index === correctIndex;
                 const isUserAnswer = isSelected;
                 
                 if (isCorrect) {
@@ -335,12 +386,15 @@ const QuizManager = {
                 }
             }
 
+            // "A) " prefixini kaldır, biz zaten solda harfi gösteriyoruz
+            const cleanText = String(option).replace(/^\s*[A-E]\)\s*/i, '');
+
             optionDiv.innerHTML = `
                 <span class="option-letter">${letters[index]}</span>
-                <span>${Utils.sanitizeHTML(option)}</span>
+                <span>${Utils.sanitizeHTML(cleanText)}</span>
             `;
 
-            // Event listener'lar
+            // Event listener'lar sadece normal çözüm modunda
             if (!this.state.isReviewing) {
                 const clickHandler = () => this.selectOption(index);
                 const keyHandler = (e) => {
@@ -380,9 +434,8 @@ const QuizManager = {
 
         try {
             const question = this.state.questions[this.state.currentIndex];
-            const selectedOption = question.o[index];
-            const correctAnswer = question.a;
-            const isCorrect = selectedOption === correctAnswer;
+            const correctIndex = this.getCorrectIndex(question);
+            const isCorrect = index === correctIndex;
 
             // Cevabı kaydet
             this.state.answers[this.state.currentIndex] = index;
@@ -393,7 +446,7 @@ const QuizManager = {
                 item.style.pointerEvents = 'none';
                 
                 // Doğru cevabı yeşil yap
-                if (question.o[idx] === correctAnswer) {
+                if (idx === correctIndex) {
                     item.classList.add('correct');
                 }
                 
@@ -570,11 +623,11 @@ const QuizManager = {
         let wrong = 0;
 
         this.state.questions.forEach((question, index) => {
-            const userAnswer = this.state.answers[index];
+            const userAnswerIndex = this.state.answers[index];
             
-            if (userAnswer !== null) {
-                const selectedOption = question.o[userAnswer];
-                if (selectedOption === question.a) {
+            if (userAnswerIndex !== null && typeof userAnswerIndex === 'number') {
+                const correctIndex = this.getCorrectIndex(question);
+                if (userAnswerIndex === correctIndex) {
                     correct++;
                 } else {
                     wrong++;
