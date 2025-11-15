@@ -3404,6 +3404,15 @@ a:hover {
     color: #e5e7eb !important;
 }
 
+/* === Toast / Bildirimleri Tamamen Gizle === */
+#toastContainer,
+.toast-container,
+.toast {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 
 
 
