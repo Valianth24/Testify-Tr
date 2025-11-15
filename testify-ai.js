@@ -833,13 +833,22 @@ Sadece geçerli JSON döndür.`;
     
     /**
      * ═══════════════════════════════════════════════════════════════════
-     * SAVE GENERATED TEST
+     * SAVE GENERATED TEST (24 saat + doğru key’ler)
      * ═══════════════════════════════════════════════════════════════════
      */
     saveGeneratedTest(testData) {
         try {
+            // 24 saatlik geçerlilik
+            const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
+            testData.expiresAt = expiresAt;
+
+            // Yeni anahtar (QuizManager buradan okuyor)
+            localStorage.setItem('testify_generated_test', JSON.stringify(testData));
+
+            // Geriye dönük uyumluluk için eski anahtar
             localStorage.setItem('testify_current_test', JSON.stringify(testData));
-            console.log('✓ Test kaydedildi');
+
+            console.log('✓ Test kaydedildi (AI, 24 saat geçerli)');
         } catch (error) {
             console.error('❌ Test kaydedilemedi:', error);
         }
