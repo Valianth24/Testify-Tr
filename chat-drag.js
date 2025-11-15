@@ -24,6 +24,26 @@
     // 🔍 Header içindeki buton / link gibi etkileşimli elemanları tespit et
     function isInteractiveElement(el) {
       if (!el) return false;
+      
+      // 1. Direkt tag kontrolü (en hızlı)
+      if (el.tagName === 'BUTTON' || el.tagName === 'A' || 
+          el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || 
+          el.tagName === 'SELECT') {
+        return true;
+      }
+      
+      // 2. ID kontrolü (butonların ID'leri)
+      if (el.id === 'chatMinimizeBtn' || el.id === 'chatCloseBtn') {
+        return true;
+      }
+      
+      // 3. Class kontrolü
+      if (el.classList && (el.classList.contains('chat-header-btn') || 
+          el.classList.contains('chat-header-actions'))) {
+        return true;
+      }
+      
+      // 4. Parent kontrolü (closest)
       return !!el.closest(
         'button, a, input, textarea, select, [data-chat-no-drag], .chat-header-btn, .chat-header-actions'
       );
@@ -122,8 +142,10 @@
     function onMouseDown(e) {
       if (e.button !== 0) return;
 
+      // ⚠️ Buton kontrolü - burada çıkış yapmalı
       if (isInteractiveElement(e.target)) {
-        return;
+        console.log('🔘 Buton tıklandı, drag başlatılmıyor');
+        return; // Hiçbir şey yapma, buton normal çalışsın
       }
 
       e.preventDefault();
@@ -148,7 +170,9 @@
       if (!e.touches || e.touches.length === 0) return;
       const t = e.touches[0];
 
+      // ⚠️ Buton kontrolü
       if (isInteractiveElement(e.target)) {
+        console.log('🔘 Buton dokunuldu, drag başlatılmıyor');
         return;
       }
 
