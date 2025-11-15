@@ -3247,6 +3247,96 @@ a:hover {
     transform: translateY(-1px);
 }
 
+/* === Confirm / Onay Modalı === */
+
+/* Arka plan perdesi (overlay) */
+.confirm-overlay,
+#confirmOverlay,
+#confirmDialogOverlay {
+    position: fixed;
+    inset: 0; /* top:0; right:0; bottom:0; left:0 */
+    display: flex;
+    align-items: center;      /* dikeyde ortala */
+    justify-content: center;  /* yatayda ortala */
+    background: rgba(15, 23, 42, 0.65); /* hafif karartma */
+    z-index: var(--z-modal-backdrop);
+    padding: 1rem;
+}
+
+/* Eski hâli alttan çıkıyorsa muhtemelen align-items:flex-end idi.
+   Bu kod onu tamamen override edecek. */
+
+/* Asıl kutu */
+.confirm-dialog,
+#confirmDialog,
+.confirm-modal {
+    max-width: 480px;
+    width: 100%;
+    background: var(--bg-elevated-soft, #ffffff);
+    border-radius: 1rem;
+    padding: 1rem 1.25rem 0.9rem;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-soft, rgba(148, 163, 184, 0.35));
+    color: var(--text-primary);
+    z-index: var(--z-modal);
+}
+
+/* Başlık + mesaj */
+.confirm-dialog-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.confirm-dialog-message {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.9rem;
+}
+
+/* Buton grubu */
+.confirm-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* Mevcut .btn sınıfların zaten var ama
+   spesifik olarak burada biraz daha yuvarlak dursun: */
+.confirm-dialog-actions .btn {
+    border-radius: var(--radius-full);
+    padding-inline: 1.1rem;
+    font-size: 0.85rem;
+}
+
+/* Mobilde biraz daha boşluk */
+@media (max-width: 640px) {
+    .confirm-overlay,
+    #confirmOverlay,
+    #confirmDialogOverlay {
+        padding: 0.75rem;
+    }
+
+    .confirm-dialog,
+    #confirmDialog,
+    .confirm-modal {
+        border-radius: 0.85rem;
+        padding: 0.9rem 1rem 0.8rem;
+    }
+}
+
+/* Dark tema için ufak iyileştirme */
+[data-theme="dark"] .confirm-dialog,
+[data-theme="dark"] #confirmDialog,
+[data-theme="dark"] .confirm-modal {
+    background: rgba(15, 23, 42, 0.98);
+    border-color: rgba(30, 64, 175, 0.7);
+    color: #e5e7eb;
+}
+
+
 
 
 
