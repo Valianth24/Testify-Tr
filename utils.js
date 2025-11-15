@@ -1,6 +1,8 @@
 /**
  * TESTIFY UTILS
  * Yardımcı fonksiyonlar (storage, tarih, format, toast, confirm, validation, vb.)
+ * 
+ * 🔇 TOAST BİLDİRİMLERİ DEVRE DIŞI (Kullanıcı talebi)
  */
 
 'use strict';
@@ -215,16 +217,28 @@ const Utils = {
     handleError(error, context = '') {
         console.error('🔴 Hata:', context, error);
         const msg = (error && error.message) ? error.message : 'Bilinmeyen hata';
-        this.showToast(`Beklenmeyen bir hata oluştu: ${msg}`, 'error', 3500);
+        // Toast devre dışı - sadece console'a yazdır
+        console.warn(`Hata bildirimi: ${msg}`);
     },
 
     /**
+     * ═══════════════════════════════════════════════════════════════════
+     * TOAST BİLDİRİMLERİ - DEVRE DIŞI
+     * ═══════════════════════════════════════════════════════════════════
      * Şık toast bildirimi
      * @param {string} message
      * @param {"success"|"error"|"info"|"warning"} type
      * @param {number} duration ms
+     * 
+     * 🔇 KULLANICI TALEBİYLE DEVRE DIŞI BIRAKILDI
      */
     showToast(message, type = 'info', duration = 2500) {
+        // Toast bildirimleri kapalı
+        // Sadece console'a yazdır (debug için)
+        console.log(`[Toast devre dışı] ${type.toUpperCase()}: ${message}`);
+        return;
+
+        /* ESKİ KOD - DEVRE DIŞI
         try {
             const container = document.getElementById('toastContainer');
             if (!container) {
@@ -277,6 +291,7 @@ const Utils = {
         } catch (error) {
             console.error('Toast hatası:', error);
         }
+        */
     },
 
     /**
@@ -339,3 +354,6 @@ const Utils = {
 
 // Export
 window.Utils = Utils;
+
+// Başlangıçta bilgi ver
+console.log('🔇 Toast bildirimleri devre dışı bırakıldı (Utils.showToast)');
