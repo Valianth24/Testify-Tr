@@ -1,33 +1,41 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════
- * TESTIFY AI - PROFESSIONAL EDUCATION SYSTEM
+ * TESTIFY AI - PROFESSIONAL EDUCATION SYSTEM (BACKEND VERSION)
  * Advanced AI-Powered Educational Content Generator
  * ═══════════════════════════════════════════════════════════════════════
  * 
  * "Eğitim, hayatın hazırlığı değil, hayatın ta kendisidir." - John Dewey
  * 
- * MODEL: GPT-4o-mini (OpenAI)
+ * MODEL: GPT-5-nano (OpenAI, backend üzerinden)
  * QUALITY: Professional Academic Standard
  * METHOD: Research-Based Pedagogy + Advanced Prompt Engineering
  * 
+ * NOT:
+ *  - Bu dosya artık DOĞRUDAN OpenAI'a gitmiyor.
+ *  - Sadece kendi backend'ine (örn. /api/testify/generate-test) istek atıyor.
+ *  - API key kesinlikle frontend içinde kullanılmıyor.
  * ═══════════════════════════════════════════════════════════════════════
  */
 
 'use strict';
 
 const TestifyAI = {
-    version: '12.0.1-PROFESSIONAL',
+    version: '12.0.1-PROFESSIONAL-BACKEND',
     name: 'Testify AI - Professional Education System',
-    
+
     /**
      * ═══════════════════════════════════════════════════════════════════
      * CONFIGURATION
+     * (Frontend’de API key TUTMAMAYA çalış; backend kullandığın için
+     *  burası artık sadece geriye dönük uyumluluk için duruyor.)
      * ═══════════════════════════════════════════════════════════════════
      */
     config: {
         apiKey: null,
         
         setApiKey(key) {
+            // Artık backend tarafında kullanılmalı.
+            // Burada saklansa bile OpenAI'a direkt istek gitmiyor.
             this.apiKey = key;
             if (window.TESTIFY_CONFIG) {
                 window.TESTIFY_CONFIG.API_KEY = key;
@@ -505,7 +513,7 @@ Sadece geçerli JSON döndür, markdown veya yorum yok:
     "pedagogicalFramework": "Testify AI Professional v12.0",
     "bloomProgression": "${exam.bloomPreference.join(' → ')}",
     "qualityTarget": "Profesyonel Akademik Standart",
-    "model": "gpt-4o-mini",
+    "model": "gpt-5-nano",
     "answerDistribution": "Randomized (A, B, C, D, E)"
   },
   "questions": [
@@ -733,38 +741,57 @@ Sadece geçerli JSON döndür.`;
     
     /**
      * ═══════════════════════════════════════════════════════════════════
-     * API CALL WITH RETRY
+     * API CALL WITH RETRY (ARTIK BACKEND ÜZERİNDEN)
      * ═══════════════════════════════════════════════════════════════════
+     *
+     * Backend kontratı:
+     * 1) OpenAI proxy gibi davranıp CHAT COMPLETION döndürebilir
+     *    (choices[0].message.content içinde JSON string).
+     * veya
+     * 2) Direkt şu formatta dönebilir:
+     *    {
+     *      "success": true,
+     *      "testData": { ... Test JSON ... },
+     *      "usage": { "total_tokens": 1234 },
+     *      "model": "gpt-5-nano"
+     *    }
      */
-    async callAPIWithRetry(systemPrompt, userPrompt, retryCount = 0) {
+    async callAPIWithRetry(payload, retryCount = 0) {
         const maxRetries = 3;
         const timeouts = [90000, 120000, 180000];
         const currentTimeout = timeouts[retryCount] || timeouts[timeouts.length - 1];
         
         try {
-            console.log(`🌐 API isteği (deneme ${retryCount + 1}/${maxRetries + 1})`);
+            console.log(`🌐 Backend isteği (deneme ${retryCount + 1}/${maxRetries + 1})`);
             console.log(`⏱️ Zaman aşımı: ${currentTimeout / 1000}s`);
             
             await this.requestManager.waitIfNeeded();
             
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), currentTimeout);
-            
-            const response = await fetch("https://api.openai.com/v1/chat/completions", {
+
+            // Backend URL:
+            //  - Aynı domainde ise: /api/testify/generate-test
+            //  - Farklı domainde ise: window.TESTIFY_BACKEND_URL + '/api/testify/generate-test'
+            const baseUrlRaw = window.TESTIFY_BACKEND_URL || '';
+            const baseUrl = baseUrlRaw.endsWith('/')
+                ? baseUrlRaw.slice(0, -1)
+                : baseUrlRaw;
+            const url = `${baseUrl}/api/testify/generate-test`.replace(/^\/\//, '/');
+
+            const response = await fetch(url, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${this.config.getApiKey()}`
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "gpt-4o-mini",
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        { role: "user", content: userPrompt }
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 16000,
-                    response_format: { type: "json_object" }
+                    systemPrompt: payload.systemPrompt,
+                    userPrompt: payload.userPrompt,
+                    params: payload.params || {},
+                    client: "Testify-Web",
+                    clientVersion: this.version,
+                    model: "gpt-5-nano",
+                    response_format: "json_testify_v12"
                 }),
                 signal: controller.signal
             });
@@ -772,36 +799,49 @@ Sadece geçerli JSON döndür.`;
             clearTimeout(timeoutId);
             
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                const errorMessage = errorData.error?.message || `HTTP ${response.status}`;
-                
-                if (response.status === 429 || response.status === 500 || response.status === 503) {
-                    if (retryCount < maxRetries) {
-                        const waitTime = Math.pow(2, retryCount) * 2000;
-                        console.log(`⏳ Sunucu meşgul. ${waitTime/1000}s bekleniyor...`);
-                        await new Promise(resolve => setTimeout(resolve, waitTime));
-                        return this.callAPIWithRetry(systemPrompt, userPrompt, retryCount + 1);
+                let errorMessage = `HTTP ${response.status}`;
+                let errorData = null;
+
+                try {
+                    errorData = await response.json();
+                    if (errorData && (errorData.error || errorData.message)) {
+                        errorMessage = errorData.error?.message || errorData.error || errorData.message || errorMessage;
                     }
+                } catch (_) {
+                    // ignore parse error
+                }
+                
+                if ((response.status === 429 || response.status === 500 || response.status === 503) && retryCount < maxRetries) {
+                    const waitTime = Math.pow(2, retryCount) * 2000;
+                    console.log(`⏳ Sunucu meşgul. ${waitTime/1000}s bekleniyor...`);
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
+                    return this.callAPIWithRetry(payload, retryCount + 1);
                 }
                 
                 throw new Error(errorMessage);
             }
             
-            return await response.json();
+            const result = await response.json();
+
+            if (result && result.success === false) {
+                throw new Error(result.message || result.error || 'Sunucu isteği başarısız oldu.');
+            }
+            
+            return result;
             
         } catch (error) {
             if (error.name === 'AbortError') {
                 if (retryCount < maxRetries) {
                     console.log(`⏱️ Zaman aşımı. Tekrar deneniyor...`);
-                    return this.callAPIWithRetry(systemPrompt, userPrompt, retryCount + 1);
+                    return this.callAPIWithRetry(payload, retryCount + 1);
                 }
                 throw new Error(`İstek zaman aşımına uğradı. Lütfen daha az soru sayısı deneyin.`);
             }
             
-            if (retryCount < maxRetries && error.message.includes('network')) {
+            if (retryCount < maxRetries && (error.message || '').toLowerCase().includes('network')) {
                 console.log(`🔄 Ağ hatası. Tekrar deneniyor...`);
                 await new Promise(resolve => setTimeout(resolve, 2000));
-                return this.callAPIWithRetry(systemPrompt, userPrompt, retryCount + 1);
+                return this.callAPIWithRetry(payload, retryCount + 1);
             }
             
             throw error;
@@ -829,8 +869,8 @@ Sadece geçerli JSON döndür.`;
         this.showTypingIndicator();
         
         console.log('═'.repeat(80));
-        console.log('🎓 TESTIFY AI v12.0 PROFESSIONAL');
-        console.log('Model: GPT-4o-mini');
+        console.log('🎓 TESTIFY AI v12.0 PROFESSIONAL (Backend + GPT-5-nano)');
+        console.log('Model: GPT-5-nano (backend üzerinden)');
         console.log('═'.repeat(80));
         
         try {
@@ -864,25 +904,46 @@ Sadece geçerli JSON döndür.`;
             const totalInputTokens = systemTokens + userTokens;
             
             console.log(`\n📏 Prompt: ~${totalInputTokens} token`);
-            console.log(`🤖 API çağrısı başlatılıyor...`);
+            console.log(`🤖 Backend API çağrısı başlatılıyor...`);
             
             const startTime = Date.now();
-            const data = await this.callAPIWithRetry(systemPrompt, userPrompt);
+            const apiResult = await this.callAPIWithRetry({ systemPrompt, userPrompt, params });
             const duration = ((Date.now() - startTime) / 1000).toFixed(2);
             
-            const usage = data.usage || {};
+            let usage = {};
+            let testData = null;
+
+            // 1) Backend direkt testData döndürdüyse
+            if (apiResult && apiResult.testData) {
+                testData = apiResult.testData;
+                usage = apiResult.usage || {};
+            }
+            // 2) Backend "data.testData" şeklinde döndürdüyse
+            else if (apiResult && apiResult.data && apiResult.data.testData) {
+                testData = apiResult.data.testData;
+                usage = apiResult.data.usage || apiResult.usage || {};
+            }
+            // 3) Backend, OpenAI chat completions proxy'si ise
+            else {
+                const data = apiResult;
+                usage = data.usage || {};
+                
+                let content = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) 
+                    ? data.choices[0].message.content 
+                    : '';
+
+                content = content
+                    .replace(/```json\n?/g, '')
+                    .replace(/```\n?/g, '')
+                    .trim();
+                
+                testData = JSON.parse(content);
+            }
             
             console.log(`\n✅ İçerik oluşturuldu!`);
             console.log(`⏱️ Süre: ${duration}s`);
             console.log(`📊 Tokenler: ${usage.total_tokens || 'N/A'}`);
             
-            let content = data.choices[0].message.content
-                .replace(/```json\n?/g, '')
-                .replace(/```\n?/g, '')
-                .trim();
-            
-            const testData = JSON.parse(content);
-
             // 🔀 Doğru cevap dağılımını dengeli + rastgele hale getir
             this.rebalanceAnswerDistribution(testData);
             
@@ -905,7 +966,7 @@ Sadece geçerli JSON döndür.`;
             
             testData.metadata = testData.metadata || {};
             testData.metadata.generatedWith = `Testify AI v${this.version}`;
-            testData.metadata.model = 'gpt-4o-mini';
+            testData.metadata.model = apiResult.model || testData.metadata.model || 'gpt-5-nano';
             testData.metadata.generationTime = `${duration}s`;
             testData.metadata.tokens = usage.total_tokens;
             testData.metadata.timestamp = new Date().toISOString();
@@ -948,14 +1009,14 @@ Sadece geçerli JSON döndür.`;
             this.highlightTestTab();
             
             console.log(`\n${'═'.repeat(80)}`);
-            console.log('✅ PROFESYONEL EĞİTİM İÇERİĞİ OLUŞTURULDU');
+            console.log('✅ PROFESYONEL EĞİTİM İÇERİĞİ OLUŞTURULDU (Backend)');
             console.log(`${'═'.repeat(80)}\n`);
             
             return testData;
             
         } catch (error) {
             console.error(`\n${'═'.repeat(80)}`);
-            console.error('❌ İÇERİK OLUŞTURMA HATASI');
+            console.error('❌ İÇERİK OLUŞTURMA HATASI (Backend)');
             console.error(`${'═'.repeat(80)}`);
             console.error(`Hata: ${error.message}`);
             console.error(`${'═'.repeat(80)}\n`);
@@ -971,13 +1032,13 @@ Sadece geçerli JSON döndür.`;
                     `• Sistem otomatik tekrar deneyecek`;
             } else if (error.message.includes('429') || error.message.includes('rate limit')) {
                 userMessage += `**Çözüm:**\n` +
-                    `• 1-2 dakika bekleyin\n` +
-                    `• Sistem yoğunluğu azalınca tekrar deneyin`;
+                    `• Bir süre bekleyip tekrar deneyin\n` +
+                    `• Sunucu yoğunluğu azalınca deneyin`;
             } else {
                 userMessage += `**Çözüm:**\n` +
                     `• Lütfen tekrar deneyin\n` +
                     `• Farklı parametreler deneyin\n` +
-                    `• Sorun devam ederse destek alın`;
+                    `• Sorun devam ederse geliştiriciye iletin`;
             }
             
             this.addMessage(userMessage, 'ai');
@@ -1057,13 +1118,13 @@ window.minimizeAiPanel = () => window.TestifyAI && TestifyAI.toggleMinimize();
  * ═══════════════════════════════════════════════════════════════════════
  */
 console.log('\n' + '═'.repeat(80));
-console.log('🎓 TESTIFY AI v12.0.1 PROFESSIONAL');
+console.log('🎓 TESTIFY AI v12.0.1 PROFESSIONAL (Backend + GPT-5-nano)');
 console.log('═'.repeat(80));
-console.log('\n📚 Model: GPT-4o-mini');
+console.log('\n📚 Model: GPT-5-nano (backend üzerinden)');
 console.log('🎯 Quality: Professional Academic Standard');
 console.log('🔬 Framework: Research-Based Pedagogy');
 console.log('🔢 Format: 5 Options (A, B, C, D, E)');
 console.log('🎲 Answers: Balanced randomized distribution\n');
 console.log('━'.repeat(80));
-console.log('✨ Testify AI hazır (UI + Test üretimi)!');
+console.log('✨ Testify AI hazır (UI + Test üretimi, backend ile)!');
 console.log('━'.repeat(80) + '\n');
