@@ -848,10 +848,6 @@ const App = {
                 });
             }
 
-            // Test oluşturma formu submit'i js/testify-ai.js içindeki
-            // TestifyAI entegrasyonu tarafından yönetilecek.
-            // Burada ekstra submit handler eklemiyoruz.
-
             // Not ekleme butonu
             const addNoteBtn = document.getElementById('addNoteBtn');
             if (addNoteBtn) {
@@ -874,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
     App.init();
     App.handleInitialTabFromHash();
 
-    // TestifyAI'yi başlat (v10 override)
+    // TestifyAI'yi başlat (varsa init fonksiyonu)
     try {
         if (typeof TestifyAI !== 'undefined' && TestifyAI && typeof TestifyAI.init === 'function') {
             TestifyAI.init();
@@ -904,7 +900,7 @@ window.addEventListener('popstate', (event) => {
     }
 });
 
-// Eski örnekteki gibi kullanmak istersen: SPA içinde sekme değiştirme helper'ı
+// SPA helper
 window.navigateTo = function(tabName) {
     if (!tabName) return;
     if (!document.getElementById(tabName)) return;
