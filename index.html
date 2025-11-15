@@ -954,5 +954,41 @@
         }
     })();
     </script>
+
+    <!-- Not Ekle Modalı -->
+<div id="noteModalOverlay" class="confirm-overlay note-modal-overlay" aria-hidden="true">
+    <div id="noteModal" class="confirm-dialog note-modal" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle">
+        <h2 id="noteModalTitle" class="confirm-dialog-title">Yeni Not</h2>
+        <p class="confirm-dialog-message">
+            Notun için bir başlık ve içerik ekle.
+        </p>
+
+        <div class="note-modal-body">
+            <label class="note-label" for="noteTitleInput">
+                Not Başlığı
+                <input 
+                    type="text" 
+                    id="noteTitleInput" 
+                    maxlength="80"
+                    placeholder="Örn: HTML Etiketleri"
+                />
+            </label>
+
+            <label class="note-label" for="noteContentInput">
+                Not İçeriği (isteğe bağlı)
+                <textarea 
+                    id="noteContentInput" 
+                    rows="4"
+                    placeholder="İçeriği buraya yazabilirsin..."></textarea>
+            </label>
+        </div>
+
+        <div class="confirm-dialog-actions">
+            <button type="button" class="btn btn-secondary" id="noteCancelBtn">Vazgeç</button>
+            <button type="button" class="btn btn-primary" id="noteSaveBtn">Kaydet</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
