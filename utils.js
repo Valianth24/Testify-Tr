@@ -1,672 +1,341 @@
 /**
- * TESTIFY UTILITY FUNCTIONS
- * Güvenli ve optimize edilmiş yardımcı fonksiyonlar
+ * TESTIFY UTILS
+ * Yardımcı fonksiyonlar (storage, tarih, format, toast, confirm, validation, vb.)
  */
 
 'use strict';
 
 const Utils = {
     /**
-     * XSS saldırılarını önlemek için HTML'i sanitize eder
-     * @param {string} text - Temizlenecek metin
-     * @returns {string} - Temizlenmiş metin
+     * Güvenli JSON parse
      */
-    sanitizeHTML(text) {
-        if (text === null || text === undefined) return '';
-        const div = document.createElement('div');
-        div.textContent = String(text);
-        return div.innerHTML;
-    },
-
-    /**
-     * HTML entity'lerini decode eder
-     * @param {string} html - Decode edilecek HTML
-     * @returns {string} - Decode edilmiş metin
-     */
-    decodeHTML(html) {
-        const txt = document.createElement('textarea');
-        txt.innerHTML = html;
-        return txt.value;
-    },
-
-    /**
-     * Email formatını kontrol eder
-     * @param {string} email - Kontrol edilecek email
-     * @returns {boolean} - Geçerli mi?
-     */
-    validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(String(email).toLowerCase());
-    },
-
-    /**
-     * Kullanıcı adı formatını kontrol eder
-     * @param {string} username - Kontrol edilecek kullanıcı adı
-     * @returns {boolean} - Geçerli mi?
-     */
-    validateUsername(username) {
-        // 3-20 karakter, sadece harf, rakam ve alt çizgi
-        const re = /^[a-zA-Z0-9_]{3,20}$/;
-        return re.test(username);
-    },
-
-    /**
-     * Süreyi formatlar (saniye -> MM:SS)
-     * @param {number} seconds - Saniye
-     * @returns {string} - Formatlanmış süre
-     */
-    formatTime(seconds) {
-        if (typeof seconds !== 'number' || seconds < 0) return '00:00';
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    },
-
-    /**
-     * Tarihi formatlar (dil desteği ile)
-     * @param {Date|string|number} date - Tarih
-     * @returns {string} - Formatlanmış tarih
-     */
-    formatDate(date) {
+    safeParse(value, fallback = null) {
         try {
-            const d = new Date(date);
-            const lang =
-                window.LanguageManager && LanguageManager.currentLang === 'en' ? 'en' : 'tr';
-
-            if (isNaN(d.getTime())) {
-                return lang === 'en' ? 'Invalid date' : 'Geçersiz tarih';
-            }
-
-            const now = new Date();
-            const diff = now - d;
-            const seconds = Math.floor(diff / 1000);
-            const minutes = Math.floor(seconds / 60);
-            const hours = Math.floor(minutes / 60);
-            const days = Math.floor(hours / 24);
-
-            if (seconds < 60) {
-                return lang === 'en' ? 'Just now' : 'Az önce';
-            }
-            if (minutes < 60) {
-                return lang === 'en'
-                    ? `${minutes} minute(s) ago`
-                    : `${minutes} dakika önce`;
-            }
-            if (hours < 24) {
-                return lang === 'en'
-                    ? `${hours} hour(s) ago`
-                    : `${hours} saat önce`;
-            }
-            if (days < 7) {
-                return lang === 'en'
-                    ? `${days} day(s) ago`
-                    : `${days} gün önce`;
-            }
-
-            const locale = lang === 'en' ? 'en-US' : 'tr-TR';
-            return d.toLocaleDateString(locale, {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        } catch (error) {
-            console.error('Tarih formatlama hatası:', error);
-            const lang =
-                window.LanguageManager && LanguageManager.currentLang === 'en' ? 'en' : 'tr';
-            return lang === 'en' ? 'Invalid date' : 'Geçersiz tarih';
+            return JSON.parse(value);
+        } catch (e) {
+            return fallback;
         }
     },
 
     /**
-     * Sayıyı formatlar (1000 -> 1K)
-     * @param {number} num - Sayı
-     * @returns {string} - Formatlanmış sayı
-     */
-    formatNumber(num) {
-        if (typeof num !== 'number') return '0';
-        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-        return num.toString();
-    },
-
-    /**
-     * Debounce fonksiyonu - Performans için
-     * @param {Function} func - Çalıştırılacak fonksiyon
-     * @param {number} wait - Bekleme süresi (ms)
-     * @returns {Function} - Debounced fonksiyon
-     */
-    debounce(func, wait = 300) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    },
-
-    /**
-     * Throttle fonksiyonu - Performans için
-     * @param {Function} func - Çalıştırılacak fonksiyon
-     * @param {number} limit - Limit süresi (ms)
-     * @returns {Function} - Throttled fonksiyon
-     */
-    throttle(func, limit = 300) {
-        let inThrottle;
-        return function (...args) {
-            if (!inThrottle) {
-                func.apply(this, args);
-                inThrottle = true;
-                setTimeout(() => (inThrottle = false), limit);
-            }
-        };
-    },
-
-    /**
-     * Deep clone - Nesne kopyalama
-     * @param {Object} obj - Kopyalanacak nesne
-     * @returns {Object} - Kopya nesne
-     */
-    deepClone(obj) {
-        try {
-            return JSON.parse(JSON.stringify(obj));
-        } catch (error) {
-            console.error('Deep clone hatası:', error);
-            return obj;
-        }
-    },
-
-    /**
-     * Rastgele ID oluşturur
-     * @param {number} length - ID uzunluğu
-     * @returns {string} - Rastgele ID
-     */
-    generateId(length = 16) {
-        const chars =
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let result = '';
-        for (let i = 0; i < length; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-    },
-
-    /**
-     * Array'i karıştırır (Fisher-Yates)
-     * @param {Array} array - Karıştırılacak array
-     * @returns {Array} - Karıştırılmış array
-     */
-    shuffleArray(array) {
-        const newArray = [...array];
-        for (let i = newArray.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-        }
-        return newArray;
-    },
-
-    /**
-     * Local storage'dan güvenli okuma
-     * @param {string} key - Key
-     * @param {*} defaultValue - Varsayılan değer
-     * @returns {*} - Değer
+     * LocalStorage'dan veri al (JSON destekli)
+     * @param {string} key
+     * @param {*} defaultValue
+     * @returns {*}
      */
     getFromStorage(key, defaultValue = null) {
         try {
-            const item = localStorage.getItem(key);
-            return item ? JSON.parse(item) : defaultValue;
+            const raw = localStorage.getItem(key);
+            if (raw === null || raw === undefined) return defaultValue;
+            return this.safeParse(raw, raw);
         } catch (error) {
-            console.error(`Storage okuma hatası (${key}):`, error);
+            console.error('getFromStorage hatası:', error);
             return defaultValue;
         }
     },
 
     /**
-     * Local storage'a güvenli yazma
-     * @param {string} key - Key
-     * @param {*} value - Değer
-     * @returns {boolean} - Başarılı mı?
+     * LocalStorage'a veri yaz (JSON)
+     * @param {string} key
+     * @param {*} value
+     * @returns {boolean}
      */
     setToStorage(key, value) {
         try {
-            localStorage.setItem(key, JSON.stringify(value));
+            const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+            localStorage.setItem(key, serialized);
             return true;
         } catch (error) {
-            console.error(`Storage yazma hatası (${key}):`, error);
-            // Storage dolu olabilir
-            if (error && error.name === 'QuotaExceededError') {
-                const msg =
-                    window.LanguageManager &&
-                    LanguageManager.currentLang === 'en'
-                        ? 'Storage is full!'
-                        : 'Depolama alanı dolu!';
-                this.showToast(msg, 'error');
-            }
+            console.error('setToStorage hatası:', error);
             return false;
         }
     },
 
     /**
-     * Local storage'dan silme
-     * @param {string} key - Key
+     * LocalStorage'dan veri sil
      */
     removeFromStorage(key) {
         try {
             localStorage.removeItem(key);
         } catch (error) {
-            console.error(`Storage silme hatası (${key}):`, error);
+            console.error('removeFromStorage hatası:', error);
         }
     },
 
     /**
-     * Toast bildirim gösterir
-     * @param {string} message - Mesaj
-     * @param {string} type - Tip (success, error, warning, info)
-     * @param {number} duration - Süre (ms)
+     * ID üret
      */
-    showToast(message, type = 'info', duration = 3000) {
-        let container = document.getElementById('toastContainer');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toastContainer';
-            container.className = 'toast-container';
-            document.body.appendChild(container);
+    generateId(length = 16) {
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let id = '';
+        for (let i = 0; i < length; i++) {
+            id += chars.charAt(Math.floor(Math.random() * chars.length));
         }
-
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-
-        const icons = {
-            success: '✅',
-            error: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
-
-        const closeLabel =
-            typeof window !== 'undefined' && typeof window.t === 'function'
-                ? t('common.close', 'Kapat')
-                : 'Kapat';
-
-        toast.innerHTML = `
-            <span class="toast-icon" aria-hidden="true">${icons[type] || icons.info}</span>
-            <div class="toast-content">
-                <p class="toast-message">${this.sanitizeHTML(message)}</p>
-            </div>
-            <button class="toast-close" aria-label="${closeLabel}">×</button>
-        `;
-
-        container.appendChild(toast);
-
-        // Close button
-        const closeBtn = toast.querySelector('.toast-close');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                toast.style.animation = 'slideOutRight 0.3s ease-out';
-                setTimeout(() => toast.remove(), 300);
-            });
-        }
-
-        // Auto remove
-        setTimeout(() => {
-            if (toast.parentElement) {
-                toast.style.animation = 'slideOutRight 0.3s ease-out';
-                setTimeout(() => toast.remove(), 300);
-            }
-        }, duration);
+        return id;
     },
 
     /**
-     * Loading overlay gösterir/gizler
-     * @param {boolean} show - Göster/Gizle
+     * Basit HTML sanitize (XSS önlemek için)
      */
-    toggleLoading(show) {
-        const overlay = document.getElementById('loadingOverlay');
-        if (!overlay) return;
+    sanitizeHTML(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    },
 
-        if (show) {
-            overlay.classList.add('active');
-            overlay.setAttribute('aria-hidden', 'false');
-        } else {
-            overlay.classList.remove('active');
-            overlay.setAttribute('aria-hidden', 'true');
+    /**
+     * Tarih formatla
+     * @param {number} timestamp ms
+     * @returns {string}
+     */
+    formatDate(timestamp) {
+        try {
+            const date = new Date(timestamp);
+            if (Number.isNaN(date.getTime())) return '-';
+            const d = String(date.getDate()).padStart(2, '0');
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const y = date.getFullYear();
+            const hh = String(date.getHours()).padStart(2, '0');
+            const mm = String(date.getMinutes()).padStart(2, '0');
+            return `${d}.${m}.${y} ${hh}:${mm}`;
+        } catch {
+            return '-';
         }
     },
 
     /**
-     * Modern confirm dialog
-     * @param {string} message - Mesaj
-     * @param {string} title - Başlık
-     * @returns {Promise<boolean>} - Kullanıcı onayı
+     * Saniyeyi mm:ss veya hh:mm:ss formatına çevirir
+     * @param {number} totalSeconds
+     * @returns {string}
      */
-    async showConfirm(message, title = 'Onay') {
-        return new Promise((resolve) => {
-            const modal = document.getElementById('customConfirmModal');
-            const titleEl = document.getElementById('confirmTitle');
-            const messageEl = document.getElementById('confirmMessage');
-            const okBtn = document.getElementById('confirmOkBtn');
-            const cancelBtn = document.getElementById('confirmCancelBtn');
+    formatTime(totalSeconds) {
+        const sec = Math.max(0, parseInt(totalSeconds, 10) || 0);
+        const hours = Math.floor(sec / 3600);
+        const minutes = Math.floor((sec % 3600) / 60);
+        const seconds = sec % 60;
 
-            if (!modal || !titleEl || !messageEl || !okBtn || !cancelBtn) {
-                // Fallback: modal yoksa tarayıcı confirm'i kullan
-                resolve(confirm(message));
-                return;
-            }
+        const mm = String(minutes).padStart(2, '0');
+        const ss = String(seconds).padStart(2, '0');
 
-            titleEl.textContent = title;
-            messageEl.textContent = message;
-            modal.style.display = 'flex';
-
-            const cleanup = () => {
-                modal.style.display = 'none';
-                okBtn.onclick = null;
-                cancelBtn.onclick = null;
-            };
-
-            okBtn.onclick = () => {
-                cleanup();
-                resolve(true);
-            };
-
-            cancelBtn.onclick = () => {
-                cleanup();
-                resolve(false);
-            };
-
-            // ESC tuşu ile kapat
-            const escHandler = (e) => {
-                if (e.key === 'Escape') {
-                    cleanup();
-                    resolve(false);
-                    document.removeEventListener('keydown', escHandler);
-                }
-            };
-            document.addEventListener('keydown', escHandler);
-        });
+        if (hours > 0) {
+            const hh = String(hours).padStart(2, '0');
+            return `${hh}:${mm}:${ss}`;
+        }
+        return `${mm}:${ss}`;
     },
 
     /**
-     * Modern prompt dialog
-     * @param {string} message - Mesaj
-     * @param {string} title - Başlık
-     * @param {string} defaultValue - Varsayılan değer
-     * @returns {Promise<string|null>} - Kullanıcı girişi
-     */
-    async showPrompt(message, title = 'Giriş', defaultValue = '') {
-        return new Promise((resolve) => {
-            const modal = document.getElementById('customPromptModal');
-            const titleEl = document.getElementById('promptTitle');
-            const messageEl = document.getElementById('promptMessage');
-            const inputEl = document.getElementById('promptInput');
-            const okBtn = document.getElementById('promptOkBtn');
-            const cancelBtn = document.getElementById('promptCancelBtn');
-
-            if (!modal || !titleEl || !messageEl || !inputEl || !okBtn || !cancelBtn) {
-                // Fallback: modal yoksa tarayıcı prompt'u kullan
-                resolve(prompt(message, defaultValue));
-                return;
-            }
-
-            titleEl.textContent = title;
-            messageEl.textContent = message;
-            inputEl.value = defaultValue;
-            modal.style.display = 'flex';
-            
-            // Input'a focus
-            setTimeout(() => inputEl.focus(), 100);
-
-            const cleanup = () => {
-                modal.style.display = 'none';
-                okBtn.onclick = null;
-                cancelBtn.onclick = null;
-                inputEl.onkeypress = null;
-            };
-
-            okBtn.onclick = () => {
-                const value = inputEl.value.trim();
-                cleanup();
-                resolve(value || null);
-            };
-
-            cancelBtn.onclick = () => {
-                cleanup();
-                resolve(null);
-            };
-
-            // Enter tuşu ile onayla
-            inputEl.onkeypress = (e) => {
-                if (e.key === 'Enter') {
-                    const value = inputEl.value.trim();
-                    cleanup();
-                    resolve(value || null);
-                }
-            };
-
-            // ESC tuşu ile kapat
-            const escHandler = (e) => {
-                if (e.key === 'Escape') {
-                    cleanup();
-                    resolve(null);
-                    document.removeEventListener('keydown', escHandler);
-                }
-            };
-            document.addEventListener('keydown', escHandler);
-        });
-    },
-
-    /**
-     * Geriye uyumluluk için eski confirm fonksiyonu
-     * @param {string} message - Mesaj
-     * @returns {Promise<boolean>} - Kullanıcı onayı
-     */
-    async confirm(message) {
-        return this.showConfirm(message, 'Onay');
-    },
-
-    /**
-     * Element'in görünür olup olmadığını kontrol eder
-     * @param {HTMLElement} element - Element
-     * @returns {boolean} - Görünür mü?
-     */
-    isElementVisible(element) {
-        if (!element) return false;
-        return !!(
-            element.offsetWidth ||
-            element.offsetHeight ||
-            element.getClientRects().length
-        );
-    },
-
-    /**
-     * Smooth scroll
-     * @param {string|HTMLElement} target - Target element veya selector
-     * @param {number} offset - Offset (px)
-     */
-    scrollTo(target, offset = 0) {
-        const element =
-            typeof target === 'string' ? document.querySelector(target) : target;
-
-        if (!element) return;
-
-        const top =
-            element.getBoundingClientRect().top + window.pageYOffset - offset;
-        window.scrollTo({
-            top,
-            behavior: 'smooth'
-        });
-    },
-
-    /**
-     * Dosya boyutunu formatlar
-     * @param {number} bytes - Byte cinsinden boyut
-     * @returns {string} - Formatlanmış boyut
+     * Dosya boyutunu okunabilir formatta döndür
+     * @param {number} bytes
+     * @returns {string}
      */
     formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return (
-            Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
-        );
-    },
-
-    /**
-     * Dosya uzantısını kontrol eder
-     * @param {string} filename - Dosya adı
-     * @param {Array} allowedExtensions - İzin verilen uzantılar
-     * @returns {boolean} - Geçerli mi?
-     */
-    validateFileExtension(filename, allowedExtensions) {
-        const ext = filename.split('.').pop().toLowerCase();
-        return allowedExtensions.includes(ext);
-    },
-
-    /**
-     * Copy to clipboard
-     * @param {string} text - Kopyalanacak metin
-     * @returns {Promise<boolean>} - Başarılı mı?
-     */
-    async copyToClipboard(text) {
-        try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(text);
-                return true;
-            } else {
-                // Fallback
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                textarea.style.position = 'fixed';
-                textarea.style.opacity = '0';
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                return true;
-            }
-        } catch (error) {
-            console.error('Kopyalama hatası:', error);
-            return false;
+        if (!bytes || bytes <= 0) return '0 B';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let index = 0;
+        let size = bytes;
+        while (size >= 1024 && index < units.length - 1) {
+            size /= 1024;
+            index++;
         }
+        return `${size.toFixed(1)} ${units[index]}`;
     },
 
     /**
-     * Form input doğrulama
-     * @param {HTMLInputElement} input - Input elemanı
-     * @param {string} type - 'required' | 'email' | 'username'
+     * Dizi karıştırma (Fisher-Yates)
+     */
+    shuffleArray(array) {
+        if (!Array.isArray(array)) return array;
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    },
+
+    /**
+     * Input validation
+     * @param {HTMLInputElement} input
+     * @param {"username"|"email"} type
      * @returns {boolean}
      */
-    validateInput(input, type = 'required') {
-        if (!input) return false;
+    validateInput(input, type) {
+        if (!input) return true;
+        const value = input.value.trim();
+        const errorElId = input.id + 'Error';
+        const errorEl = document.getElementById(errorElId);
 
-        const value = (input.value || '').trim();
-        const lang =
-            window.LanguageManager && LanguageManager.currentLang === 'en' ? 'en' : 'tr';
+        const setError = (msg) => {
+            if (errorEl) {
+                errorEl.textContent = msg;
+            } else {
+                console.warn('Error span bulunamadı:', errorElId);
+            }
+            input.classList.add('input-error');
+        };
 
-        const msg = (tr, en) => (lang === 'en' ? en : tr);
+        const clearError = () => {
+            if (errorEl) errorEl.textContent = '';
+            input.classList.remove('input-error');
+        };
 
-        let isValid = true;
-        let errorMessage = '';
+        clearError();
+
+        if (type === 'username') {
+            if (value.length < 3) {
+                setError('Kullanıcı adı en az 3 karakter olmalı');
+                return false;
+            }
+            if (value.length > 20) {
+                setError('Kullanıcı adı en fazla 20 karakter olabilir');
+                return false;
+            }
+            return true;
+        }
 
         if (type === 'email') {
-            if (!value) {
-                isValid = false;
-                errorMessage = msg('E-posta zorunlu', 'Email is required');
-            } else if (!this.validateEmail(value)) {
-                isValid = false;
-                errorMessage = msg(
-                    'Geçerli bir e-posta girin',
-                    'Please enter a valid email'
-                );
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                setError('Geçerli bir e-posta adresi giriniz');
+                return false;
             }
-        } else if (type === 'username') {
-            if (!value) {
-                isValid = false;
-                errorMessage = msg('Kullanıcı adı zorunlu', 'Username is required');
-            } else if (!this.validateUsername(value)) {
-                isValid = false;
-                errorMessage = msg(
-                    '3-20 karakter, sadece harf, rakam ve alt çizgi kullanabilirsiniz',
-                    'Username must be 3-20 characters and can contain letters, numbers and underscore'
-                );
-            }
-        } else if (type === 'required') {
-            if (!value) {
-                isValid = false;
-                errorMessage = msg('Bu alan zorunlu', 'This field is required');
-            }
+            return true;
         }
 
-        // Hata elemanını bul
-        let errorEl =
-            document.getElementById(input.id + 'Error') ||
-            (input.closest('.form-group')
-                ? input.closest('.form-group').querySelector('.error-message')
-                : null);
-
-        if (errorEl) {
-            errorEl.textContent = errorMessage || '';
-        }
-
-        if (!isValid) {
-            input.classList.add('input-error');
-        } else {
-            input.classList.remove('input-error');
-        }
-
-        return isValid;
+        return true;
     },
 
     /**
-     * Genel hata yakalama helper'ı
-     * @param {Error} error
-     * @param {string} context
+     * Hata yakalama helper
      */
     handleError(error, context = '') {
-        console.error('Hata:', context, error);
+        console.error('🔴 Hata:', context, error);
+        const msg = (error && error.message) ? error.message : 'Bilinmeyen hata';
+        this.showToast(`Beklenmeyen bir hata oluştu: ${msg}`, 'error', 3500);
+    },
 
-        const lang =
-            window.LanguageManager && LanguageManager.currentLang === 'en' ? 'en' : 'tr';
-        const defaultMsg =
-            lang === 'en'
-                ? 'An unexpected error occurred.'
-                : 'Beklenmeyen bir hata oluştu.';
-
+    /**
+     * Şık toast bildirimi
+     * @param {string} message
+     * @param {"success"|"error"|"info"|"warning"} type
+     * @param {number} duration ms
+     */
+    showToast(message, type = 'info', duration = 2500) {
         try {
-            this.showToast(defaultMsg, 'error');
-        } catch (e) {
-            console.error('Toast gösterilemedi:', e);
+            const container = document.getElementById('toastContainer');
+            if (!container) {
+                console.warn('toastContainer bulunamadı');
+                return;
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `toast toast--${type}`;
+
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️',
+                warning: '⚠️'
+            };
+
+            const titles = {
+                success: 'Başarılı',
+                error: 'Hata',
+                info: 'Bilgi',
+                warning: 'Uyarı'
+            };
+
+            toast.innerHTML = `
+                <div class="toast__icon">${icons[type] || 'ℹ️'}</div>
+                <div class="toast__content">
+                    <div class="toast__title">${titles[type] || 'Bilgi'}</div>
+                    <div class="toast__message">${this.sanitizeHTML(message)}</div>
+                </div>
+                <button class="toast__close" aria-label="Kapat">×</button>
+            `;
+
+            const closeBtn = toast.querySelector('.toast__close');
+
+            const removeToast = () => {
+                toast.style.animation = 'toast-out 0.18s ease-in forwards';
+                setTimeout(() => {
+                    toast.remove();
+                }, 180);
+            };
+
+            closeBtn.addEventListener('click', removeToast);
+
+            container.appendChild(toast);
+
+            if (duration > 0) {
+                setTimeout(removeToast, duration);
+            }
+        } catch (error) {
+            console.error('Toast hatası:', error);
         }
+    },
+
+    /**
+     * Custom confirm (Promise tabanlı)
+     * Kullanım: const ok = await Utils.confirm('Emin misin?');
+     */
+    confirm(message) {
+        return new Promise((resolve) => {
+            // Eğer zaten bir dialog varsa önce kaldır
+            const existing = document.getElementById('confirmOverlay');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'confirmOverlay';
+            overlay.className = 'confirm-overlay';
+            overlay.innerHTML = `
+                <div class="confirm-dialog" role="dialog" aria-modal="true">
+                    <div class="confirm-title">Onay gerekiyor</div>
+                    <div class="confirm-message">${this.sanitizeHTML(message)}</div>
+                    <div class="confirm-actions">
+                        <button class="btn btn-secondary confirm-cancel">Vazgeç</button>
+                        <button class="btn btn-primary confirm-ok">Onayla</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            const okBtn = overlay.querySelector('.confirm-ok');
+            const cancelBtn = overlay.querySelector('.confirm-cancel');
+
+            const cleanup = (value) => {
+                overlay.classList.add('confirm-overlay--closing');
+                setTimeout(() => {
+                    overlay.remove();
+                    resolve(value);
+                }, 150);
+            };
+
+            okBtn.addEventListener('click', () => cleanup(true));
+            cancelBtn.addEventListener('click', () => cleanup(false));
+
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    cleanup(false);
+                }
+            });
+
+            const escHandler = (e) => {
+                if (e.key === 'Escape') {
+                    document.removeEventListener('keydown', escHandler);
+                    cleanup(false);
+                }
+            };
+
+            document.addEventListener('keydown', escHandler);
+        });
     }
 };
-
-// CSS animasyonu ekleme
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideOutRight {
-        from {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(100%);
-        }
-    }
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-`;
-document.head.appendChild(style);
 
 // Export
 window.Utils = Utils;
