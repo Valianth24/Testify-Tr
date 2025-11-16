@@ -42,8 +42,8 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="testify-ads.css">
 
-  <!-- Phosphor Icons CDN -->
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css">
+  <!-- Phosphor Icons CDN - DUOTONE -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/duotone/style.css">
 
   <script></script>
   <script></script>
@@ -67,9 +67,61 @@
   </script>
 
   <style>
+    :root {
+      --primary: #374AA9;
+    }
+
     .icon {
       font-size: 1.1em;
       vertical-align: middle;
+      color: #374AA9;
+    }
+
+    .logo-img {
+      height: 32px;
+      width: auto;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+      display: inline-block;
+    }
+
+    /* Butonlar için #374AA9 ayarı (duoton görünümlü buton) */
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      min-width: 144px;
+      min-height: 46px;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    }
+
+    .btn-primary:hover {
+      background-color: #4154c0;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.22);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
     .message-content strong {
@@ -111,7 +163,7 @@
       font-family: inherit;
       font-size: 0.95rem;
       font-weight: 600;
-      background: var(--primary, #4f46e5);
+      background: var(--primary, #374AA9);
       color: #fff;
       box-shadow: 0 10px 25px rgba(15, 23, 42, 0.35);
       cursor: pointer;
@@ -124,7 +176,7 @@
     }
 
     .chat-toggle-btn:focus-visible {
-      outline: 2px solid var(--primary, #4f46e5);
+      outline: 2px solid var(--primary, #374AA9);
       outline-offset: 2px;
     }
 
@@ -286,82 +338,83 @@
     <div class="header-content">
       <div class="header-top">
         <a href="/" id="logoLink" class="logo" aria-label="Testify Ana Sayfa">
-          <i class="ph ph-open-ai-logo icon" aria-hidden="true"></i>
+          <!-- Yeni logo görseli -->
+          <img src="logo.png" alt="Testify Logo" class="logo-img">
           <span data-i18n="app.name">Testify</span>
         </a>
 
         <div class="header-actions">
           <button class="theme-toggle" onclick="themeManager.toggle()" aria-label="Tema değiştir" aria-pressed="false" title="Karanlık/Aydınlık mod">
             <span class="theme-toggle-slider">
-              <i id="themeIcon" class="ph ph-moon icon" aria-hidden="true"></i>
+              <i id="themeIcon" class="ph-duotone ph-moon icon" aria-hidden="true"></i>
             </span>
           </button>
 
           <div class="user-stats" role="status" aria-live="polite">
             <div class="stat-badge" title="Günlük seri">
-              <i class="ph ph-rocket-launch icon" aria-hidden="true"></i>
+              <i class="ph-duotone ph-rocket-launch icon" aria-hidden="true"></i>
               <span id="streak" aria-label="Seri günler">0
                 <span data-i18n="header.streak">Gün</span>
               </span>
             </div>
 
             <div class="stat-badge" title="Toplam puan">
-              <i class="ph ph-star icon" aria-hidden="true"></i>
+              <i class="ph-duotone ph-star icon" aria-hidden="true"></i>
               <span id="totalPoints" aria-label="Toplam XP">0
                 <span data-i18n="header.points">XP</span>
               </span>
             </div>
 
             <div class="stat-badge" title="Sıralama">
-              <i class="ph ph-target icon" aria-hidden="true"></i>
+              <i class="ph-duotone ph-target icon" aria-hidden="true"></i>
               <span id="rank" aria-label="Sıralama">#--</span>
             </div>
           </div>
 
           <button class="user-avatar" id="userAvatar" aria-label="Kullanıcı menüsü" title="Profil">
-            <i class="ph ph-user icon" aria-hidden="true"></i>
+            <i class="ph-duotone ph-user icon" aria-hidden="true"></i>
           </button>
         </div>
       </div>
 
       <nav class="nav-tabs" role="tablist" aria-label="Ana navigasyon">
         <button id="tab-dashboard" class="nav-tab active" data-tab="dashboard" role="tab" aria-selected="true" aria-controls="dashboard">
-          <i class="ph ph-chart-line-up icon" aria-hidden="true"></i>
+          <i class="ph-duotone ph-chart-line-up icon" aria-hidden="true"></i>
           <span data-i18n="nav.dashboard">Dashboard</span>
         </button>
 
         <button id="tab-test" class="nav-tab" data-tab="test" role="tab" aria-selected="false" aria-controls="test">
-          <i class="ph ph-list-bullets icon" aria-hidden="true"></i>
+          <i class="ph-duotone ph-list-bullets icon" aria-hidden="true"></i>
           <span data-i18n="nav.test">Test Çöz</span>
         </button>
 
         <button id="tab-create" class="nav-tab" data-tab="create" role="tab" aria-selected="false" aria-controls="create">
-          <i class="ph ph-plus icon" aria-hidden="true"></i>
+          <i class="ph-duotone ph-plus icon" aria-hidden="true"></i>
           <span data-i18n="nav.create">Test Oluştur</span>
         </button>
 
         <button id="tab-library" class="nav-tab" data-tab="library" role="tab" aria-selected="false" aria-controls="library">
-          <i class="ph ph-book icon" aria-hidden="true"></i>
+          <i class="ph-duotone ph-book icon" aria-hidden="true"></i>
           <span data-i18n="nav.library">Kütüphanem</span>
         </button>
 
         <button id="tab-notes" class="nav-tab" data-tab="notes" role="tab" aria-selected="false" aria-controls="notes">
-          <i class="ph ph-note-pencil icon" aria-hidden="true"></i>
+          <i class="ph-duotone ph-note-pencil icon" aria-hidden="true"></i>
           <span data-i18n="nav.notes">Notlarım</span>
         </button>
 
         <button id="tab-leaderboard" class="nav-tab" data-tab="leaderboard" role="tab" aria-selected="false" aria-controls="leaderboard">
-          <i class="ph ph-star icon" aria-hidden="true"></i>
+          <i class="ph-duotone ph-star icon" aria-hidden="true"></i>
           <span data-i18n="nav.leaderboard">Liderlik</span>
         </button>
 
         <button id="tab-analysis" class="nav-tab" data-tab="analysis" role="tab" aria-selected="false" aria-controls="analysis">
-          <i class="ph ph-target icon" aria-hidden="true"></i>
+          <i class="ph-duotone ph-target icon" aria-hidden="true"></i>
           <span data-i18n="nav.analysis">Analizler</span>
         </button>
 
         <button id="tab-settings" class="nav-tab" data-tab="settings" role="tab" aria-selected="false" aria-controls="settings">
-          <i class="ph ph-user icon" aria-hidden="true"></i>
+          <i class="ph-duotone ph-user icon" aria-hidden="true"></i>
           <span data-i18n="nav.settings">Ayarlar</span>
         </button>
       </nav>
@@ -377,7 +430,7 @@
         <div class="stats-grid" role="region" aria-label="İstatistikler">
           <article class="stat-card">
             <div class="stat-icon" aria-hidden="true">
-              <i class="ph ph-files icon"></i>
+              <i class="ph-duotone ph-files icon"></i>
             </div>
             <div class="stat-value" id="totalTests" aria-label="Çözülen test sayısı">0</div>
             <div class="stat-label" data-i18n="dashboard.tests">Çözülen Test</div>
@@ -385,7 +438,7 @@
 
           <article class="stat-card">
             <div class="stat-icon" aria-hidden="true">
-              <i class="ph ph-target icon"></i>
+              <i class="ph-duotone ph-target icon"></i>
             </div>
             <div class="stat-value" id="successRate" aria-label="Başarı oranı">0%</div>
             <div class="stat-label" data-i18n="dashboard.success">Başarı Oranı</div>
@@ -393,7 +446,7 @@
 
           <article class="stat-card">
             <div class="stat-icon" aria-hidden="true">
-              <i class="ph ph-list-bullets icon"></i>
+              <i class="ph-duotone ph-list-bullets icon"></i>
             </div>
             <div class="stat-value" id="totalQuestions" aria-label="Toplam soru sayısı">0</div>
             <div class="stat-label" data-i18n="dashboard.questions">Toplam Soru</div>
@@ -401,7 +454,7 @@
 
           <article class="stat-card">
             <div class="stat-icon" aria-hidden="true">
-              <i class="ph ph-rocket-launch icon"></i>
+              <i class="ph-duotone ph-rocket-launch icon"></i>
             </div>
             <div class="stat-value" id="avgTime" aria-label="Ortalama süre">0s</div>
             <div class="stat-label" data-i18n="dashboard.avgTime">Ort. Süre</div>
@@ -413,7 +466,7 @@
           <div id="activityList" class="activity-list">
             <div class="empty-state">
               <div class="empty-state-icon" aria-hidden="true">
-                <i class="ph ph-chart-line-up icon"></i>
+                <i class="ph-duotone ph-chart-line-up icon"></i>
               </div>
               <p data-i18n="dashboard.empty">Henüz aktivite yok. Test çözerek başla!</p>
             </div>
@@ -430,7 +483,7 @@
             <div class="test-options" role="group" aria-label="Test modu seçenekleri">
               <article class="test-option-card" tabindex="0" role="button" aria-label="Pratik modu">
                 <div class="test-option-icon" aria-hidden="true">
-                  <i class="ph ph-book icon"></i>
+                  <i class="ph-duotone ph-book icon"></i>
                 </div>
                 <h3 class="test-option-title" data-i18n="test.practice">Pratik Modu</h3>
                 <p class="test-option-desc" data-i18n="test.practiceDesc">Zaman baskısı olmadan pratik yap</p>
@@ -438,7 +491,7 @@
 
               <article class="test-option-card" tabindex="0" role="button" aria-label="Sınav modu">
                 <div class="test-option-icon" aria-hidden="true">
-                  <i class="ph ph-target icon"></i>
+                  <i class="ph-duotone ph-target icon"></i>
                 </div>
                 <h3 class="test-option-title" data-i18n="test.exam">Sınav Modu</h3>
                 <p class="test-option-desc" data-i18n="test.examDesc">Gerçek sınav deneyimi</p>
@@ -446,7 +499,7 @@
 
               <article class="test-option-card" tabindex="0" role="button" aria-label="AI test">
                 <div class="test-option-icon" aria-hidden="true">
-                  <i class="ph ph-open-ai-logo icon"></i>
+                  <i class="ph-duotone ph-open-ai-logo icon"></i>
                 </div>
                 <h3 class="test-option-title" data-i18n="test.ai">AI Test</h3>
                 <p class="test-option-desc" data-i18n="test.aiDesc">AI tarafından oluşturulan sorular</p>
@@ -454,7 +507,7 @@
 
               <article class="test-option-card" tabindex="0" role="button" aria-label="Özel test">
                 <div class="test-option-icon" aria-hidden="true">
-                  <i class="ph ph-note-pencil icon"></i>
+                  <i class="ph-duotone ph-note-pencil icon"></i>
                 </div>
                 <h3 class="test-option-title" data-i18n="test.custom">Özel Test</h3>
                 <p class="test-option-desc" data-i18n="test.customDesc">Kendi kriterlerine göre</p>
@@ -476,11 +529,11 @@
               </div>
 
               <div class="quiz-info">
-                <i class="ph ph-rocket-launch icon" aria-hidden="true"></i>
+                <i class="ph-duotone ph-rocket-launch icon" aria-hidden="true"></i>
                 <time id="quizTimer">00:00</time>
               </div>
 
-              <button class="btn-exit-quiz" id="exitQuizBtn" aria-label="Testi bırak ve çık" data-i18n-title="quiz.exit">
+              <button class="btn btn-secondary btn-exit-quiz" id="exitQuizBtn" aria-label="Testi bırak ve çık" data-i18n-title="quiz.exit">
                 ❌<span data-i18n="quiz.exit">Çıkış</span>
               </button>
             </div>
@@ -515,7 +568,7 @@
         <div class="test-page" id="resultsPage">
           <article class="results-container">
             <div class="results-icon" aria-hidden="true">
-              <i class="ph ph-star icon"></i>
+              <i class="ph-duotone ph-star icon"></i>
             </div>
             <h1 class="results-title" data-i18n="results.title">Test Tamamlandı!</h1>
 
@@ -586,7 +639,7 @@
               <input type="file" id="fileUpload" name="fileUpload" accept=".pdf,.docx,.txt" aria-label="Dosya seç">
               <div class="file-upload-content">
                 <div class="file-icon" aria-hidden="true">
-                  <i class="ph ph-files icon"></i>
+                  <i class="ph-duotone ph-files icon"></i>
                 </div>
                 <p data-i18n="create.uploadDesc">PDF, DOCX veya TXT dosyası yükle</p>
                 <p class="file-hint" data-i18n="create.uploadHint">veya sürükle bırak</p>
@@ -603,7 +656,7 @@
           <input type="hidden" id="language" value="tr">
 
           <button type="submit" class="btn btn-primary btn-large">
-            <i class="ph ph-open-ai-logo icon" aria-hidden="true"></i>
+            <i class="ph-duotone ph-open-ai-logo icon" aria-hidden="true"></i>
             <span data-i18n="create.submit">Testfy ile Oluştur</span>
           </button>
         </form>
@@ -613,7 +666,7 @@
       <section class="tab-content" id="library" role="tabpanel" aria-labelledby="tab-library">
         <div class="library-header">
           <h1>
-            <i class="ph ph-book icon" aria-hidden="true"></i>
+            <i class="ph-duotone ph-book icon" aria-hidden="true"></i>
             <span data-i18n="library.title">Kütüphanem</span>
           </h1>
           <p style="color: var(--text-secondary); margin-bottom: var(--spacing-xl);" data-i18n="library.desc">
@@ -624,7 +677,7 @@
         <div id="libraryList" class="library-list">
           <div class="empty-state">
             <div class="empty-state-icon" aria-hidden="true">
-              <i class="ph ph-book icon"></i>
+              <i class="ph-duotone ph-book icon"></i>
             </div>
             <p data-i18n="library.empty">Henüz test oluşturmadın</p>
             <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 8px;" data-i18n="library.emptyDesc">
@@ -640,7 +693,7 @@
           <h1 data-i18n="notes.title">Notlarım</h1>
           <button class="btn btn-primary" id="addNoteBtn" aria-label="Yeni not ekle">
             <span aria-hidden="true">
-              <i class="ph ph-plus icon"></i>
+              <i class="ph-duotone ph-plus icon"></i>
             </span>
             <span data-i18n="notes.add">Yeni Not</span>
           </button>
@@ -649,7 +702,7 @@
         <div id="notesList" class="notes-list">
           <div class="empty-state">
             <div class="empty-state-icon" aria-hidden="true">
-              <i class="ph ph-note-pencil icon"></i>
+              <i class="ph-duotone ph-note-pencil icon"></i>
             </div>
             <p data-i18n="notes.empty">Henüz not eklemedin</p>
           </div>
@@ -661,7 +714,7 @@
         <article class="leaderboard-container">
           <header class="leaderboard-header">
             <h1>
-              <i class="ph ph-star icon" aria-hidden="true"></i>
+              <i class="ph-duotone ph-star icon" aria-hidden="true"></i>
               <span data-i18n="leaderboard.title">Liderlik Tablosu</span>
             </h1>
             <p data-i18n="leaderboard.period">Haftalık Sıralama</p>
@@ -694,7 +747,7 @@
         <div id="analysisContent">
           <div class="empty-state">
             <div class="empty-state-icon" aria-hidden="true">
-              <i class="ph ph-chart-line-up icon"></i>
+              <i class="ph-duotone ph-chart-line-up icon"></i>
             </div>
             <p data-i18n="analysis.empty">Analiz için daha fazla test çöz</p>
           </div>
