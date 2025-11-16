@@ -1,201 +1,201 @@
 /**
- * TESTIFY ADS v3.1
- * Global 6-slot yerleşimi:
- *  - PC:  üstte 2 (alt alta), altta 2 (alt alta), solda 1, sağda 1
- *  - Mobil: üstte 3, altta 3, yan reklam yok
+ * TESTIFY ADS v1.2
  *
- * Eski sistemden kalan dashboard içi reklam layout'unu da temizler.
+ * Masaüstü:
+ *  - Üstte 2 banner:  ad-top-1, ad-top-2
+ *  - Solda 1 dikey:   ad-left
+ *  - Sağda 1 dikey:   ad-right
+ *  - Altta 2 banner:  ad-bottom-1, ad-bottom-2
+ *
+ * Mobil:
+ *  - Üst satır: 2 banner (üst)
+ *  - Orta satır: sol reklam → dashboard içeriği → sağ reklam (alt alta)
+ *  - Alt satır: 2 banner (alt)
+ *
+ * Not:
+ *  - Sadece #dashboard section’ını sarar, navbar’a dokunmaz.
+ *  - Eski .ad-banner vb. yapıları kullanmaz; kendi .tads-* sınıflarını kullanır.
  */
 
 (function () {
-    'use strict';
+  'use strict';
 
-    const TestifyAds = {
-        initialized: false,
+  const TestifyAds = {
+    initialized: false,
 
-        init() {
-            if (this.initialized) return;
-            this.initialized = true;
+    init() {
+      if (this.initialized) return;
+      this.initialized = true;
 
-            const start = () => {
-                try {
-                    this.setup();
-                    console.log('%c[TestifyAds] Global reklam layout yüklendi.', 'color:#bb86fc;');
-                } catch (err) {
-                    console.error('[TestifyAds] init hatası:', err);
-                }
-            };
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', start);
-            } else {
-                start();
-            }
-        },
-
-        setup() {
-            const header = document.querySelector('.header');
-            const mainContainer = document.querySelector('.main-container');
-
-            if (!header || !mainContainer) {
-                console.warn('[TestifyAds] .header veya .main-container bulunamadı, reklam eklenemedi.');
-                return;
-            }
-
-            // Aynı sayfada iki kez kurulum olmasın
-            if (document.body.dataset.tfyAdsInitialized === '1') return;
-            document.body.dataset.tfyAdsInitialized = '1';
-
-            // Önce eski reklam layout'larını topla/temizle
-            this.cleanupLegacyAds();
-
-            // ── ÜSTTEKİ REKLAMLAR (2 PC, 3 MOBİL) ────────────────────
-            const topRow = document.createElement('div');
-            topRow.className = 'tfy-ad-row tfy-ad-row--top';
-
-            topRow.appendChild(this.createSlot('tfy-ad-top-1', 'Reklam Alanı Top-1'));
-            topRow.appendChild(this.createSlot('tfy-ad-top-2', 'Reklam Alanı Top-2'));
-            topRow.appendChild(
-                this.createSlot(
-                    'tfy-ad-top-3',
-                    'Reklam Alanı Top-3 (Mobil)',
-                    'tfy-ad-slot--mobile-extra'
-                )
-            );
-
-            // Header’ın hemen altına yerleştir
-            header.insertAdjacentElement('afterend', topRow);
-
-            // ── ALTAKİ REKLAMLAR (2 PC, 3 MOBİL) ─────────────────────
-            const bottomRow = document.createElement('div');
-            bottomRow.className = 'tfy-ad-row tfy-ad-row--bottom';
-
-            bottomRow.appendChild(this.createSlot('tfy-ad-bottom-1', 'Reklam Alanı Bottom-1'));
-            bottomRow.appendChild(this.createSlot('tfy-ad-bottom-2', 'Reklam Alanı Bottom-2'));
-            bottomRow.appendChild(
-                this.createSlot(
-                    'tfy-ad-bottom-3',
-                    'Reklam Alanı Bottom-3 (Mobil)',
-                    'tfy-ad-slot--mobile-extra'
-                )
-            );
-
-            // Ana içeriğin hemen altına
-            mainContainer.insertAdjacentElement('afterend', bottomRow);
-
-            // ── YAN REKLAMLAR (solda 1, sağda 1) ─────────────────────
-            this.injectSideAd(
-                'tfy-ad-left',
-                'tfy-side-ad tfy-side-ad--left',
-                'Reklam Alanı Sol'
-            );
-            this.injectSideAd(
-                'tfy-ad-right',
-                'tfy-side-ad tfy-side-ad--right',
-                'Reklam Alanı Sağ'
-            );
-        },
-
-        /**
-         * Eski dashboard reklam layout'unu ve eski sınıfları temizler
-         * (dashboard-layout-with-ads, .ad-slot vb.)
-         */
-        cleanupLegacyAds() {
-            const dashboard = document.getElementById('dashboard');
-
-            if (dashboard) {
-                const legacyLayout = dashboard.querySelector('.dashboard-layout-with-ads');
-                if (legacyLayout) {
-                    // Eski yapıyı çözüp dashboard'u orijinal haline getir
-                    const legacyMain = legacyLayout.querySelector('.dashboard-main');
-                    const nodes = legacyMain
-                        ? Array.from(legacyMain.childNodes)
-                        : Array.from(legacyLayout.childNodes);
-
-                    dashboard.innerHTML = '';
-                    nodes.forEach(node => {
-                        // Tamamen boş text nodlarını at
-                        if (
-                            node.nodeType === Node.TEXT_NODE &&
-                            !node.textContent.trim()
-                        ) {
-                            return;
-                        }
-                        dashboard.appendChild(node);
-                    });
-                }
-
-                // Dashboard içinde kalmış eski reklam kutularını kaldır
-                dashboard
-                    .querySelectorAll('.ad-slot, .ad-banner, .ad-container, .global-ad-row')
-                    .forEach(el => el.remove());
-            }
-
-            // Genel sayfada varsa eski global reklam satırlarını sil
-            document
-                .querySelectorAll('.global-ad-row, .ad-banner, .ad-container')
-                .forEach(el => el.remove());
-        },
-
-        /**
-         * Ortak slot oluşturucu
-         * @param {string} id
-         * @param {string} label
-         * @param {string} [extraClass]
-         */
-        createSlot(id, label, extraClass) {
-            const slot = document.createElement('div');
-            slot.className = 'tfy-ad-slot' + (extraClass ? ' ' + extraClass : '');
-            slot.id = id;
-            slot.dataset.adSlot = id; // İstersen adsense-manager buradan yakalayabilir
-
-            const span = document.createElement('span');
-            span.className = 'tfy-ad-placeholder';
-            span.textContent = label;
-            slot.appendChild(span);
-
-            return slot;
-        },
-
-        /**
-         * Sabit yan kolon için yardımcı
-         */
-        injectSideAd(id, className, label) {
-            const el = document.createElement('aside');
-            el.id = id;
-            el.className = className;
-            el.dataset.adSlot = id;
-
-            const span = document.createElement('span');
-            span.className = 'tfy-ad-placeholder';
-            span.textContent = label;
-            el.appendChild(span);
-
-            document.body.appendChild(el);
-        },
-
-        /**
-         * Dışarıdan slot doldurmak istersen:
-         *   TestifyAds.fillSlot('tfy-ad-top-1', el => { el.innerHTML = '...adsense kodu...'; });
-         */
-        fillSlot(slotId, render) {
-            const el = document.getElementById(slotId);
-            if (!el) {
-                console.warn('[TestifyAds] Slot bulunamadı:', slotId);
-                return;
-            }
-
-            el.innerHTML = '';
-
-            if (typeof render === 'function') {
-                render(el);
-            } else if (typeof render === 'string') {
-                el.innerHTML = render;
-            }
+      const start = () => {
+        try {
+          this.setupDashboardAds('#dashboard');
+          console.log(
+            '%c[TestifyAds] Yeni 6-slot reklam layoutu aktif.',
+            'color:#bb86fc;'
+          );
+        } catch (err) {
+          console.error('[TestifyAds] init hatası:', err);
         }
-    };
+      };
 
-    // Global export
-    window.TestifyAds = TestifyAds;
-    TestifyAds.init();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start);
+      } else {
+        start();
+      }
+    },
+
+    /**
+     * Dashboard bölümünü yeni reklamlara göre sar.
+     * @param {string} selector - örn: "#dashboard"
+     */
+    setupDashboardAds(selector) {
+      const section = document.querySelector(selector);
+      if (!section) {
+        console.warn('[TestifyAds] Hedef section bulunamadı:', selector);
+        return;
+      }
+
+      if (section.dataset.tadsInitialized === '1') {
+        // Zaten yapılmışsa tekrar elleme
+        return;
+      }
+      section.dataset.tadsInitialized = '1';
+
+      // Eski çocukları al (başlık, kartlar vs.)
+      const oldChildren = Array.from(section.children);
+
+      // === Ana layout ===
+      const layout = document.createElement('div');
+      layout.className = 'tads-layout tads-layout--dashboard';
+      layout.dataset.tadsLayoutFor = 'dashboard';
+
+      // Üst satır (2 yatay)
+      const rowTop = document.createElement('div');
+      rowTop.className = 'tads-row tads-row-top';
+
+      // Orta satır (sol reklam – içerik – sağ reklam)
+      const middle = document.createElement('div');
+      middle.className = 'tads-middle';
+
+      // Dashboard içeriği için wrapper
+      const main = document.createElement('div');
+      main.className = 'tads-main';
+
+      oldChildren.forEach(child => main.appendChild(child));
+
+      // Alt satır (2 yatay)
+      const rowBottom = document.createElement('div');
+      rowBottom.className = 'tads-row tads-row-bottom';
+
+      // Reklam slotu oluşturucu
+      const createSlot = (id, label, extraClass) => {
+        const slot = document.createElement('div');
+        slot.className = 'tads-slot ' + (extraClass || '');
+        slot.id = id;
+        slot.dataset.adSlot = id; // İleride AdSense için kullanılabilir
+
+        const span = document.createElement('span');
+        span.className = 'tads-slot-placeholder';
+        span.textContent = label;
+        slot.appendChild(span);
+
+        return slot;
+      };
+
+      // 6 adet slot
+      const adTop1 = createSlot('ad-top-1', 'Reklam Alanı Top-1');
+      const adTop2 = createSlot('ad-top-2', 'Reklam Alanı Top-2');
+
+      const adLeft = createSlot(
+        'ad-left',
+        'Reklam Alanı Left',
+        'tads-slot--side'
+      );
+      const adRight = createSlot(
+        'ad-right',
+        'Reklam Alanı Right',
+        'tads-slot--side'
+      );
+
+      const adBottom1 = createSlot(
+        'ad-bottom-1',
+        'Reklam Alanı Bottom-1'
+      );
+      const adBottom2 = createSlot(
+        'ad-bottom-2',
+        'Reklam Alanı Bottom-2'
+      );
+
+      // DOM ağacını kur
+      rowTop.appendChild(adTop1);
+      rowTop.appendChild(adTop2);
+
+      middle.appendChild(adLeft);
+      middle.appendChild(main);
+      middle.appendChild(adRight);
+
+      rowBottom.appendChild(adBottom1);
+      rowBottom.appendChild(adBottom2);
+
+      layout.appendChild(rowTop);
+      layout.appendChild(middle);
+      layout.appendChild(rowBottom);
+
+      // Section içini temizle, yeni layout’u ekle
+      section.innerHTML = '';
+      section.appendChild(layout);
+
+      // İleride başka script’ler (ör. adsense-manager.js) dinlesin diye event at
+      try {
+        const event = new CustomEvent('TestifyAds:ready', {
+          detail: {
+            section: selector,
+            slots: {
+              top1: adTop1,
+              top2: adTop2,
+              left: adLeft,
+              right: adRight,
+              bottom1: adBottom1,
+              bottom2: adBottom2
+            }
+          }
+        });
+        document.dispatchEvent(event);
+      } catch (e) {
+        // Eski tarayıcı vs. olursa sessizce geç
+      }
+    },
+
+    /**
+     * Dışarıdan bir slotu doldurmak için yardımcı.
+     * Örnek:
+     *   TestifyAds.fillSlot('ad-top-1', el => {
+     *       el.innerHTML = '...adsense script...';
+     *   });
+     */
+    fillSlot(slotId, render) {
+      const el = document.getElementById(slotId);
+      if (!el) {
+        console.warn('[TestifyAds] Slot bulunamadı:', slotId);
+        return;
+      }
+
+      // Placeholder’ı temizle
+      el.innerHTML = '';
+
+      if (typeof render === 'function') {
+        render(el);
+      } else if (typeof render === 'string') {
+        el.innerHTML = render;
+      }
+    }
+  };
+
+  // Global export
+  window.TestifyAds = TestifyAds;
+
+  // Otomatik başlat
+  TestifyAds.init();
 })();
