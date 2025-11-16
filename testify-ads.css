@@ -1,7 +1,7 @@
 /**
- * TESTIFY ADS STYLES v3
+ * TESTIFY ADS STYLES v3.1
  * PC:  Üstte 2 (alt alta), altta 2 (alt alta), solda 1, sağda 1
- * MOBİL: Üstte 3, altta 3, yan reklam YOK
+ * MOBİL: Üstte 3, altta 3, yan reklam yok
  * Tam ekran reklam yok, hepsi kenar / banner şeklinde.
  */
 
@@ -61,14 +61,15 @@
     text-align: center;
 }
 
+/* sadece mobilde görülecek ekstra slotlar (üst 3 / alt 3 için) */
+.tfy-ad-slot--mobile-extra {
+    display: none;
+}
+
+/* hover efekti */
 .tfy-ad-slot:hover {
     border-color: rgba(187, 134, 252, 0.45);
     box-shadow: 0 0 0 1px rgba(187, 134, 252, 0.28);
-}
-
-/* Sadece mobilde görülecek ekstra slotlar (üstte 3, altta 3 için) */
-.tfy-ad-slot--mobile-extra {
-    display: none;
 }
 
 /* ─────────────────────────────── */
@@ -79,8 +80,8 @@
     background: radial-gradient(circle at top, #23232a, #050609 65%);
     border-radius: 14px;
     border: 1px dashed rgba(255, 255, 255, 0.08);
-    min-height: 720px;           /* AŞAĞI UZUN – tek kutu ama uzun kolon */
-    width: 220px;                /* Öncekine göre ~%25 daha geniş */
+    min-height: 720px;           /* Aşağı doğru uzun kolon */
+    width: 180px;                /* %20 DARALTILDI (220 → 180) */
     display: none;               /* Sadece geniş ekranda açılacak */
     align-items: center;
     justify-content: center;
@@ -158,4 +159,21 @@
     .tfy-side-ad {
         display: flex;            /* Sağ/Sol kolonlar sadece geniş ekranda */
     }
+}
+
+/* ─────────────────────────────── */
+/* ESKİ REKLAM İZLERİNİ SÖNDÜRME  */
+/* (eski .ad-slot, .ad-banner vb.)*/
+/* ─────────────────────────────── */
+
+.dashboard-layout-with-ads,
+.global-ad-row,
+.ad-banner,
+.ad-container,
+.ad-slot {
+    /* Eski sistemden kalan kutular görünmesin */
+    display: none !important;
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
