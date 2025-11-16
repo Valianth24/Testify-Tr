@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════
- * TESTIFY ADS STYLES v2.3 - FINAL
+ * TESTIFY ADS STYLES v2.4 - FINAL
  * Global reklam yerleşimi (TÜM sayfalar)
  * ═══════════════════════════════════════════════════════════════════════
  */
@@ -146,9 +146,9 @@
     gap: 12px !important;
 
     /* KRİTİK DEĞERLER */
-    top: 380px !important;
-    width: 191px !important;
-    min-height: 720px !important;
+    top: 420px !important;           /* ↑ 380px → 420px (biraz daha aşağı) */
+    width: 191px !important;          /* Kısa kenar aynı */
+    min-height: 612px !important;     /* ↑ 720px → 612px (%15 azaltıldı: 720 × 0.85 = 612) */
     z-index: 40 !important;
     
     /* Pozisyon garantisi */
