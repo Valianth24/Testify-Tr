@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════
- * TESTIFY ADS STYLES v2.5 - FINAL
+ * TESTIFY ADS STYLES v2.6 - FINAL
  * Global reklam yerleşimi (TÜM sayfalar)
  * ═══════════════════════════════════════════════════════════════════════
  */
@@ -145,10 +145,13 @@
     justify-content: flex-start !important;
     gap: 12px !important;
 
-    /* KRİTİK DEĞERLER */
-    top: 500px !important;           /* ↑ Çok daha aşağı */
-    width: 191px !important;          /* Kısa kenar aynı */
-    min-height: 400px !important;     /* ↑ Uzunluk 400px */
+    /* KRİTİK DEĞERLER - DİKEY ORTALAMA */
+    top: 20% !important;              /* ↑ Yukarıdan %20 boşluk */
+    bottom: 20% !important;           /* ↑ Aşağıdan %20 boşluk */
+    width: 191px !important;          /* Kısa kenar */
+    height: auto !important;          /* Yükseklik otomatik (top + bottom ile sınırlandı) */
+    min-height: 400px !important;     /* Minimum yükseklik */
+    max-height: 60vh !important;      /* Maksimum yükseklik ekranın %60'ı */
     z-index: 40 !important;
     
     /* Pozisyon garantisi */
