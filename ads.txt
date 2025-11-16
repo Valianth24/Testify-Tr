@@ -1,0 +1,10 @@
+# ==========================
+# Testify - ads.txt
+# ==========================
+# Bu dosya, bu alan adı için
+# yetkili reklam satıcılarını listeler.
+# AdSense için ZORUNLUDUR.
+# ==========================
+
+# Google AdSense
+google.com, pub-6980942787991808, DIRECT, f08c47fec0942fa0
