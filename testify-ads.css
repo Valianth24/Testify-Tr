@@ -146,41 +146,46 @@
 }
 
 /* ─────────────────────────────── */
-/* BÜYÜK EKRANLAR (≥ 1200px)      */
-/* Yan reklamların konumu         */
+/* BÜYÜK EKRANLAR (yan reklamlar) */
+/* KESİN ÇÖZÜM - MAXIMUM ÖNCELİK  */
 /* ─────────────────────────────── */
 
-@media (min-width: 1200px) {
-  .global-side-ad,
-  .tfy-side-ad {
-    /* Header ile sayfa sonu arasında, orantılı dursun */
-    top: 15vh;          /* yukarıdan %15 boşluk */
-    bottom: 12vh;       /* aşağıdan %12 boşluk */
+@media (min-width: 1400px) {
+  div.global-side-ad,
+  .global-side-ad.global-side-ad--left,
+  .global-side-ad.global-side-ad--right {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
 
-    width: 191px;       /* kısa kenar senin istediğin gibi */
-    max-height: 73vh;   /* dikey boy: ekranın ~%73'ü */
-    min-height: 380px;
+    /* ↓↓ İSTEDİĞİN AYARLAR ↓↓ */
+    /* Eski: top: 20%, max-height: 60vh civarıydı */
 
-    z-index: 40;
+    /* Konum: şu anki yerinden ~%40 daha aşağı (20% → 28% civarı) */
+    top: 28vh !important;
+    bottom: auto !important;
+
+    /* Uzun kenar: ~%20 daha uzun (60vh → 72vh) */
+    width: 191px !important;          /* kısa kenar aynı */
+    height: 72vh !important;          /* toplam yükseklik */
+    min-height: 480px !important;     /* 400px → 480px (≈%20 uzadı) */
+    max-height: 72vh !important;
+
+    z-index: 40 !important;
+    position: fixed !important;
   }
 
   .global-side-ad--left,
-  .tfy-side-ad--left {
-    left: 10px;
-    right: auto;
+  div.global-side-ad.global-side-ad--left {
+    left: 10px !important;
+    right: auto !important;
   }
 
   .global-side-ad--right,
-  .tfy-side-ad--right {
-    right: 10px;
-    left: auto;
-  }
-}
-
-/* Orta ekranlarda (769–1199px) yan reklamları gizle ki içerik daralmasın */
-@media (min-width: 769px) and (max-width: 1199px) {
-  .global-side-ad,
-  .tfy-side-ad {
-    display: none;
+  div.global-side-ad.global-side-ad--right {
+    right: 10px !important;
+    left: auto !important;
   }
 }
