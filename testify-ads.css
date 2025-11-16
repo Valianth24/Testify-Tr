@@ -1,17 +1,7 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════
- * TESTIFY ADS STYLES v2.2
+ * TESTIFY ADS STYLES v2.3 - FINAL
  * Global reklam yerleşimi (TÜM sayfalar)
- *
- * PC:
- * - Üstte 2 slot (alt alta, tam geniş banner)
- * - Altta 2 slot (alt alta, tam geniş banner)
- * - Sağda 1, solda 1 (uzun dikey kolon, içeriği çok daraltmadan)
- *
- * Mobil:
- * - Üstte 3 slot
- * - Altta 3 slot
- * - Yan reklamlar mobilde gizli
  * ═══════════════════════════════════════════════════════════════════════
  */
 
@@ -40,7 +30,7 @@
   background: radial-gradient(circle at top, #23232a, #050609 65%);
   border-radius: 14px;
   border: 1px dashed rgba(255, 255, 255, 0.08);
-  min-height: 150px;             /* ↑ Önceki ~120px, yaklaşık %25 daha yüksek */
+  min-height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,24 +38,23 @@
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
-
   width: 100%;
-  max-width: 1200px;              /* Sağa sola uzunlamasına banner */
+  max-width: 1200px;
 }
 
-/* Yan reklamlar (sağ / sol kolon) – temel görünüm */
+/* Yan reklamlar - EN YÜKSEK ÖNCELİK */
 .global-side-ad {
-  background: radial-gradient(circle at top, #23232a, #050609 65%);
-  border-radius: 14px;
-  border: 1px dashed rgba(255, 255, 255, 0.08);
-  min-height: 260px;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  position: fixed;
-  overflow: hidden;
-  box-sizing: border-box;
+  background: radial-gradient(circle at top, #23232a, #050609 65%) !important;
+  border-radius: 14px !important;
+  border: 1px dashed rgba(255, 255, 255, 0.08) !important;
+  min-height: 260px !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 10px !important;
+  position: fixed !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
 /* Küçük "Reklam" etiketi */
@@ -113,7 +102,7 @@
   }
 
   .ad-slot {
-    min-height: 112px;          /* ↑ Önce 90px, yaklaşık %25 artış */
+    min-height: 112px;
     border-radius: 12px;
     max-width: 100%;
   }
@@ -123,7 +112,7 @@
   }
 
   .global-side-ad {
-    display: none;
+    display: none !important;
   }
 }
 
@@ -133,7 +122,7 @@
 
 @media (min-width: 769px) {
   .ad-slot {
-    min-height: 165px;          /* ↑ Önce 130px, yaklaşık %25 artış */
+    min-height: 165px;
   }
 
   .ad-slot--mobile-only {
@@ -143,28 +132,38 @@
 
 /* ─────────────────────────────── */
 /* BÜYÜK EKRANLAR (yan reklamlar) */
+/* KESİN ÇÖZÜM - MAXIMUM ÖNCELİK  */
 /* ─────────────────────────────── */
 
 @media (min-width: 1400px) {
-  /* !important ile zorla uygula */
-  .global-side-ad {
+  div.global-side-ad,
+  .global-side-ad.global-side-ad--left,
+  .global-side-ad.global-side-ad--right {
     display: flex !important;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
-    gap: 12px;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
 
-    top: 380px !important;      /* ↑ Çok daha aşağı - !important ile zorla */
-    width: 191px !important;    /* ↑ %15 daha dar - !important ile zorla */
-    min-height: 720px;
-    z-index: 40;
+    /* KRİTİK DEĞERLER */
+    top: 380px !important;
+    width: 191px !important;
+    min-height: 720px !important;
+    z-index: 40 !important;
+    
+    /* Pozisyon garantisi */
+    position: fixed !important;
   }
 
-  .global-side-ad--left {
+  .global-side-ad--left,
+  div.global-side-ad.global-side-ad--left {
     left: 10px !important;
+    right: auto !important;
   }
 
-  .global-side-ad--right {
+  .global-side-ad--right,
+  div.global-side-ad.global-side-ad--right {
     right: 10px !important;
+    left: auto !important;
   }
 }
