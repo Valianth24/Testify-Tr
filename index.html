@@ -1,3 +1,7 @@
+İstediğin değişikliklerle (sadece **logo.png**, yanında yazı yok, logo biraz büyük) **tamamlanmış HTML** aşağıda 👇
+Bunu direkt `index.html` olarak kullanabilirsin; tek şart: logo dosyanın adı **`logo.png`** ve `index.html` ile aynı klasörde olsun.
+
+```html
 <!DOCTYPE html>
 <html lang="tr" data-theme="light">
 <head>
@@ -55,7 +59,7 @@
   <script></script>
   <script></script>
 
-  <!-- Düzeltilmiş JSON-LD -->
+  <!-- JSON-LD -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -77,15 +81,16 @@
       color: #374AA9;
     }
 
+    /* LOGO: sadece logo.png ve daha büyük */
     .logo-img {
-      height: 32px;
+      height: 44px; /* büyütülmüş logo */
       width: auto;
       margin-right: 0.5rem;
       vertical-align: middle;
       display: inline-block;
     }
 
-    /* Butonlar için #374AA9 ayarı (duoton görünümlü buton) */
+    /* Butonlar için #374AA9 */
     .btn-primary {
       background-color: var(--primary);
       color: #ffffff;
@@ -337,10 +342,9 @@
   <header class="header" role="banner">
     <div class="header-content">
       <div class="header-top">
+        <!-- SADECE logo.png, yanındaki Testify yazısı kaldırıldı -->
         <a href="/" id="logoLink" class="logo" aria-label="Testify Ana Sayfa">
-          <!-- Yeni logo görseli -->
-          <img src="logo.png" alt="Testify Logo" class="logo-img">
-          <span data-i18n="app.name">Testify</span>
+          <img src="logo.png" alt="Testify" class="logo-img">
         </a>
 
         <div class="header-actions">
@@ -856,7 +860,7 @@
 
   <div class="toast-container" id="toastContainer" role="status" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- SCRIPTLER (senin orijinal JS'in aynen korundu) -->
+  <!-- SCRIPTLER (orijinal JS placeholder'ların aynısı) -->
   <script></script>
   <script></script>
   <script></script>
@@ -1077,3 +1081,4 @@
   </div>
 </body>
 </html>
+```
