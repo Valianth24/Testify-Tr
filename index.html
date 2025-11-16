@@ -37,7 +37,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://pagead2.googlesyndication.com">
-    
+
+    <!-- ✅ GOOGLE ADSENSE DOĞRULAMA KODU -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6980942787991808"
+            crossorigin="anonymous"></script>
+    <!-- ✅ BİTİŞ -->
+
     <!-- Font - Preload for Performance -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -45,8 +50,8 @@
     <!-- External CSS -->
     <link rel="stylesheet" href="styles.css">
     <!-- AdSense Manager Styles -->
-    
-    
+    <link rel="stylesheet" href="adsense-styles.css">
+    <link rel="stylesheet" href="ad-manager.css">
     
     <!-- jsPDF for PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -334,17 +339,6 @@
         </div>
     </header>
 
-    <!-- ✅ ÜST REKLAM SATIRI (PC: 2, Mobil: 3) -->
-    <div class="global-ad-row global-ad-row--top">
-        <div class="ad-slot ad-slot--top ad-slot--desktop-or-mobile" data-ad-slot="top-1"></div>
-        <div class="ad-slot ad-slot--top ad-slot--desktop-or-mobile" data-ad-slot="top-2"></div>
-        <div class="ad-slot ad-slot--top ad-slot--mobile-only" data-ad-slot="top-3"></div>
-    </div>
-
-    <!-- ✅ SAĞ / SOL YAN REKLAMLAR (sadece PC, en kenarlarda) -->
-    <div class="global-side-ad global-side-ad--left" data-ad-slot="side-left"></div>
-    <div class="global-side-ad global-side-ad--right" data-ad-slot="side-right"></div>
-
     <!-- Main Container -->
     <div class="main-container">
         <!-- Main Content Area -->
@@ -529,7 +523,7 @@
                         <label for="testCategory"><span data-i18n="create.category">Kategori</span> <span class="required">*</span></label>
                         <select id="testCategory" name="testCategory" required aria-required="true">
                             <option value="" data-i18n="create.selectCategory">Seçiniz...</option>
-                            <option value="matematik" data-i18n="category.matematik">Matematik</</option>
+                            <option value="matematik" data-i18n="category.matematik">Matematik</option>
                             <option value="fen" data-i18n="category.fen">Fen Bilimleri</option>
                             <option value="turkce" data-i18n="category.turkce">Türkçe</option>
                             <option value="sosyal" data-i18n="category.sosyal">Sosyal Bilgiler</option>
@@ -698,13 +692,6 @@
                 </form>
             </section>
         </main>
-    </div>
-
-    <!-- ✅ ALT REKLAM SATIRI (PC: 2, Mobil: 3) -->
-    <div class="global-ad-row global-ad-row--bottom">
-        <div class="ad-slot ad-slot--bottom ad-slot--desktop-or-mobile" data-ad-slot="bottom-1"></div>
-        <div class="ad-slot ad-slot--bottom ad-slot--desktop-or-mobile" data-ad-slot="bottom-2"></div>
-        <div class="ad-slot ad-slot--bottom ad-slot--mobile-only" data-ad-slot="bottom-3"></div>
     </div>
 
     <!-- Floating Testfy Assistant -->
@@ -974,46 +961,44 @@
     </script>
 
     <!-- Not Ekle Modalı -->
-<div id="noteModalOverlay" class="confirm-overlay note-modal-overlay" aria-hidden="true">
-    <div id="noteModal" class="confirm-dialog note-modal" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle">
-        <h2 id="noteModalTitle" class="confirm-dialog-title">Yeni Not</h2>
-        <p class="confirm-dialog-message">
-            Notun için bir başlık ve içerik ekle.
-        </p>
+    <div id="noteModalOverlay" class="confirm-overlay note-modal-overlay" aria-hidden="true">
+        <div id="noteModal" class="confirm-dialog note-modal" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle">
+            <h2 id="noteModalTitle" class="confirm-dialog-title">Yeni Not</h2>
+            <p class="confirm-dialog-message">
+                Notun için bir başlık ve içerik ekle.
+            </p>
 
-        <div class="note-modal-body">
-            <label class="note-label" for="noteTitleInput">
-                Not Başlığı
-                <input 
-                    type="text" 
-                    id="noteTitleInput" 
-                    maxlength="80"
-                    placeholder="Örn: HTML Etiketleri"
-                />
-            </label>
+            <div class="note-modal-body">
+                <label class="note-label" for="noteTitleInput">
+                    Not Başlığı
+                    <input 
+                        type="text" 
+                        id="noteTitleInput" 
+                        maxlength="80"
+                        placeholder="Örn: HTML Etiketleri"
+                    />
+                </label>
 
-            <label class="note-label" for="noteContentInput">
-                Not İçeriği (isteğe bağlı)
-                <textarea 
-                    id="noteContentInput" 
-                    rows="4"
-                    placeholder="İçeriği buraya yazabilirsin..."></textarea>
-            </label>
-        </div>
+                <label class="note-label" for="noteContentInput">
+                    Not İçeriği (isteğe bağlı)
+                    <textarea 
+                        id="noteContentInput" 
+                        rows="4"
+                        placeholder="İçeriği buraya yazabilirsin..."></textarea>
+                </label>
+            </div>
 
-        <div class="confirm-dialog-actions">
-            <button type="button" class="btn btn-secondary" id="noteCancelBtn">Vazgeç</button>
-            <button type="button" class="btn btn-primary" id="noteSaveBtn">Kaydet</button>
+            <div class="confirm-dialog-actions">
+                <button type="button" class="btn btn-secondary" id="noteCancelBtn">Vazgeç</button>
+                <button type="button" class="btn btn-primary" id="noteSaveBtn">Kaydet</button>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Reklam stil dosyası -->
-<link rel="stylesheet" href="testify-ads.css">
-
-<!-- Reklam yerleşimini yöneten JS -->
-<script src="testify-ads.js" defer></script>
-
+    <link rel="stylesheet" href="testify-ads.css">
+    <!-- Reklam yerleşimini yöneten JS -->
+    <script src="testify-ads.js" defer></script>
 
 </body>
 </html>
