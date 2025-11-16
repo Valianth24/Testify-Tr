@@ -1,13 +1,10 @@
 /**
- * TESTIFY ADS v3
+ * TESTIFY ADS v3.1
  * Global 6-slot yerleşimi:
  *  - PC:  üstte 2 (alt alta), altta 2 (alt alta), solda 1, sağda 1
  *  - Mobil: üstte 3, altta 3, yan reklam yok
  *
- * HTML tarafında sadece:
- *   <link rel="stylesheet" href="testify-ads.css">
- *   <script src="testify-ads.js" defer></script>
- * olması yeterli.
+ * Eski sistemden kalan dashboard içi reklam layout'unu da temizler.
  */
 
 (function () {
@@ -48,6 +45,9 @@
             // Aynı sayfada iki kez kurulum olmasın
             if (document.body.dataset.tfyAdsInitialized === '1') return;
             document.body.dataset.tfyAdsInitialized = '1';
+
+            // Önce eski reklam layout'larını topla/temizle
+            this.cleanupLegacyAds();
 
             // ── ÜSTTEKİ REKLAMLAR (2 PC, 3 MOBİL) ────────────────────
             const topRow = document.createElement('div');
@@ -94,6 +94,47 @@
                 'tfy-side-ad tfy-side-ad--right',
                 'Reklam Alanı Sağ'
             );
+        },
+
+        /**
+         * Eski dashboard reklam layout'unu ve eski sınıfları temizler
+         * (dashboard-layout-with-ads, .ad-slot vb.)
+         */
+        cleanupLegacyAds() {
+            const dashboard = document.getElementById('dashboard');
+
+            if (dashboard) {
+                const legacyLayout = dashboard.querySelector('.dashboard-layout-with-ads');
+                if (legacyLayout) {
+                    // Eski yapıyı çözüp dashboard'u orijinal haline getir
+                    const legacyMain = legacyLayout.querySelector('.dashboard-main');
+                    const nodes = legacyMain
+                        ? Array.from(legacyMain.childNodes)
+                        : Array.from(legacyLayout.childNodes);
+
+                    dashboard.innerHTML = '';
+                    nodes.forEach(node => {
+                        // Tamamen boş text nodlarını at
+                        if (
+                            node.nodeType === Node.TEXT_NODE &&
+                            !node.textContent.trim()
+                        ) {
+                            return;
+                        }
+                        dashboard.appendChild(node);
+                    });
+                }
+
+                // Dashboard içinde kalmış eski reklam kutularını kaldır
+                dashboard
+                    .querySelectorAll('.ad-slot, .ad-banner, .ad-container, .global-ad-row')
+                    .forEach(el => el.remove());
+            }
+
+            // Genel sayfada varsa eski global reklam satırlarını sil
+            document
+                .querySelectorAll('.global-ad-row, .ad-banner, .ad-container')
+                .forEach(el => el.remove());
         },
 
         /**
