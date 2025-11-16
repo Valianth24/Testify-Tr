@@ -1,41 +1,27 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════
- * TESTIFY ADS STYLES v2.0
+ * TESTIFY ADS STYLES v2.2
  * Global reklam yerleşimi (TÜM sayfalar)
  *
  * PC:
- * - Üstte 2 slot
- * - Altta 2 slot
- * - Sağda 1, solda 1 (büyük ekranlarda, en köşelerde, içeriği çok daraltmadan)
+ * - Üstte 2 slot (alt alta, tam geniş banner)
+ * - Altta 2 slot (alt alta, tam geniş banner)
+ * - Sağda 1, solda 1 (uzun dikey kolon, içeriği çok daraltmadan)
  *
  * Mobil:
  * - Üstte 3 slot
  * - Altta 3 slot
- *
- * HTML:
- *  <div class="global-ad-row global-ad-row--top">
- *    <div class="ad-slot ad-slot--top ad-slot--desktop-or-mobile" data-ad-slot="top-1"></div>
- *    <div class="ad-slot ad-slot--top ad-slot--desktop-or-mobile" data-ad-slot="top-2"></div>
- *    <div class="ad-slot ad-slot--top ad-slot--mobile-only"        data-ad-slot="top-3"></div>
- *  </div>
- *
- *  <div class="global-side-ad global-side-ad--left"  data-ad-slot="side-left"></div>
- *  <div class="global-side-ad global-side-ad--right" data-ad-slot="side-right"></div>
- *
- *  <div class="global-ad-row global-ad-row--bottom">
- *    <div class="ad-slot ad-slot--bottom ad-slot--desktop-or-mobile" data-ad-slot="bottom-1"></div>
- *    <div class="ad-slot ad-slot--bottom ad-slot--desktop-or-mobile" data-ad-slot="bottom-2"></div>
- *    <div class="ad-slot ad-slot--bottom ad-slot--mobile-only"        data-ad-slot="bottom-3"></div>
- *  </div>
+ * - Yan reklamlar mobilde gizli
  * ═══════════════════════════════════════════════════════════════════════
  */
 
-/* Genel satır (üst / alt banner) */
+/* Genel satır (üst / alt banner alanı) */
 .global-ad-row {
   width: 100%;
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   padding-inline: 8px;
   box-sizing: border-box;
 }
@@ -54,27 +40,30 @@
   background: radial-gradient(circle at top, #23232a, #050609 65%);
   border-radius: 14px;
   border: 1px dashed rgba(255, 255, 255, 0.08);
-  min-height: 120px;
+  min-height: 150px;             /* ↑ Önceki ~120px, yaklaşık %25 daha yüksek */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 8px 14px;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
+
+  width: 100%;
+  max-width: 1200px;              /* Sağa sola uzunlamasına banner */
 }
 
-/* Yan reklamlar (sağ / sol) aynı stil tabanı */
+/* Yan reklamlar (sağ / sol kolon) – temel görünüm */
 .global-side-ad {
   background: radial-gradient(circle at top, #23232a, #050609 65%);
   border-radius: 14px;
   border: 1px dashed rgba(255, 255, 255, 0.08);
   min-height: 260px;
-  display: none; /* varsayılan: gizli, sadece büyük ekranlarda açıyoruz */
+  display: none;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  position: fixed;  /* büyük ekranlarda açınca fixed olacak */
+  padding: 10px;
+  position: fixed;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -82,7 +71,7 @@
 /* Küçük "Reklam" etiketi */
 .ad-slot::after,
 .global-side-ad::after {
-  content: "Reklam";
+  content: "REKLAM";
   position: absolute;
   top: 8px;
   right: 10px;
@@ -92,11 +81,12 @@
   letter-spacing: 0.08em;
 }
 
-/* Placeholder yazısı (test için) */
+/* Placeholder yazısı (test / dev için) */
 .ad-placeholder {
   font-size: 0.8rem;
   color: var(--text-secondary, #a0a0b8);
-  opacity: 0.7;
+  opacity: 0.8;
+  text-align: center;
 }
 
 /* Hafif hover efekti */
@@ -117,23 +107,21 @@
 
 @media (max-width: 768px) {
   .global-ad-row {
-    flex-direction: column;    /* Üstte 3, altta 3 tane alt alta görünür */
+    flex-direction: column;
     gap: 10px;
     padding-inline: 10px;
   }
 
-  .ad-slot,
-  .global-side-ad {
-    min-height: 90px;
+  .ad-slot {
+    min-height: 112px;          /* ↑ Önce 90px, yaklaşık %25 artış */
     border-radius: 12px;
+    max-width: 100%;
   }
 
-  /* Mobilde 3 slotun hepsi görünsün (top-1, top-2 + top-3) */
   .ad-slot--mobile-only {
     display: flex;
   }
 
-  /* Yan reklamlar mobilde görünmesin */
   .global-side-ad {
     display: none;
   }
@@ -144,17 +132,10 @@
 /* ─────────────────────────────── */
 
 @media (min-width: 769px) {
-  .global-ad-row {
-    flex-direction: row;
+  .ad-slot {
+    min-height: 165px;          /* ↑ Önce 130px, yaklaşık %25 artış */
   }
 
-  .global-ad-row .ad-slot {
-    max-width: 468px;       /* Tipik Adsense genişliği, 2 tane rahat yan yana */
-    width: 100%;
-    flex: 1 1 0;
-  }
-
-  /* Mobil-only slotlar burada gizli (sadece 2 üst + 2 alt) */
   .ad-slot--mobile-only {
     display: none;
   }
@@ -164,25 +145,25 @@
 /* BÜYÜK EKRANLAR (yan reklamlar) */
 /* ─────────────────────────────── */
 
-/**
- * Yan reklamlar sadece geniş ekranlarda (örn. ≥ 1400px) açılıyor.
- * Böylece içerik çok daralmadan, gerçekten "en köşe" hissi veriyor.
- */
 @media (min-width: 1400px) {
   .global-side-ad {
     display: flex;
-    position: fixed;
-    top: 120px;          /* Header'ın biraz altından başlasın */
-    width: 160px;        /* Çok geniş olmasın ki içerik daralmasın */
-    min-height: 600px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+
+    top: 120px;
+    width: 225px;               /* ↑ Önce 180px, ~%25 daha geniş */
+    min-height: 720px;
     z-index: 40;
   }
 
   .global-side-ad--left {
-    left: 8px;
+    left: 10px;
   }
 
   .global-side-ad--right {
-    right: 8px;
+    right: 10px;
   }
 }
