@@ -1,160 +1,161 @@
 /**
- * TESTIFY ADS v3
- * Global 6-slot yerleşimi:
- *  - PC:  üstte 2 (alt alta), altta 2 (alt alta), solda 1, sağda 1
- *  - Mobil: üstte 3, altta 3, yan reklam yok
- *
- * HTML tarafında sadece:
- *   <link rel="stylesheet" href="testify-ads.css">
- *   <script src="testify-ads.js" defer></script>
- * olması yeterli.
+ * TESTIFY ADS STYLES v3
+ * PC:  Üstte 2 (alt alta), altta 2 (alt alta), solda 1, sağda 1
+ * MOBİL: Üstte 3, altta 3, yan reklam YOK
+ * Tam ekran reklam yok, hepsi kenar / banner şeklinde.
  */
 
-(function () {
-    'use strict';
+/* ─────────────────────────────── */
+/* ORTAK GÖRÜNÜM                  */
+/* ─────────────────────────────── */
 
-    const TestifyAds = {
-        initialized: false,
+.tfy-ad-row {
+    width: 100%;
+    display: flex;
+    flex-direction: column;      /* ALT ALTA */
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+}
 
-        init() {
-            if (this.initialized) return;
-            this.initialized = true;
+.tfy-ad-row--top {
+    margin-top: 8px;
+}
 
-            const start = () => {
-                try {
-                    this.setup();
-                    console.log('%c[TestifyAds] Global reklam layout yüklendi.', 'color:#bb86fc;');
-                } catch (err) {
-                    console.error('[TestifyAds] init hatası:', err);
-                }
-            };
+.tfy-ad-row--bottom {
+    margin: 16px 0 12px;
+}
 
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', start);
-            } else {
-                start();
-            }
-        },
+.tfy-ad-slot {
+    background: radial-gradient(circle at top, #23232a, #050609 65%);
+    border-radius: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    width: 100%;
+    max-width: 1200px;           /* Sağa–sola uzun banner */
+    min-height: 170px;           /* Öncekine göre ~%25 daha yüksek */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+}
 
-        setup() {
-            const header = document.querySelector('.header');
-            const mainContainer = document.querySelector('.main-container');
+.tfy-ad-slot::after {
+    content: "REKLAM";
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
 
-            if (!header || !mainContainer) {
-                console.warn('[TestifyAds] .header veya .main-container bulunamadı, reklam eklenemedi.');
-                return;
-            }
+.tfy-ad-placeholder {
+    font-size: 0.8rem;
+    color: var(--text-secondary, #a0a0b8);
+    opacity: 0.8;
+    text-align: center;
+}
 
-            // Aynı sayfada iki kez kurulum olmasın
-            if (document.body.dataset.tfyAdsInitialized === '1') return;
-            document.body.dataset.tfyAdsInitialized = '1';
+.tfy-ad-slot:hover {
+    border-color: rgba(187, 134, 252, 0.45);
+    box-shadow: 0 0 0 1px rgba(187, 134, 252, 0.28);
+}
 
-            // ── ÜSTTEKİ REKLAMLAR (2 PC, 3 MOBİL) ────────────────────
-            const topRow = document.createElement('div');
-            topRow.className = 'tfy-ad-row tfy-ad-row--top';
+/* Sadece mobilde görülecek ekstra slotlar (üstte 3, altta 3 için) */
+.tfy-ad-slot--mobile-extra {
+    display: none;
+}
 
-            topRow.appendChild(this.createSlot('tfy-ad-top-1', 'Reklam Alanı Top-1'));
-            topRow.appendChild(this.createSlot('tfy-ad-top-2', 'Reklam Alanı Top-2'));
-            topRow.appendChild(
-                this.createSlot(
-                    'tfy-ad-top-3',
-                    'Reklam Alanı Top-3 (Mobil)',
-                    'tfy-ad-slot--mobile-extra'
-                )
-            );
+/* ─────────────────────────────── */
+/* YAN REKLAM KOLONLARI (PC)      */
+/* ─────────────────────────────── */
 
-            // Header’ın hemen altına yerleştir
-            header.insertAdjacentElement('afterend', topRow);
+.tfy-side-ad {
+    background: radial-gradient(circle at top, #23232a, #050609 65%);
+    border-radius: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    min-height: 720px;           /* AŞAĞI UZUN – tek kutu ama uzun kolon */
+    width: 220px;                /* Öncekine göre ~%25 daha geniş */
+    display: none;               /* Sadece geniş ekranda açılacak */
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    position: fixed;
+    top: 120px;
+    z-index: 40;
+    box-sizing: border-box;
+    overflow: hidden;
+}
 
-            // ── ALTAKİ REKLAMLAR (2 PC, 3 MOBİL) ─────────────────────
-            const bottomRow = document.createElement('div');
-            bottomRow.className = 'tfy-ad-row tfy-ad-row--bottom';
+.tfy-side-ad--left {
+    left: 10px;
+}
 
-            bottomRow.appendChild(this.createSlot('tfy-ad-bottom-1', 'Reklam Alanı Bottom-1'));
-            bottomRow.appendChild(this.createSlot('tfy-ad-bottom-2', 'Reklam Alanı Bottom-2'));
-            bottomRow.appendChild(
-                this.createSlot(
-                    'tfy-ad-bottom-3',
-                    'Reklam Alanı Bottom-3 (Mobil)',
-                    'tfy-ad-slot--mobile-extra'
-                )
-            );
+.tfy-side-ad--right {
+    right: 10px;
+}
 
-            // Ana içeriğin hemen altına
-            mainContainer.insertAdjacentElement('afterend', bottomRow);
+.tfy-side-ad::after {
+    content: "REKLAM";
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
 
-            // ── YAN REKLAMLAR (solda 1, sağda 1) ─────────────────────
-            this.injectSideAd(
-                'tfy-ad-left',
-                'tfy-side-ad tfy-side-ad--left',
-                'Reklam Alanı Sol'
-            );
-            this.injectSideAd(
-                'tfy-ad-right',
-                'tfy-side-ad tfy-side-ad--right',
-                'Reklam Alanı Sağ'
-            );
-        },
+.tfy-side-ad:hover {
+    border-color: rgba(187, 134, 252, 0.45);
+    box-shadow: 0 0 0 1px rgba(187, 134, 252, 0.28);
+}
 
-        /**
-         * Ortak slot oluşturucu
-         * @param {string} id
-         * @param {string} label
-         * @param {string} [extraClass]
-         */
-        createSlot(id, label, extraClass) {
-            const slot = document.createElement('div');
-            slot.className = 'tfy-ad-slot' + (extraClass ? ' ' + extraClass : '');
-            slot.id = id;
-            slot.dataset.adSlot = id; // İstersen adsense-manager buradan yakalayabilir
+/* ─────────────────────────────── */
+/* MOBİL (≤ 768px)                */
+/* ─────────────────────────────── */
 
-            const span = document.createElement('span');
-            span.className = 'tfy-ad-placeholder';
-            span.textContent = label;
-            slot.appendChild(span);
+@media (max-width: 768px) {
+    .tfy-ad-row {
+        padding-inline: 10px;
+    }
 
-            return slot;
-        },
+    .tfy-ad-slot {
+        max-width: 100%;
+        min-height: 120px;        /* Mobilde biraz daha küçük, full screen değil */
+        border-radius: 12px;
+    }
 
-        /**
-         * Sabit yan kolon için yardımcı
-         */
-        injectSideAd(id, className, label) {
-            const el = document.createElement('aside');
-            el.id = id;
-            el.className = className;
-            el.dataset.adSlot = id;
+    .tfy-ad-slot--mobile-extra {
+        display: flex;            /* Üstte 3, altta 3 olsun diye açıyoruz */
+    }
 
-            const span = document.createElement('span');
-            span.className = 'tfy-ad-placeholder';
-            span.textContent = label;
-            el.appendChild(span);
+    .tfy-side-ad {
+        display: none !important; /* Yan reklam yok mobilde */
+    }
+}
 
-            document.body.appendChild(el);
-        },
+/* ─────────────────────────────── */
+/* NORMAL DESKTOP (769–1399px)    */
+/* ─────────────────────────────── */
 
-        /**
-         * Dışarıdan slot doldurmak istersen:
-         *   TestifyAds.fillSlot('tfy-ad-top-1', el => { el.innerHTML = '...adsense kodu...'; });
-         */
-        fillSlot(slotId, render) {
-            const el = document.getElementById(slotId);
-            if (!el) {
-                console.warn('[TestifyAds] Slot bulunamadı:', slotId);
-                return;
-            }
+@media (min-width: 769px) and (max-width: 1399px) {
+    .tfy-ad-slot {
+        min-height: 180px;
+    }
+}
 
-            el.innerHTML = '';
+/* ─────────────────────────────── */
+/* GENİŞ DESKTOP (≥ 1400px)       */
+/* ─────────────────────────────── */
 
-            if (typeof render === 'function') {
-                render(el);
-            } else if (typeof render === 'string') {
-                el.innerHTML = render;
-            }
-        }
-    };
-
-    // Global export
-    window.TestifyAds = TestifyAds;
-    TestifyAds.init();
-})();
+@media (min-width: 1400px) {
+    .tfy-side-ad {
+        display: flex;            /* Sağ/Sol kolonlar sadece geniş ekranda */
+    }
+}
