@@ -146,12 +146,12 @@
     gap: 12px !important;
 
     /* KRİTİK DEĞERLER - DİKEY ORTALAMA */
-    top: 20% !important;              /* ↑ Yukarıdan %20 boşluk */
-    bottom: 20% !important;           /* ↑ Aşağıdan %20 boşluk */
+    top: 10% !important;              /* ↑ Yukarıdan %10 boşluk */
+    bottom: 10% !important;           /* ↑ Aşağıdan %10 boşluk */
     width: 191px !important;          /* Kısa kenar */
     height: auto !important;          /* Yükseklik otomatik (top + bottom ile sınırlandı) */
     min-height: 400px !important;     /* Minimum yükseklik */
-    max-height: 60vh !important;      /* Maksimum yükseklik ekranın %60'ı */
+    max-height: 80vh !important;      /* Maksimum yükseklik ekranın %80'i */
     z-index: 40 !important;
     
     /* Pozisyon garantisi */
