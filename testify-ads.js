@@ -1,9 +1,4 @@
-/**
- * TESTIFY ADS v3.2
- * Global 6-slot yerleşimi
- *  - PC:  üstte 2, altta 2, solda 1, sağda 1
- *  - Mobil: üstte 3, altta 3 (yan reklam yok)
- */
+
 
 (function () {
   'use strict';
