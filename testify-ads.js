@@ -1,36 +1,24 @@
 /**
- * ═══════════════════════════════════════════════════════════════════════
- * TESTIFY ADS v2.0
- * Global reklam yönetimi (tüm sayfalar)
- *
- * Özellikler:
- * - HTML'de tanımlı .ad-slot ve .global-side-ad alanlarını otomatik bulur
- * - İçine placeholder "Reklam Alanı X" yazar (Adsense gelene kadar görüntü)
- * - Sekme (nav-tab) değişimlerinde "refresh" tetikler
- * - İstersen dışarıdan TestifyAds.fillSlot(...) ile belli bir alanı doldurursun
- * - İstersen adsense-manager.js içinde "testify:ads:refresh" event'ini yakalayıp
- *   gerçek Adsense reload işlemini orada yaparsın.
- * ═══════════════════════════════════════════════════════════════════════
+ * TESTIFY ADS v3.2
+ * Global 6-slot yerleşimi
+ *  - PC:  üstte 2, altta 2, solda 1, sağda 1
+ *  - Mobil: üstte 3, altta 3 (yan reklam yok)
  */
 
 (function () {
   'use strict';
 
   const TestifyAds = {
-    _initialized: false,
+    initialized: false,
 
-    /**
-     * Ana init
-     */
     init() {
-      if (this._initialized) return;
-      this._initialized = true;
+      if (this.initialized) return;
+      this.initialized = true;
 
       const start = () => {
         try {
-          this.setupPlaceholders();
-          this.bindTabRefresh();
-          console.log('%c[TestifyAds] Global reklam sistemi aktif.', 'color:#bb86fc;');
+          this.setup();
+          console.log('%c[TestifyAds] Global reklam layout yüklendi.', 'color:#bb86fc;');
         } catch (err) {
           console.error('[TestifyAds] init hatası:', err);
         }
@@ -43,118 +31,145 @@
       }
     },
 
-    /**
-     * Sayfadaki tüm reklam alanlarını bulup placeholder ekler.
-     * (Gerçek Adsense kodu geldiğinde bu placeholder'ları kaldırabilirsin.)
-     */
-    setupPlaceholders() {
-      const slots = document.querySelectorAll('.ad-slot, .global-side-ad');
-      if (!slots.length) {
-        console.warn('[TestifyAds] Hiç reklam alanı bulunamadı.');
+    setup() {
+      const header = document.querySelector('.header');
+      const mainContainer = document.querySelector('.main-container');
+
+      if (!header || !mainContainer) {
+        console.warn('[TestifyAds] .header veya .main-container bulunamadı, reklam eklenemedi.');
         return;
       }
 
-      let counter = 1;
-      slots.forEach((el) => {
-        if (el.dataset.adsInitialized === '1') return;
-        el.dataset.adsInitialized = '1';
+      // Aynı sayfada iki kez kurma
+      if (document.body.dataset.tfyAdsInitialized === '1') return;
+      document.body.dataset.tfyAdsInitialized = '1';
 
-        // Eğer içinde daha önce içerik yoksa placeholder ekle
-        const hasContent = el.querySelector('.ad-placeholder') || el.children.length > 0;
-        if (!hasContent) {
-          const span = document.createElement('span');
-          span.className = 'ad-placeholder';
+      // Eski layout izlerini temizle
+      this.cleanupLegacyAds();
 
-          // data-ad-slot varsa label'da da gösterelim
-          const slotName = el.getAttribute('data-ad-slot') || counter;
-          span.textContent = 'Reklam Alanı ' + slotName;
-          el.appendChild(span);
-        }
+      /* ── ÜST REKLAMLAR ───────────────────────────── */
 
-        counter++;
-      });
+      const topRow = document.createElement('div');
+      topRow.className = 'global-ad-row global-ad-row--top tfy-ad-row tfy-ad-row--top';
+
+      topRow.appendChild(this.createSlot('tfy-ad-top-1', 'Reklam Alanı Top-1'));
+      topRow.appendChild(this.createSlot('tfy-ad-top-2', 'Reklam Alanı Top-2'));
+      topRow.appendChild(
+        this.createSlot(
+          'tfy-ad-top-3',
+          'Reklam Alanı Top-3 (Mobil)',
+          'ad-slot--mobile-only tfy-ad-slot--mobile-extra'
+        )
+      );
+
+      header.insertAdjacentElement('afterend', topRow);
+
+      /* ── ALT REKLAMLAR ───────────────────────────── */
+
+      const bottomRow = document.createElement('div');
+      bottomRow.className = 'global-ad-row global-ad-row--bottom tfy-ad-row tfy-ad-row--bottom';
+
+      bottomRow.appendChild(this.createSlot('tfy-ad-bottom-1', 'Reklam Alanı Bottom-1'));
+      bottomRow.appendChild(this.createSlot('tfy-ad-bottom-2', 'Reklam Alanı Bottom-2'));
+      bottomRow.appendChild(
+        this.createSlot(
+          'tfy-ad-bottom-3',
+          'Reklam Alanı Bottom-3 (Mobil)',
+          'ad-slot--mobile-only tfy-ad-slot--mobile-extra'
+        )
+      );
+
+      mainContainer.insertAdjacentElement('afterend', bottomRow);
+
+      /* ── YAN REKLAMLAR ───────────────────────────── */
+
+      this.injectSideAd(
+        'tfy-ad-left',
+        'global-side-ad--left tfy-side-ad--left',
+        'Reklam Alanı Sol'
+      );
+      this.injectSideAd(
+        'tfy-ad-right',
+        'global-side-ad--right tfy-side-ad--right',
+        'Reklam Alanı Sağ'
+      );
     },
 
     /**
-     * Tüm slotlar için "refresh" tetikler.
-     * Şu an sadece data-refresh-key güncelliyor + event fırlatıyor.
-     * Gerçek Adsense reload'ı için adsense-manager.js içinde:
-     *
-     *  window.addEventListener('testify:ads:refresh', (ev) => {
-     *    // burada adsbygoogle push vb. yapabilirsin
-     *  });
+     * Eski dashboard layout ve eski global satırları temizler
      */
-    refreshAll(reason = 'manual') {
-      const now = Date.now().toString();
-      const slots = document.querySelectorAll('.ad-slot, .global-side-ad');
+    cleanupLegacyAds() {
+      const dashboard = document.getElementById('dashboard');
 
-      slots.forEach((el, i) => {
-        el.dataset.refreshKey = now + '-' + i;
-        // İleride burada gerçek Adsense yenileme kodu çalıştırılabilir.
-      });
+      if (dashboard) {
+        const legacyLayout = dashboard.querySelector('.dashboard-layout-with-ads');
+        if (legacyLayout) {
+          const legacyMain = legacyLayout.querySelector('.dashboard-main');
+          const nodes = legacyMain
+            ? Array.from(legacyMain.childNodes)
+            : Array.from(legacyLayout.childNodes);
 
-      // Dış sistemler için custom event
-      try {
-        const ev = new CustomEvent('testify:ads:refresh', {
-          detail: { reason, timestamp: Date.now() }
-        });
-        window.dispatchEvent(ev);
-      } catch (err) {
-        console.warn('[TestifyAds] CustomEvent oluşturulamadı:', err);
+          dashboard.innerHTML = '';
+          nodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) return;
+            dashboard.appendChild(node);
+          });
+        }
+
+        dashboard
+          .querySelectorAll('.ad-slot, .ad-banner, .ad-container, .global-ad-row, .tfy-ad-row')
+          .forEach(el => el.remove());
       }
 
-      console.log('[TestifyAds] Slotlar yenilendi. Sebep:', reason);
+      document
+        .querySelectorAll('.global-ad-row, .ad-banner, .ad-container')
+        .forEach(el => el.remove());
     },
 
     /**
-     * nav-tab butonlarına tıklanınca reklamları yeniler.
-     * (Sadece okur, mevcut tab logic'ine karışmaz.)
+     * Ortak slot oluşturucu
      */
-    bindTabRefresh() {
-      const tabs = document.querySelectorAll('.nav-tab');
-      if (!tabs.length) return;
+    createSlot(id, label, extraClass) {
+      const slot = document.createElement('div');
+      slot.className = 'ad-slot tfy-ad-slot' + (extraClass ? ' ' + extraClass : '');
+      slot.id = id;
+      slot.dataset.adSlot = id;
 
-      tabs.forEach((tab) => {
-        tab.addEventListener('click', () => {
-          // Sekme değiştirildiğinde reklamları "yenile"
-          this.refreshAll('tab-change');
-        });
-      });
+      const span = document.createElement('span');
+      span.className = 'ad-placeholder tfy-ad-placeholder';
+      span.textContent = label;
+      slot.appendChild(span);
+
+      return slot;
     },
 
     /**
-     * Dışarıdan belirli bir slotu doldurmak için yardımcı fonksiyon.
-     *
-     * Örnek:
-     *   TestifyAds.fillSlot('top-1', (el) => {
-     *       el.innerHTML = '<!-- adsense kodu buraya -->';
-     *   });
-     *
-     *   TestifyAds.fillSlot('[data-ad-slot="side-left"]', '<b>Custom Banner</b>');
+     * Yan reklam alanı ekler
      */
-    fillSlot(selectorOrEl, render) {
-      let el = null;
+    injectSideAd(id, extraClass, label) {
+      const el = document.createElement('aside');
+      el.id = id;
+      el.className = 'global-side-ad tfy-side-ad ' + (extraClass || '');
+      el.dataset.adSlot = id;
 
-      if (typeof selectorOrEl === 'string') {
-        // Eğer string ID gibi ise (top-1) önce data-ad-slot ile dene
-        if (!selectorOrEl.startsWith('#') && !selectorOrEl.startsWith('.')) {
-          el = document.querySelector('[data-ad-slot="' + selectorOrEl + '"]');
-        }
+      const span = document.createElement('span');
+      span.className = 'ad-placeholder tfy-ad-placeholder';
+      span.textContent = label;
+      el.appendChild(span);
 
-        // Bulamazsa normal selector olarak dene
-        if (!el) {
-          el = document.querySelector(selectorOrEl);
-        }
-      } else if (selectorOrEl && selectorOrEl.nodeType === 1) {
-        el = selectorOrEl;
-      }
+      document.body.appendChild(el);
+    },
 
+    /**
+     * İleride adsense-manager ile slot doldurmak için helper
+     */
+    fillSlot(slotId, render) {
+      const el = document.getElementById(slotId);
       if (!el) {
-        console.warn('[TestifyAds] Slot bulunamadı:', selectorOrEl);
+        console.warn('[TestifyAds] Slot bulunamadı:', slotId);
         return;
       }
 
-      // Placeholder dahil içeriği temizle
       el.innerHTML = '';
 
       if (typeof render === 'function') {
@@ -165,9 +180,6 @@
     }
   };
 
-  // Global export
   window.TestifyAds = TestifyAds;
-
-  // Otomatik başlat
   TestifyAds.init();
 })();
