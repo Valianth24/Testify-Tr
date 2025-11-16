@@ -1,184 +1,169 @@
 /**
- * TESTIFY ADS STYLES for v3.1
- * - Bu CSS, JS'teki tfy-* sınıflarını stillendirir.
- * - Eski .ad-slot / dashboard-layout-with-ads izlerini tamamen gizler.
+ * ═══════════════════════════════════════════════════════════════════════
+ * TESTIFY ADS STYLES v2.2
+ * Global reklam yerleşimi (TÜM sayfalar)
+ *
+ * PC:
+ * - Üstte 2 slot (alt alta, tam geniş banner)
+ * - Altta 2 slot (alt alta, tam geniş banner)
+ * - Sağda 1, solda 1 (uzun dikey kolon, içeriği çok daraltmadan)
+ *
+ * Mobil:
+ * - Üstte 3 slot
+ * - Altta 3 slot
+ * - Yan reklamlar mobilde gizli
+ * ═══════════════════════════════════════════════════════════════════════
  */
 
-/* =========================
-   GENEL SATIR / SLOT STİLİ
-   ========================= */
-
-.tfy-ad-row {
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 8px 16px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column; /* PC’de üst/alt reklamlar ALT ALTA */
-    gap: 10px;
+/* Genel satır (üst / alt banner alanı) */
+.global-ad-row {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 8px;
+  box-sizing: border-box;
 }
 
-.tfy-ad-row--top {
-    margin-top: 8px;
+.global-ad-row--top {
+  margin-top: 8px;
 }
 
-.tfy-ad-row--bottom {
-    margin-top: 16px;
-    margin-bottom: 16px;
+.global-ad-row--bottom {
+  margin-top: 12px;
+  margin-bottom: 12px;
 }
 
-/* Tek tek reklam kutuları */
-.tfy-ad-slot {
-    background: radial-gradient(circle at top, #1d1d25, #050609 65%);
-    border-radius: 14px;
-    border: 1px dashed rgba(255, 255, 255, 0.08);
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    position: relative;
-    overflow: hidden;
+/* Ortak reklam kutusu görünümü (üst / alt) */
+.ad-slot {
+  background: radial-gradient(circle at top, #23232a, #050609 65%);
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  min-height: 150px;             /* ↑ Önceki ~120px, yaklaşık %25 daha yüksek */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  width: 100%;
+  max-width: 1200px;              /* Sağa sola uzunlamasına banner */
 }
 
-/* Küçük "REKLAM" etiketi */
-.tfy-ad-slot::after {
-    content: "REKLAM";
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.55);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+/* Yan reklamlar (sağ / sol kolon) – temel görünüm */
+.global-side-ad {
+  background: radial-gradient(circle at top, #23232a, #050609 65%);
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  min-height: 260px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  position: fixed;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-/* Placeholder test yazısı */
-.tfy-ad-placeholder {
-    font-size: 0.8rem;
-    color: var(--text-secondary, #a0a0b8);
-    opacity: 0.7;
-    text-align: center;
+/* Küçük "Reklam" etiketi */
+.ad-slot::after,
+.global-side-ad::after {
+  content: "REKLAM";
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-/* Hafif hover */
-.tfy-ad-slot:hover {
-    border-color: rgba(187, 134, 252, 0.45);
-    box-shadow: 0 0 0 1px rgba(187, 134, 252, 0.28);
+/* Placeholder yazısı (test / dev için) */
+.ad-placeholder {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #a0a0b8);
+  opacity: 0.8;
+  text-align: center;
 }
 
-/* Sadece mobilde kullanılan 3. slotlar (PC'de gizli) */
-.tfy-ad-slot--mobile-extra {
-    display: none;
+/* Hafif hover efekti */
+.ad-slot:hover,
+.global-side-ad:hover {
+  border-color: rgba(187, 134, 252, 0.45);
+  box-shadow: 0 0 0 1px rgba(187, 134, 252, 0.28);
 }
 
-/* =========================
-   YAN REKLAMLAR (PC)
-   ========================= */
-
-.tfy-side-ad {
-    position: fixed;
-    top: 130px;
-    width: 200px;          /* Daha dar (öncekinden yaklaşık %20 dar) */
-    min-height: 260px;
-    background: radial-gradient(circle at top, #1d1d25, #050609 65%);
-    border-radius: 14px;
-    border: 1px dashed rgba(255, 255, 255, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    z-index: 900;
-    box-sizing: border-box;
+/* Mobil ekstra slotlar (top-3, bottom-3) default gizli */
+.ad-slot--mobile-only {
+  display: none;
 }
 
-.tfy-side-ad::after {
-    content: "REKLAM";
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.55);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-.tfy-side-ad--left {
-    left: 8px;
-}
-
-.tfy-side-ad--right {
-    right: 8px;
-}
-
-/* Yan reklamlarda da aynı placeholder stilini kullanalım */
-.tfy-side-ad .tfy-ad-placeholder {
-    font-size: 0.8rem;
-    color: var(--text-secondary, #a0a0b8);
-    opacity: 0.7;
-    text-align: center;
-}
-
-/* =========================
-   MOBİL DÜZEN
-   ========================= */
-
-@media (max-width: 1023px) {
-    /* Tablet + mobilde yan reklamları kapat */
-    .tfy-side-ad {
-        display: none !important;
-    }
-}
+/* ─────────────────────────────── */
+/* MOBİL TASARIM (≤ 768px)        */
+/* ─────────────────────────────── */
 
 @media (max-width: 768px) {
-    .tfy-ad-row {
-        padding: 6px 8px;
-        gap: 8px;
-    }
+  .global-ad-row {
+    flex-direction: column;
+    gap: 10px;
+    padding-inline: 10px;
+  }
 
-    /* Üstte 3, altta 3 reklam: hepsi alt alta */
-    .tfy-ad-slot {
-        min-height: 90px;
-        border-radius: 12px;
-    }
+  .ad-slot {
+    min-height: 112px;          /* ↑ Önce 90px, yaklaşık %25 artış */
+    border-radius: 12px;
+    max-width: 100%;
+  }
 
-    .tfy-ad-slot--mobile-extra {
-        display: flex;  /* Mobilde 3. slotları aç */
-    }
+  .ad-slot--mobile-only {
+    display: flex;
+  }
+
+  .global-side-ad {
+    display: none;
+  }
 }
 
-/* =========================
-   DAHA GENİŞ EKRANLAR
-   ========================= */
+/* ─────────────────────────────── */
+/* TABLET / DESKTOP (≥ 769px)     */
+/* ─────────────────────────────── */
 
-@media (min-width: 1440px) {
-    .tfy-ad-row {
-        max-width: 1600px;
-    }
+@media (min-width: 769px) {
+  .ad-slot {
+    min-height: 165px;          /* ↑ Önce 130px, yaklaşık %25 artış */
+  }
+
+  .ad-slot--mobile-only {
+    display: none;
+  }
 }
 
-/* =========================
-   ESKİ REKLAM İZLERİNİ YOK ET
-   ========================= */
+/* ─────────────────────────────── */
+/* BÜYÜK EKRANLAR (yan reklamlar) */
+/* ─────────────────────────────── */
 
-/* Eski dashboard-layout-with-ads ve ad-slot yapıları tamamen gizlensin */
-.dashboard-layout-with-ads,
-.dashboard-layout-with-ads .ad-slot,
-.dashboard-layout-with-ads .ad-banner,
-.dashboard-layout-with-ads .ad-container,
-.global-ad-row,
-.global-ad-row .ad-slot,
-.global-ad-row .ad-banner,
-.ad-banner,
-.ad-container,
-.ad-slot {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
+@media (min-width: 1400px) {
+  .global-side-ad {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+
+    top: 120px;
+    width: 225px;               /* ↑ Önce 180px, ~%25 daha geniş */
+    min-height: 720px;
+    z-index: 40;
+  }
+
+  .global-side-ad--left {
+    left: 10px;
+  }
+
+  .global-side-ad--right {
+    right: 10px;
+  }
 }
