@@ -153,8 +153,8 @@
     justify-content: flex-start;
     gap: 12px;
 
-    top: 180px;                 /* ↑ Önce 120px, daha aşağı konumlandı */
-    width: 191px;               /* ↑ Önce 225px, %15 daha dar (225 × 0.85 = 191.25) */
+    top: 280px;                 /* ↑ Header'ın altında kalması için artırıldı */
+    width: 191px;               /* ↑ Önce 225px, %15 daha dar */
     min-height: 720px;
     z-index: 40;
   }
