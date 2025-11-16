@@ -1,163 +1,184 @@
 /**
- * TESTIFY ADS STYLES v1.2
- * - Masaüstü: 6 reklam
- *   • Üstte 2 yatay banner
- *   • Solda 1 dikey, sağda 1 dikey (en kenarda, içerik çok daralmadan)
- *   • Altta 2 yatay banner
- * - Mobil: hepsi alt alta, ekranı kaplamadan banner gibi.
- * - Eski .ad-banner vb. reklam izleri komple gizlenir.
+ * TESTIFY ADS STYLES for v3.1
+ * - Bu CSS, JS'teki tfy-* sınıflarını stillendirir.
+ * - Eski .ad-slot / dashboard-layout-with-ads izlerini tamamen gizler.
  */
 
 /* =========================
-   ANA LAYOUT
+   GENEL SATIR / SLOT STİLİ
    ========================= */
 
-.tads-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 20px 16px 24px;
+.tfy-ad-row {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column; /* PC’de üst/alt reklamlar ALT ALTA */
+    gap: 10px;
 }
 
-/* Dashboard’un ortalanması */
-.tads-layout--dashboard {
-  max-width: 1400px;
-  margin: 0 auto;
+.tfy-ad-row--top {
+    margin-top: 8px;
 }
 
-/* Üst ve alt satırlar (2’li yatay banner) */
-.tads-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+.tfy-ad-row--bottom {
+    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
-/* Orta satır: sol reklam – içerik – sağ reklam */
-.tads-middle {
-  display: grid;
-  grid-template-columns: minmax(0, 210px) minmax(0, 1fr) minmax(0, 210px); /* önceki hâle göre ~%20 daraltıldı */
-  gap: 16px;
-  align-items: stretch;
+/* Tek tek reklam kutuları */
+.tfy-ad-slot {
+    background: radial-gradient(circle at top, #1d1d25, #050609 65%);
+    border-radius: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Dashboard içeriği */
-.tads-main {
-  background: var(--bg-primary, #050608);
-  border-radius: 16px;
-  padding: 24px 24px 28px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+/* Küçük "REKLAM" etiketi */
+.tfy-ad-slot::after {
+    content: "REKLAM";
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* Placeholder test yazısı */
+.tfy-ad-placeholder {
+    font-size: 0.8rem;
+    color: var(--text-secondary, #a0a0b8);
+    opacity: 0.7;
+    text-align: center;
+}
+
+/* Hafif hover */
+.tfy-ad-slot:hover {
+    border-color: rgba(187, 134, 252, 0.45);
+    box-shadow: 0 0 0 1px rgba(187, 134, 252, 0.28);
+}
+
+/* Sadece mobilde kullanılan 3. slotlar (PC'de gizli) */
+.tfy-ad-slot--mobile-extra {
+    display: none;
 }
 
 /* =========================
-   REKLAM SLOT GENEL GÖRÜNÜM
+   YAN REKLAMLAR (PC)
    ========================= */
 
-.tads-slot {
-  background: radial-gradient(circle at top, #1d1d25, #050609 65%);
-  border-radius: 14px;
-  border: 1px dashed rgba(255, 255, 255, 0.08);
-  min-height: 140px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  position: relative;
-  overflow: hidden;
+.tfy-side-ad {
+    position: fixed;
+    top: 130px;
+    width: 200px;          /* Daha dar (öncekinden yaklaşık %20 dar) */
+    min-height: 260px;
+    background: radial-gradient(circle at top, #1d1d25, #050609 65%);
+    border-radius: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    z-index: 900;
+    box-sizing: border-box;
 }
 
-/* Sol / sağ dikey slotlar */
-.tads-slot--side {
-  min-height: 260px;
+.tfy-side-ad::after {
+    content: "REKLAM";
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
-/* Küçük “REKLAM” etiketi */
-.tads-slot::after {
-  content: "REKLAM";
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.55);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.tfy-side-ad--left {
+    left: 8px;
 }
 
-/* Placeholder yazısı (şimdilik simülasyon) */
-.tads-slot-placeholder {
-  font-size: 0.8rem;
-  color: var(--text-secondary, #a0a0b8);
-  opacity: 0.7;
-  text-align: center;
+.tfy-side-ad--right {
+    right: 8px;
 }
 
-/* Hafif hover efekti (rahatsız etmeyen) */
-.tads-slot:hover {
-  border-color: rgba(187, 134, 252, 0.45);
-  box-shadow: 0 0 0 1px rgba(187, 134, 252, 0.28);
+/* Yan reklamlarda da aynı placeholder stilini kullanalım */
+.tfy-side-ad .tfy-ad-placeholder {
+    font-size: 0.8rem;
+    color: var(--text-secondary, #a0a0b8);
+    opacity: 0.7;
+    text-align: center;
 }
 
 /* =========================
-   MOBİL TASARIM
+   MOBİL DÜZEN
    ========================= */
+
+@media (max-width: 1023px) {
+    /* Tablet + mobilde yan reklamları kapat */
+    .tfy-side-ad {
+        display: none !important;
+    }
+}
 
 @media (max-width: 768px) {
-  .tads-layout {
-    padding: 10px 8px 16px;
-  }
+    .tfy-ad-row {
+        padding: 6px 8px;
+        gap: 8px;
+    }
 
-  /* Üst ve alt satırlar: 2 değil 1’er sütun, alt alta 2’şer reklam */
-  .tads-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
+    /* Üstte 3, altta 3 reklam: hepsi alt alta */
+    .tfy-ad-slot {
+        min-height: 90px;
+        border-radius: 12px;
+    }
 
-  /* Orta satır: sol reklam -> içerik -> sağ reklam şeklinde alt alta */
-  .tads-middle {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .tads-main {
-    padding: 18px 14px 20px;
-    border-radius: 14px;
-  }
-
-  .tads-slot {
-    min-height: 90px;
-    border-radius: 12px;
-  }
-
-  .tads-slot--side {
-    min-height: 130px;
-  }
-}
-
-/* Daha geniş ekranlarda biraz nefes alanı */
-@media (min-width: 1440px) {
-  .tads-layout--dashboard {
-    max-width: 1600px;
-  }
-
-  .tads-middle {
-    grid-template-columns: minmax(0, 220px) minmax(0, 1fr) minmax(0, 220px);
-  }
+    .tfy-ad-slot--mobile-extra {
+        display: flex;  /* Mobilde 3. slotları aç */
+    }
 }
 
 /* =========================
-   ESKİ REKLAM İZLERİNİ SİL
+   DAHA GENİŞ EKRANLAR
    ========================= */
 
-/* Eski sistemden kalan .ad-banner, .ad-container vb. kutuların tamamını gizle */
+@media (min-width: 1440px) {
+    .tfy-ad-row {
+        max-width: 1600px;
+    }
+}
+
+/* =========================
+   ESKİ REKLAM İZLERİNİ YOK ET
+   ========================= */
+
+/* Eski dashboard-layout-with-ads ve ad-slot yapıları tamamen gizlensin */
+.dashboard-layout-with-ads,
+.dashboard-layout-with-ads .ad-slot,
+.dashboard-layout-with-ads .ad-banner,
+.dashboard-layout-with-ads .ad-container,
+.global-ad-row,
+.global-ad-row .ad-slot,
+.global-ad-row .ad-banner,
 .ad-banner,
 .ad-container,
-.ad-wrapper,
-.ad-slot-legacy {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  background: transparent !important;
+.ad-slot {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }
