@@ -1,1 +1,1139 @@
-"use strict";"function"!=typeof window.t&&(window.t=function(t,e){return e});const App={init(){console.log("🎓 Testify başlatılıyor...");try{this.checkStorage(),this.loadUserData(),this.loadTheme(),this.attachEventListeners(),this.updateDashboard(),this.updateLeaderboard(),console.log("✅ Testify hazır!")}catch(t){console.error("❌ Başlatma hatası:",t),Utils.handleError(t,"App.init")}},checkStorage(){try{const t="__storage_test__";localStorage.setItem(t,t),localStorage.removeItem(t)}catch(t){Utils.showToast("LocalStorage kullanılamıyor! Veriler kaydedilmeyecek.","warning"),console.error("Storage hatası:",t)}},loadUserData(){try{const e=StorageManager.getUserData(),a=document.getElementById("userAvatar"),n=document.getElementById("streak"),o=document.getElementById("totalPoints"),s=document.getElementById("rank");if(a){const t=e.username||"U";a.textContent=t.charAt(0).toUpperCase()}if(n){const a=t("header.streak","Gün");n.querySelector('span[data-i18n="header.streak"]')?n.innerHTML=`${e.stats.streak} <span data-i18n="header.streak">${a}</span>`:n.textContent=e.stats.streak+" "+a}if(o){const a=t("header.points","XP");o.querySelector('span[data-i18n="header.points"]')?o.innerHTML=`${e.stats.xp} <span data-i18n="header.points">${a}</span>`:o.textContent=e.stats.xp+" "+a}s&&(s.textContent=e.stats.rank?"#"+e.stats.rank:"#--")}catch(t){console.error("Kullanıcı verisi yükleme hatası:",t),Utils.handleError(t,"loadUserData")}},themeManager:{toggle(){const t=document.documentElement,e="light"===t.getAttribute("data-theme")?"dark":"light";t.setAttribute("data-theme",e);const a=document.getElementById("themeIcon");a&&(a.textContent="light"===e?"☀️":"🌙");const n=document.querySelector(".theme-toggle");n&&n.setAttribute("aria-pressed","dark"===e),Utils.setToStorage(Config.STORAGE_KEYS.THEME,e)}},loadTheme(){const t=Utils.getFromStorage(Config.STORAGE_KEYS.THEME,"light");document.documentElement.setAttribute("data-theme",t);const e=document.getElementById("themeIcon");e&&(e.textContent="light"===t?"☀️":"🌙");const a=document.querySelector(".theme-toggle");a&&a.setAttribute("aria-pressed","dark"===t)},showLoadingOverlay(){try{const t=document.getElementById("loadingOverlay");t&&(t.style.display="flex",t.setAttribute("aria-hidden","false"))}catch(t){console.error("Loading overlay gösterilemedi:",t)}},hideLoadingOverlay(){try{const t=document.getElementById("loadingOverlay");t&&(t.style.display="none",t.setAttribute("aria-hidden","true"))}catch(t){console.error("Loading overlay gizlenemedi:",t)}},handleInitialTabFromHash(){try{const t=window.location.hash?window.location.hash.replace("#",""):"",e="dashboard",a=t&&document.getElementById(t)?t:e;a!==e?this.switchTab(a,{skipHistory:!0}):window.history&&window.history.replaceState?window.history.replaceState({tab:e},"","#"+e):window.location.hash="#"+e}catch(t){console.error("İlk sekme ayarlama hatası:",t)}},switchTab(t,e={}){try{switch(this.showLoadingOverlay(),document.querySelectorAll(".nav-tab").forEach((e=>{const a=e.dataset.tab===t;e.classList.toggle("active",a),e.setAttribute("aria-selected",a)})),document.querySelectorAll(".tab-content").forEach((e=>{e.classList.toggle("active",e.id===t)})),t){case"library":window.LibraryManager&&"function"==typeof LibraryManager.loadLibrary?LibraryManager.loadLibrary():(console.warn("⚠️ LibraryManager henüz yüklenmedi"),setTimeout((()=>{window.LibraryManager?LibraryManager.loadLibrary():console.error("❌ LibraryManager yüklenemedi")}),100));break;case"leaderboard":this.updateLeaderboard();break;case"notes":this.updateNotes();break;case"analysis":this.updateAnalysis();break;case"dashboard":this.updateDashboard()}e.skipHistory||(window.history&&window.history.pushState?window.history.pushState({tab:t},"","#"+t):window.location.hash="#"+t),setTimeout((()=>{this.hideLoadingOverlay(),window.scrollTo({top:0,behavior:"smooth"})}),200)}catch(t){console.error("Tab değiştirme hatası:",t),Utils.handleError(t,"switchTab"),this.hideLoadingOverlay()}},updateDashboard(){try{const t=StorageManager.getUserData().stats,e=document.getElementById("totalTests"),a=document.getElementById("totalQuestions"),n=document.getElementById("successRate"),o=document.getElementById("avgTime");if(e&&(e.textContent=t.totalTests),a&&(a.textContent=t.totalQuestions),n){const e=t.totalQuestions>0?Math.round(t.correctAnswers/t.totalQuestions*100):0;n.textContent=e+"%"}if(o){const e=t.totalTests>0?Math.round(t.totalTime/t.totalTests):0;o.textContent=e+"s"}this.updateActivityList()}catch(t){console.error("Dashboard güncelleme hatası:",t),Utils.handleError(t,"updateDashboard")}},updateActivityList(){try{const e=StorageManager.getActivities(5),a=document.getElementById("activityList");if(!a)return;if(0===e.length){const e=t("dashboard.empty","Henüz aktivite yok. Test çözerek başla!");return void(a.innerHTML=`\n                    <div class="empty-state">\n                        <div class="empty-state-icon">📊</div>\n                        <p>${e}</p>\n                    </div>\n                `)}a.innerHTML=e.map((t=>`\n                <div class="activity-item" style="padding: 15px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 10px;">\n                    <div style="display: flex; justify-content: space-between; align-items: center;">\n                        <div>\n                            <strong>${this.getActivityTitle(t)}</strong>\n                            <p style="margin: 5px 0 0; color: var(--text-secondary); font-size: 0.9rem;">\n                                ${this.getActivityDescription(t)}\n                            </p>\n                        </div>\n                        <small style="color: var(--text-tertiary);">\n                            ${Utils.formatDate(t.timestamp)}\n                        </small>\n                    </div>\n                </div>\n            `)).join("")}catch(t){console.error("Aktivite listesi hatası:",t)}},getActivityTitle:e=>({test_completed:"✅ "+t("activity.testCompleted","Test Tamamlandı"),test_saved:"💾 "+t("activity.testSaved","Test Kaydedildi"),test_exported:"📥 "+t("activity.testExported","Test İndirildi"),note_created:"📝 "+t("activity.noteCreated","Not Oluşturuldu"),level_up:"🎉 "+t("activity.levelUp","Level Atlandı")}[e.type]||"Aktivite"),getActivityDescription(t){switch(t.type){case"test_completed":return`${t.data.correctAnswers}/${t.data.totalQuestions} doğru - %${t.data.successRate} başarı`;case"test_saved":return`${t.data.title} - ${t.data.questionCount} soru`;case"test_exported":return`${t.data.title} - ${t.data.format.toUpperCase()}`;case"note_created":return t.data.title||"Yeni not";case"level_up":return`Level ${t.data.level}!`;default:return""}},updateLeaderboard(){try{const e=StorageManager.getLeaderboard(100),a=document.getElementById("leaderboardBody");if(!a)return;if(0===e.length){const e=t("leaderboard.empty","Henüz veri bulunmuyor");return void(a.innerHTML=`\n                    <tr>\n                        <td colspan="5" class="empty-cell">${e}</td>\n                    </tr>\n                `)}a.innerHTML=e.map((t=>`\n                <tr>\n                    <td>\n                        <span class="rank-badge ${this.getRankClass(t.rank)}">${t.rank}</span>\n                    </td>\n                    <td>\n                        <div class="user-info">\n                            <div class="user-avatar-small">${t.username.charAt(0).toUpperCase()}</div>\n                            <span>${Utils.sanitizeHTML(t.username)}</span>\n                        </div>\n                    </td>\n                    <td><strong>${t.xp} XP</strong></td>\n                    <td>${t.totalTests}</td>\n                    <td><span style="color: var(--success);">${t.successRate}%</span></td>\n                </tr>\n            `)).join("")}catch(t){console.error("Leaderboard güncelleme hatası:",t),Utils.handleError(t,"updateLeaderboard")}},getRankClass:t=>1===t?"rank-1":2===t?"rank-2":3===t?"rank-3":"rank-default",updateNotes(){try{const e=StorageManager.getNotes(),a=document.getElementById("notesList");if(!a)return;if(0===e.length){const e=t("notes.empty","Henüz not eklemedin");return void(a.innerHTML=`\n                    <div class="empty-state">\n                        <div class="empty-state-icon">📝</div>\n                        <p>${e}</p>\n                    </div>\n                `)}a.innerHTML=e.map((e=>{const a=t("notes.edit","Düzenle"),n=t("notes.delete","Sil");return`\n                    <div class="note-card">\n                        <h3 class="note-title">${Utils.sanitizeHTML(e.title||"Başlıksız Not")}</h3>\n                        <p class="note-content">${Utils.sanitizeHTML(e.content||"")}</p>\n                        <div class="note-meta">\n                            <span>${Utils.formatDate(e.createdAt)}</span>\n                            <div>\n                                <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="App.editNote('${e.id}')">\n                                    ${a}\n                                </button>\n                                <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="App.deleteNote('${e.id}')">\n                                    ${n}\n                                </button>\n                            </div>\n                        </div>\n                    </div>\n                `})).join("")}catch(t){console.error("Notlar güncelleme hatası:",t),Utils.handleError(t,"updateNotes")}},async addNote(){try{if(window.NoteModal&&"function"==typeof window.NoteModal.openCreate)return void window.NoteModal.openCreate();const e=t("notes.titlePrompt","Not Başlığı:"),a=t("notes.contentPrompt","Not İçeriği:"),n=prompt(e);if(!n)return;const o={title:n,content:prompt(a)||""};StorageManager.saveNote(o)&&this.updateNotes()}catch(t){console.error("Not ekleme hatası:",t),Utils.handleError(t,"addNote")}},async editNote(e){try{const a=StorageManager.getNotes().find((t=>t.id===e));if(!a)return;if(window.NoteModal&&"function"==typeof window.NoteModal.openEdit)return void window.NoteModal.openEdit(a);const n=t("notes.titlePrompt","Not Başlığı:"),o=t("notes.contentPrompt","Not İçeriği:"),s=prompt(n,a.title);if(null===s)return;const i=prompt(o,a.content);if(null===i)return;a.title=s,a.content=i,StorageManager.saveNote(a)&&this.updateNotes()}catch(t){console.error("Not düzenleme hatası:",t),Utils.handleError(t,"editNote")}},async deleteNote(e){try{const a=t("notes.deleteConfirm","Bu notu silmek istediğinizden emin misiniz?");await Utils.confirm(a)&&StorageManager.deleteNote(e)&&this.updateNotes()}catch(t){console.error("Not silme hatası:",t),Utils.handleError(t,"deleteNote")}},updateAnalysis(){try{const e=StorageManager.getUserData().stats,a=document.getElementById("analysisContent");if(!a)return;if(0===e.totalTests){const e=t("analysis.empty","Analiz için daha fazla test çöz");return void(a.innerHTML=`\n                    <div class="empty-state">\n                        <div class="empty-state-icon">📈</div>\n                        <p>${e}</p>\n                    </div>\n                `)}const n=Math.round(e.correctAnswers/e.totalQuestions*100),o=Math.round(e.totalTime/e.totalTests),s=t("analysis.avgSuccess","Ortalama Başarı"),i=t("analysis.avgTime","Ortalama Süre"),r=t("analysis.totalCorrect","Toplam Doğru"),l=t("analysis.totalWrong","Toplam Yanlış"),d=t("analysis.evaluation","Performans Değerlendirmesi");a.innerHTML=`\n                <div class="stats-grid">\n                    <div class="stat-card">\n                        <div class="stat-icon">📊</div>\n                        <div class="stat-value">${n}%</div>\n                        <div class="stat-label">${s}</div>\n                    </div>\n                    <div class="stat-card">\n                        <div class="stat-icon">⏱️</div>\n                        <div class="stat-value">${Utils.formatTime(o)}</div>\n                        <div class="stat-label">${i}</div>\n                    </div>\n                    <div class="stat-card">\n                        <div class="stat-icon">🎯</div>\n                        <div class="stat-value">${e.correctAnswers}</div>\n                        <div class="stat-label">${r}</div>\n                    </div>\n                    <div class="stat-card">\n                        <div class="stat-icon">❌</div>\n                        <div class="stat-value">${e.wrongAnswers}</div>\n                        <div class="stat-label">${l}</div>\n                    </div>\n                </div>\n                <div style="margin-top: 30px; padding: 20px; background: var(--bg-secondary); border-radius: 10px;">\n                    <h3>${d}</h3>\n                    <p style="margin-top: 10px; line-height: 1.6;">\n                        ${this.getPerformanceText(n)}\n                    </p>\n                </div>\n            `}catch(t){console.error("Analiz güncelleme hatası:",t),Utils.handleError(t,"updateAnalysis")}},getPerformanceText:t=>"en"===(window.LanguageManager&&"en"===LanguageManager.currentLang?"en":"tr")?t>=90?"🌟 Excellent! Your performance is great. Keep it up!":t>=75?"👏 Very good! Strong performance. With a bit more study you can improve even further.":t>=60?"💪 You are doing well! With some more practice you can reach your goals.":t>=40?"📚 You need to study more. Regular practice will help you improve.":"🎯 It is recommended to review the basics. Keep going step by step!":t>=90?"🌟 Mükemmel! Harika bir performans gösteriyorsun. Böyle devam et!":t>=75?"👏 Çok iyi! Başarılı bir performans. Biraz daha çalışarak daha da iyileştirebilirsin.":t>=60?"💪 İyi gidiyorsun! Biraz daha pratik yaparsan hedeflerine ulaşabilirsin.":t>=40?"📚 Daha fazla çalışma gerekiyor. Düzenli pratik yaparak gelişebilirsin.":"🎯 Temel konuları tekrar etmen önerilir. Yavaş yavaş ilerlemeye devam et!",saveSettings(e){e.preventDefault();try{const a=e.target,n=a.username,o=a.email,s=Utils.validateInput(n,"username"),i=Utils.validateInput(o,"email");if(!s||!i)return;const r=n.value.trim(),l=o.value.trim(),d={username:r,email:l,notifications:{email:a.emailNotif.checked,push:a.pushNotif.checked}},c=StorageManager.getUserData();if(c.username=r,c.email=l,c.settings.notifications=d.notifications,StorageManager.updateUserData(c)){const e=t("msg.saved","Başarıyla kaydedildi!");Utils.showToast(e,"success"),this.loadUserData()}else{const e=t("msg.error","Bir hata oluştu!");Utils.showToast(e,"error")}}catch(t){console.error("Ayar kaydetme hatası:",t),Utils.handleError(t,"saveSettings")}},async resetSettings(){try{const e=t("settings.resetConfirm","Ayarlar varsayılan değerlere dönecek. Emin misiniz?");if(!await Utils.confirm(e))return;const a=StorageManager.getUserData(),n=document.getElementById("username"),o=document.getElementById("email"),s=document.getElementById("emailNotif"),i=document.getElementById("pushNotif");n&&(n.value=a.username),o&&(o.value=a.email||""),s&&(s.checked=!0),i&&(i.checked=!1);const r=t("msg.reset","Ayarlar sıfırlandı");Utils.showToast(r,"info")}catch(t){console.error("Ayar sıfırlama hatası:",t),Utils.handleError(t,"resetSettings")}},handleFileUpload(e){try{const a=e.target.files[0];if(!a)return;if(a.size>Config.FILE_UPLOAD.MAX_SIZE){const e=t("error.fileSize","Dosya boyutu çok büyük");return void Utils.showToast(e,"error")}const n=a.name.split(".").pop().toLowerCase();if(!Config.FILE_UPLOAD.ALLOWED_TYPES.includes(n)){const e=t("error.fileType","Desteklenmeyen dosya türü");return void Utils.showToast(e,"error")}const o=document.getElementById("fileInfo");o&&(o.innerHTML=`\n                    <div style="display: flex; align-items: center; gap: 10px;">\n                        <span>📄</span>\n                        <div>\n                            <div><strong>${Utils.sanitizeHTML(a.name)}</strong></div>\n                            <small style="color: var(--text-secondary);">${Utils.formatFileSize(a.size)}</small>\n                        </div>\n                    </div>\n                `);const s=document.getElementById("testNotes");if(s){const t=s.value?s.value+" ":"";s.value=`${t}Bu test için yüklenen dosya: ${a.name} (${Utils.formatFileSize(a.size)}).`}const i=t("msg.fileUploaded","Dosya yüklendi!");Utils.showToast(i,"success")}catch(t){console.error("Dosya yükleme hatası:",t),Utils.handleError(t,"handleFileUpload")}},attachEventListeners(){try{let t=document.getElementById("logoLink");t||(t=document.querySelector(".header .logo")),t&&t.addEventListener("click",(t=>{t.preventDefault(),this.switchTab("dashboard"),window.scrollTo({top:0,behavior:"smooth"})})),document.querySelectorAll(".nav-tab").forEach((t=>{t.addEventListener("click",(()=>this.switchTab(t.dataset.tab)))}));const e=document.getElementById("settingsForm");e&&e.addEventListener("submit",(t=>this.saveSettings(t)));const a=document.getElementById("resetBtn");a&&a.addEventListener("click",(()=>this.resetSettings()));const n=document.getElementById("fileUpload");n&&n.addEventListener("change",(t=>this.handleFileUpload(t)));const o=document.getElementById("testTitle");o&&o.addEventListener("input",(()=>{const t=document.getElementById("testTopic");t&&(t.value=o.value)}));const s=document.getElementById("addNoteBtn");s&&s.addEventListener("click",(t=>{t.preventDefault(),this.addNote()})),window.themeManager=this.themeManager,console.log("✅ Event listener'lar eklendi")}catch(t){console.error("Event listener hatası:",t),Utils.handleError(t,"attachEventListeners")}}};document.addEventListener("DOMContentLoaded",(()=>{App.init(),App.handleInitialTabFromHash();try{"undefined"!=typeof TestifyAI&&TestifyAI&&"function"==typeof TestifyAI.init&&(TestifyAI.init(),window.TestifyAI=TestifyAI,window.aiChat=TestifyAI)}catch(t){console.error("TestifyAI init hatası (HTML):",t)}})),window.App=App,window.addEventListener("popstate",(t=>{try{const e=t.state&&t.state.tab,a=window.location.hash?window.location.hash.replace("#",""):null,n=e||a||"dashboard";document.getElementById(n)&&App.switchTab(n,{skipHistory:!0})}catch(t){console.error("popstate navigation error:",t)}})),window.navigateTo=function(t){t&&document.getElementById(t)&&App.switchTab(t)},function(){const t=Date.now();window.addEventListener("beforeunload",(()=>{const e=Math.round((Date.now()-t)/1e3);console.log("📊 Oturum süresi:",e,"sn")})),document.addEventListener("visibilitychange",(()=>{document.hidden?console.log("📊 Kullanıcı sayfadan ayrıldı"):console.log("📊 Kullanıcı sayfaya geri döndü")}))}(),function(){let e,a,n,o,s,i,r,l,d=!1,c="create",u=null;function m(){d||(e=document.getElementById("noteModalOverlay"),a=document.getElementById("noteModal"),n=document.getElementById("noteTitleInput"),o=document.getElementById("noteContentInput"),s=document.getElementById("noteCancelBtn"),i=document.getElementById("noteSaveBtn"),r=document.getElementById("noteModalTitle"),l=a?a.querySelector(".confirm-dialog-message"):null,e&&a&&n&&o&&s&&i&&(s.addEventListener("click",(t=>{t.preventDefault(),y()})),i.addEventListener("click",(t=>{t.preventDefault(),p()})),e.addEventListener("click",(t=>{t.target===e&&y()})),n.addEventListener("keydown",(t=>{"Enter"===t.key&&(t.preventDefault(),p())})),d=!0))}function y(){e&&(e.classList.remove("is-open"),e.setAttribute("aria-hidden","true"),c="create",u=null)}function p(){if(!d||!e)return;const t=n.value.trim(),a=o.value.trim();if(!t)return void n.focus();let s={title:t,content:a};if("edit"===c&&u&&(s.id=u),StorageManager.saveNote(s)){try{StorageManager.saveActivity({type:"note_created",data:{title:t},timestamp:Date.now()})}catch(t){console.warn("Aktivite kaydı yapılamadı:",t)}window.App&&"function"==typeof window.App.updateNotes&&window.App.updateNotes(),y()}}document.addEventListener("DOMContentLoaded",m),window.NoteModal={openCreate:function(){d||m(),e&&(c="create",u=null,r&&(r.textContent=t("notes.newNoteTitle","Yeni Not")),l&&(l.textContent=t("notes.newNoteMessage","Notun için bir başlık ve içerik ekle.")),n.value="",o.value="",e.classList.add("is-open"),e.setAttribute("aria-hidden","false"),setTimeout((()=>n.focus()),10))},openEdit:function(a){d||m(),e&&a&&(c="edit",u=a.id,r&&(r.textContent=t("notes.editNoteTitle","Notu Düzenle")),l&&(l.textContent=t("notes.editNoteMessage","Not başlığını ve içeriğini güncelleyebilirsin.")),n.value=a.title||"",o.value=a.content||"",e.classList.add("is-open"),e.setAttribute("aria-hidden","false"),setTimeout((()=>n.focus()),10))},close:y}}();
+/**
+ * TESTIFY MAIN APPLICATION - TAM HATASIZ
+ * Tüm özellikler çalışır hale getiren ana uygulama
+ */
+
+'use strict';
+
+// i18n fallback: language.js yüklenmese bile t() hata vermesin
+if (typeof window.t !== 'function') {
+    window.t = function (_key, fallback) {
+        return fallback;
+    };
+}
+
+const App = {
+    /**
+     * Uygulamayı başlatır
+     */
+    init() {
+        console.log('🎓 Testify başlatılıyor...');
+        
+        try {
+            // Storage'ı kontrol et
+            this.checkStorage();
+            
+            // Kullanıcı verilerini yükle
+            this.loadUserData();
+            
+            // Tema yükle
+            this.loadTheme();
+            
+            // Event listener'ları ekle
+            this.attachEventListeners();
+            
+            // Dashboard'ı güncelle
+            this.updateDashboard();
+            
+            // Leaderboard'ı güncelle
+            this.updateLeaderboard();
+            
+            console.log('✅ Testify hazır!');
+        } catch (error) {
+            console.error('❌ Başlatma hatası:', error);
+            Utils.handleError(error, 'App.init');
+        }
+    },
+
+    /**
+     * Storage kontrolü
+     */
+    checkStorage() {
+        try {
+            const test = '__storage_test__';
+            localStorage.setItem(test, test);
+            localStorage.removeItem(test);
+        } catch (e) {
+            Utils.showToast('LocalStorage kullanılamıyor! Veriler kaydedilmeyecek.', 'warning');
+            console.error('Storage hatası:', e);
+        }
+    },
+
+    /**
+     * Kullanıcı verilerini yükler
+     */
+    loadUserData() {
+        try {
+            const userData = StorageManager.getUserData();
+            
+            // Header'daki bilgileri güncelle
+            const userAvatar = document.getElementById('userAvatar');
+            const streak = document.getElementById('streak');
+            const totalPoints = document.getElementById('totalPoints');
+            const rank = document.getElementById('rank');
+            
+            if (userAvatar) {
+                const username = userData.username || 'U';
+                userAvatar.textContent = username.charAt(0).toUpperCase();
+            }
+            
+            if (streak) {
+                const streakText = t('header.streak', 'Gün');
+                const streakSpan = streak.querySelector('span[data-i18n="header.streak"]');
+                if (streakSpan) {
+                    streak.innerHTML = `${userData.stats.streak} <span data-i18n="header.streak">${streakText}</span>`;
+                } else {
+                    streak.textContent = userData.stats.streak + ' ' + streakText;
+                }
+            }
+            
+            if (totalPoints) {
+                const xpText = t('header.points', 'XP');
+                const xpSpan = totalPoints.querySelector('span[data-i18n="header.points"]');
+                if (xpSpan) {
+                    totalPoints.innerHTML = `${userData.stats.xp} <span data-i18n="header.points">${xpText}</span>`;
+                } else {
+                    totalPoints.textContent = userData.stats.xp + ' ' + xpText;
+                }
+            }
+            
+            if (rank) {
+                rank.textContent = userData.stats.rank ? '#' + userData.stats.rank : '#--';
+            }
+        } catch (error) {
+            console.error('Kullanıcı verisi yükleme hatası:', error);
+            Utils.handleError(error, 'loadUserData');
+        }
+    },
+
+    /**
+     * Tema yöneticisi
+     */
+    themeManager: {
+        toggle() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme);
+            
+            const themeIcon = document.getElementById('themeIcon');
+            if (themeIcon) {
+                // Phosphor ikonlarını kullan: light → güneş, dark → ay
+                const iconClass = newTheme === 'light' ? 'ph-sun-dim' : 'ph-moon-stars';
+                themeIcon.className = `ph ${iconClass} icon`;
+            }
+            
+            const themeBtn = document.querySelector('.theme-toggle');
+            if (themeBtn) {
+                themeBtn.setAttribute('aria-pressed', newTheme === 'dark');
+            }
+            
+            Utils.setToStorage(Config.STORAGE_KEYS.THEME, newTheme);
+        }
+    },
+
+    /**
+     * Temayı yükler
+     */
+    loadTheme() {
+        const savedTheme = Utils.getFromStorage(Config.STORAGE_KEYS.THEME, 'light');
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        const themeIcon = document.getElementById('themeIcon');
+        if (themeIcon) {
+            const iconClass = savedTheme === 'light' ? 'ph-sun-dim' : 'ph-moon-stars';
+            themeIcon.className = `ph ${iconClass} icon`;
+        }
+        
+        const themeBtn = document.querySelector('.theme-toggle');
+        if (themeBtn) {
+            themeBtn.setAttribute('aria-pressed', savedTheme === 'dark');
+        }
+    },
+
+    /**
+     * Sekme geçişlerinde kullanılan loading overlay
+     */
+    showLoadingOverlay() {
+        try {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+                overlay.setAttribute('aria-hidden', 'false');
+            }
+        } catch (error) {
+            console.error('Loading overlay gösterilemedi:', error);
+        }
+    },
+
+    hideLoadingOverlay() {
+        try {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+                overlay.setAttribute('aria-hidden', 'true');
+            }
+        } catch (error) {
+            console.error('Loading overlay gizlenemedi:', error);
+        }
+    },
+
+    /**
+     * URL hash'ine göre ilk açılacak sekmeyi ayarlar
+     */
+    handleInitialTabFromHash() {
+        try {
+            const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
+            const defaultTab = 'dashboard';
+            const targetTab = hash && document.getElementById(hash) ? hash : defaultTab;
+
+            if (targetTab !== defaultTab) {
+                this.switchTab(targetTab, { skipHistory: true });
+            } else {
+                // Varsayılan sekme için URL'i senkronla
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState({ tab: defaultTab }, '', '#' + defaultTab);
+                } else {
+                    window.location.hash = '#' + defaultTab;
+                }
+            }
+        } catch (error) {
+            console.error('İlk sekme ayarlama hatası:', error);
+        }
+    },
+
+    /**
+     * Tab navigasyonu - Library kontrolü + sayfa/advert yenileme
+     */
+    switchTab(tabName, options = {}) {
+        try {
+            // Kısa bir loading efekti göster
+            this.showLoadingOverlay();
+
+            // Tab butonlarını güncelle
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                const isActive = tab.dataset.tab === tabName;
+                tab.classList.toggle('active', isActive);
+                tab.setAttribute('aria-selected', isActive);
+            });
+
+            // Tab içeriklerini güncelle
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === tabName);
+            });
+
+            // Tab'a özel yüklemeler
+            switch (tabName) {
+                case 'library':
+                    if (window.LibraryManager && typeof LibraryManager.loadLibrary === 'function') {
+                        LibraryManager.loadLibrary();
+                    } else {
+                        console.warn('⚠️ LibraryManager henüz yüklenmedi');
+                        setTimeout(() => {
+                            if (window.LibraryManager) {
+                                LibraryManager.loadLibrary();
+                            } else {
+                                console.error('❌ LibraryManager yüklenemedi');
+                            }
+                        }, 100);
+                    }
+                    break;
+                case 'leaderboard':
+                    this.updateLeaderboard();
+                    break;
+                case 'notes':
+                    this.updateNotes();
+                    break;
+                case 'analysis':
+                    this.updateAnalysis();
+                    break;
+                case 'dashboard':
+                    this.updateDashboard();
+                    break;
+            }
+
+            // URL & history güncelle (SPA sayfa geçişi)
+            if (!options.skipHistory) {
+                if (window.history && window.history.pushState) {
+                    window.history.pushState({ tab: tabName }, '', '#' + tabName);
+                } else {
+                    window.location.hash = '#' + tabName;
+                }
+            }
+
+            // Kısa bir gecikmeden sonra loading'i kapat ve en üste kaydır
+            setTimeout(() => {
+                this.hideLoadingOverlay();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 200);
+        } catch (error) {
+            console.error('Tab değiştirme hatası:', error);
+            Utils.handleError(error, 'switchTab');
+            this.hideLoadingOverlay();
+        }
+    },
+
+    /**
+     * Dashboard'ı günceller
+     */
+    updateDashboard() {
+        try {
+            const userData = StorageManager.getUserData();
+            const stats = userData.stats;
+
+            const totalTests = document.getElementById('totalTests');
+            const totalQuestions = document.getElementById('totalQuestions');
+            const successRate = document.getElementById('successRate');
+            const avgTime = document.getElementById('avgTime');
+
+            if (totalTests) totalTests.textContent = stats.totalTests;
+            if (totalQuestions) totalQuestions.textContent = stats.totalQuestions;
+            
+            if (successRate) {
+                const rate = stats.totalQuestions > 0 
+                    ? Math.round((stats.correctAnswers / stats.totalQuestions) * 100)
+                    : 0;
+                successRate.textContent = rate + '%';
+            }
+            
+            if (avgTime) {
+                const avg = stats.totalTests > 0 
+                    ? Math.round(stats.totalTime / stats.totalTests)
+                    : 0;
+                avgTime.textContent = avg + 's';
+            }
+
+            // Son aktiviteleri göster
+            this.updateActivityList();
+        } catch (error) {
+            console.error('Dashboard güncelleme hatası:', error);
+            Utils.handleError(error, 'updateDashboard');
+        }
+    },
+
+    /**
+     * Aktivite listesini günceller
+     */
+    updateActivityList() {
+        try {
+            const activities = StorageManager.getActivities(5);
+            const activityList = document.getElementById('activityList');
+            
+            if (!activityList) return;
+
+            if (activities.length === 0) {
+                const emptyText = t('dashboard.empty', 'Henüz aktivite yok. Test çözerek başla!');
+                
+                activityList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="ph ph-chart-line-up icon"></i>
+                        </div>
+                        <p>${emptyText}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            activityList.innerHTML = activities.map(activity => `
+                <div class="activity-item" style="padding: 15px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${this.getActivityTitle(activity)}</strong>
+                            <p style="margin: 5px 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+                                ${this.getActivityDescription(activity)}
+                            </p>
+                        </div>
+                        <small style="color: var(--text-tertiary);">
+                            ${Utils.formatDate(activity.timestamp)}
+                        </small>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Aktivite listesi hatası:', error);
+        }
+    },
+
+    /**
+     * Aktivite başlığı
+     */
+    getActivityTitle(activity) {
+        const titles = {
+            'test_completed': `<i class="ph ph-check-circle icon"></i> ${t('activity.testCompleted', 'Test Tamamlandı')}`,
+            'test_saved': `<i class="ph ph-floppy-disk icon"></i> ${t('activity.testSaved', 'Test Kaydedildi')}`,
+            'test_exported': `<i class="ph ph-download-simple icon"></i> ${t('activity.testExported', 'Test İndirildi')}`,
+            'note_created': `<i class="ph ph-note-pencil icon"></i> ${t('activity.noteCreated', 'Not Oluşturuldu')}`,
+            'level_up': `<i class="ph ph-stars icon"></i> ${t('activity.levelUp', 'Level Atlandı')}`
+        };
+        return titles[activity.type] || `<i class="ph ph-bell icon"></i> Aktivite`;
+    },
+
+    /**
+     * Aktivite açıklaması
+     */
+    getActivityDescription(activity) {
+        switch (activity.type) {
+            case 'test_completed':
+                return `${activity.data.correctAnswers}/${activity.data.totalQuestions} doğru - %${activity.data.successRate} başarı`;
+            case 'test_saved':
+                return `${activity.data.title} - ${activity.data.questionCount} soru`;
+            case 'test_exported':
+                return `${activity.data.title} - ${activity.data.format.toUpperCase()}`;
+            case 'note_created':
+                return activity.data.title || 'Yeni not';
+            case 'level_up':
+                return `Level ${activity.data.level}!`;
+            default:
+                return '';
+        }
+    },
+
+    /**
+     * Leaderboard'ı günceller
+     */
+    updateLeaderboard() {
+        try {
+            const leaderboard = StorageManager.getLeaderboard(100);
+            const tbody = document.getElementById('leaderboardBody');
+            
+            if (!tbody) return;
+
+            if (leaderboard.length === 0) {
+                const emptyText = t('leaderboard.empty', 'Henüz veri bulunmuyor');
+                
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-cell">${emptyText}</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = leaderboard.map(user => `
+                <tr>
+                    <td>
+                        <span class="rank-badge ${this.getRankClass(user.rank)}">${user.rank}</span>
+                    </td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar-small">${user.username.charAt(0).toUpperCase()}</div>
+                            <span>${Utils.sanitizeHTML(user.username)}</span>
+                        </div>
+                    </td>
+                    <td><strong>${user.xp} XP</strong></td>
+                    <td>${user.totalTests}</td>
+                    <td><span style="color: var(--success);">${user.successRate}%</span></td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            console.error('Leaderboard güncelleme hatası:', error);
+            Utils.handleError(error, 'updateLeaderboard');
+        }
+    },
+
+    /**
+     * Rank class
+     */
+    getRankClass(rank) {
+        if (rank === 1) return 'rank-1';
+        if (rank === 2) return 'rank-2';
+        if (rank === 3) return 'rank-3';
+        return 'rank-default';
+    },
+
+    /**
+     * Notları günceller
+     */
+    updateNotes() {
+        try {
+            const notes = StorageManager.getNotes();
+            const notesList = document.getElementById('notesList');
+            
+            if (!notesList) return;
+
+            if (notes.length === 0) {
+                const emptyText = t('notes.empty', 'Henüz not eklemedin');
+                
+                notesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="ph ph-note-pencil icon"></i>
+                        </div>
+                        <p>${emptyText}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            notesList.innerHTML = notes.map(note => {
+                const editText = t('notes.edit', 'Düzenle');
+                const deleteText = t('notes.delete', 'Sil');
+                
+                return `
+                    <div class="note-card">
+                        <h3 class="note-title">${Utils.sanitizeHTML(note.title || 'Başlıksız Not')}</h3>
+                        <p class="note-content">${Utils.sanitizeHTML(note.content || '')}</p>
+                        <div class="note-meta">
+                            <span>${Utils.formatDate(note.createdAt)}</span>
+                            <div>
+                                <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="App.editNote('${note.id}')">
+                                    ${editText}
+                                </button>
+                                <button class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="App.deleteNote('${note.id}')">
+                                    ${deleteText}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Notlar güncelleme hatası:', error);
+            Utils.handleError(error, 'updateNotes');
+        }
+    },
+
+    /**
+     * Not ekler – ÖNCE modalı kullanır, yoksa prompt’a düşer
+     */
+    async addNote() {
+        try {
+            // Yeni modal sistemimiz varsa onu kullan
+            if (window.NoteModal && typeof window.NoteModal.openCreate === 'function') {
+                window.NoteModal.openCreate();
+                return;
+            }
+
+            // Fallback: tarayıcı prompt (teoride artık kullanılmayacak)
+            const titlePrompt = t('notes.titlePrompt', 'Not Başlığı:');
+            const contentPrompt = t('notes.contentPrompt', 'Not İçeriği:');
+            
+            const title = prompt(titlePrompt);
+            if (!title) return;
+
+            const content = prompt(contentPrompt) || '';
+
+            const note = {
+                title: title,
+                content: content
+            };
+
+            if (StorageManager.saveNote(note)) {
+                this.updateNotes();
+            }
+        } catch (error) {
+            console.error('Not ekleme hatası:', error);
+            Utils.handleError(error, 'addNote');
+        }
+    },
+
+    /**
+     * Not düzenler – modal varsa onu kullanır
+     */
+    async editNote(noteId) {
+        try {
+            const notes = StorageManager.getNotes();
+            const note = notes.find(n => n.id === noteId);
+            
+            if (!note) return;
+
+            // Modal sistemimiz varsa onu kullan
+            if (window.NoteModal && typeof window.NoteModal.openEdit === 'function') {
+                window.NoteModal.openEdit(note);
+                return;
+            }
+
+            // Fallback: eski prompt tabanlı düzenleme
+            const titlePrompt = t('notes.titlePrompt', 'Not Başlığı:');
+            const contentPrompt = t('notes.contentPrompt', 'Not İçeriği:');
+            
+            const title = prompt(titlePrompt, note.title);
+            if (title === null) return;
+
+            const content = prompt(contentPrompt, note.content);
+            if (content === null) return;
+
+            note.title = title;
+            note.content = content;
+
+            if (StorageManager.saveNote(note)) {
+                this.updateNotes();
+            }
+        } catch (error) {
+            console.error('Not düzenleme hatası:', error);
+            Utils.handleError(error, 'editNote');
+        }
+    },
+
+    /**
+     * Not siler
+     */
+    async deleteNote(noteId) {
+        try {
+            const confirmMsg = t('notes.deleteConfirm', 'Bu notu silmek istediğinizden emin misiniz?');
+            const confirmed = await Utils.confirm(confirmMsg);
+            
+            if (confirmed && StorageManager.deleteNote(noteId)) {
+                this.updateNotes();
+            }
+        } catch (error) {
+            console.error('Not silme hatası:', error);
+            Utils.handleError(error, 'deleteNote');
+        }
+    },
+
+    /**
+     * Analiz sayfasını günceller
+     */
+    updateAnalysis() {
+        try {
+            const userData = StorageManager.getUserData();
+            const stats = userData.stats;
+            const analysisContent = document.getElementById('analysisContent');
+            
+            if (!analysisContent) return;
+
+            if (stats.totalTests === 0) {
+                const emptyText = t('analysis.empty', 'Analiz için daha fazla test çöz');
+                
+                analysisContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="ph ph-chart-line-up icon"></i>
+                        </div>
+                        <p>${emptyText}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const successRate = Math.round((stats.correctAnswers / stats.totalQuestions) * 100);
+            const avgTime = Math.round(stats.totalTime / stats.totalTests);
+
+            const avgSuccessText = t('analysis.avgSuccess', 'Ortalama Başarı');
+            const avgTimeText = t('analysis.avgTime', 'Ortalama Süre');
+            const totalCorrectText = t('analysis.totalCorrect', 'Toplam Doğru');
+            const totalWrongText = t('analysis.totalWrong', 'Toplam Yanlış');
+            const evaluationText = t('analysis.evaluation', 'Performans Değerlendirmesi');
+
+            analysisContent.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="ph ph-chart-line-up icon"></i>
+                        </div>
+                        <div class="stat-value">${successRate}%</div>
+                        <div class="stat-label">${avgSuccessText}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="ph ph-timer icon"></i>
+                        </div>
+                        <div class="stat-value">${Utils.formatTime(avgTime)}</div>
+                        <div class="stat-label">${avgTimeText}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="ph ph-check-circle icon"></i>
+                        </div>
+                        <div class="stat-value">${stats.correctAnswers}</div>
+                        <div class="stat-label">${totalCorrectText}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="ph ph-x-circle icon"></i>
+                        </div>
+                        <div class="stat-value">${stats.wrongAnswers}</div>
+                        <div class="stat-label">${totalWrongText}</div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px; padding: 20px; background: var(--bg-secondary); border-radius: 10px;">
+                    <h3>${evaluationText}</h3>
+                    <p style="margin-top: 10px; line-height: 1.6;">
+                        ${this.getPerformanceText(successRate)}
+                    </p>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Analiz güncelleme hatası:', error);
+            Utils.handleError(error, 'updateAnalysis');
+        }
+    },
+
+    /**
+     * Performans metni (TR/EN)
+     */
+    getPerformanceText(successRate) {
+        const lang =
+            window.LanguageManager && LanguageManager.currentLang === 'en' ? 'en' : 'tr';
+
+        if (lang === 'en') {
+            if (successRate >= 90) {
+                return '🌟 Excellent! Your performance is great. Keep it up!';
+            } else if (successRate >= 75) {
+                return '👏 Very good! Strong performance. With a bit more study you can improve even further.';
+            } else if (successRate >= 60) {
+                return '💪 You are doing well! With some more practice you can reach your goals.';
+            } else if (successRate >= 40) {
+                return '📚 You need to study more. Regular practice will help you improve.';
+            } else {
+                return '🎯 It is recommended to review the basics. Keep going step by step!';
+            }
+        } else {
+            if (successRate >= 90) {
+                return '🌟 Mükemmel! Harika bir performans gösteriyorsun. Böyle devam et!';
+            } else if (successRate >= 75) {
+                return '👏 Çok iyi! Başarılı bir performans. Biraz daha çalışarak daha da iyileştirebilirsin.';
+            } else if (successRate >= 60) {
+                return '💪 İyi gidiyorsun! Biraz daha pratik yaparsan hedeflerine ulaşabilirsin.';
+            } else if (successRate >= 40) {
+                return '📚 Daha fazla çalışma gerekiyor. Düzenli pratik yaparak gelişebilirsin.';
+            } else {
+                return '🎯 Temel konuları tekrar etmen önerilir. Yavaş yavaş ilerlemeye devam et!';
+            }
+        }
+    },
+
+    /**
+     * Ayarları kaydeder - Validation ile
+     */
+    saveSettings(event) {
+        event.preventDefault();
+
+        try {
+            const form = event.target;
+            const usernameInput = form.username;
+            const emailInput = form.email;
+
+            // Validation
+            const isUsernameValid = Utils.validateInput(usernameInput, 'username');
+            const isEmailValid = Utils.validateInput(emailInput, 'email');
+
+            if (!isUsernameValid || !isEmailValid) {
+                return;
+            }
+
+            const username = usernameInput.value.trim();
+            const email = emailInput.value.trim();
+
+            const settings = {
+                username: username,
+                email: email,
+                notifications: {
+                    email: form.emailNotif.checked,
+                    push: form.pushNotif.checked
+                }
+            };
+
+            const userData = StorageManager.getUserData();
+            userData.username = username;
+            userData.email = email;
+            userData.settings.notifications = settings.notifications;
+
+            if (StorageManager.updateUserData(userData)) {
+                const successMsg = t('msg.saved', 'Başarıyla kaydedildi!');
+                Utils.showToast(successMsg, 'success');
+                this.loadUserData();
+            } else {
+                const errorMsg = t('msg.error', 'Bir hata oluştu!');
+                Utils.showToast(errorMsg, 'error');
+            }
+        } catch (error) {
+            console.error('Ayar kaydetme hatası:', error);
+            Utils.handleError(error, 'saveSettings');
+        }
+    },
+
+    /**
+     * Ayarları sıfırlar
+     */
+    async resetSettings() {
+        try {
+            const confirmMsg = t(
+                'settings.resetConfirm',
+                'Ayarlar varsayılan değerlere dönecek. Emin misiniz?'
+            );
+            
+            const confirmed = await Utils.confirm(confirmMsg);
+            
+            if (!confirmed) return;
+
+            const userData = StorageManager.getUserData();
+            const usernameEl = document.getElementById('username');
+            const emailEl = document.getElementById('email');
+            const emailNotifEl = document.getElementById('emailNotif');
+            const pushNotifEl = document.getElementById('pushNotif');
+
+            if (usernameEl) usernameEl.value = userData.username;
+            if (emailEl) emailEl.value = userData.email || '';
+            if (emailNotifEl) emailNotifEl.checked = true;
+            if (pushNotifEl) pushNotifEl.checked = false;
+
+            const infoMsg = t('msg.reset', 'Ayarlar sıfırlandı');
+            Utils.showToast(infoMsg, 'info');
+        } catch (error) {
+            console.error('Ayar sıfırlama hatası:', error);
+            Utils.handleError(error, 'resetSettings');
+        }
+    },
+
+    /**
+     * Dosya yükleme - Validation ile
+     */
+    handleFileUpload(event) {
+        try {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Dosya boyutu kontrolü
+            if (file.size > Config.FILE_UPLOAD.MAX_SIZE) {
+                const errorMsg = t('error.fileSize', 'Dosya boyutu çok büyük');
+                Utils.showToast(errorMsg, 'error');
+                return;
+            }
+
+            // Dosya türü kontrolü
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (!Config.FILE_UPLOAD.ALLOWED_TYPES.includes(ext)) {
+                const errorMsg = t('error.fileType', 'Desteklenmeyen dosya türü');
+                Utils.showToast(errorMsg, 'error');
+                return;
+            }
+
+            // Dosya bilgisini göster
+            const fileInfo = document.getElementById('fileInfo');
+            if (fileInfo) {
+                fileInfo.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span><i class="ph ph-file-text icon"></i></span>
+                        <div>
+                            <div><strong>${Utils.sanitizeHTML(file.name)}</strong></div>
+                            <small style="color: var(--text-secondary);">${Utils.formatFileSize(file.size)}</small>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // AI için ek notlara dosya bilgisini geçir
+            const notesInput = document.getElementById('testNotes');
+            if (notesInput) {
+                const baseText = notesInput.value ? notesInput.value + ' ' : '';
+                notesInput.value = `${baseText}Bu test için yüklenen dosya: ${file.name} (${Utils.formatFileSize(file.size)}).`;
+            }
+
+            const successMsg = t('msg.fileUploaded', 'Dosya yüklendi!');
+            Utils.showToast(successMsg, 'success');
+        } catch (error) {
+            console.error('Dosya yükleme hatası:', error);
+            Utils.handleError(error, 'handleFileUpload');
+        }
+    },
+
+    /**
+     * Event listener'ları ekler
+     */
+    attachEventListeners() {
+        try {
+            // LOGO → DASHBOARD (ana sayfa)
+            let logoLink = document.getElementById('logoLink');
+            if (!logoLink) {
+                logoLink = document.querySelector('.header .logo');
+            }
+            if (logoLink) {
+                logoLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.switchTab('dashboard');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
+            // Tab navigasyonu
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
+            });
+
+            // Ayarlar formu
+            const settingsForm = document.getElementById('settingsForm');
+            if (settingsForm) {
+                settingsForm.addEventListener('submit', (e) => this.saveSettings(e));
+            }
+
+            // Ayarları sıfırla
+            const resetBtn = document.getElementById('resetBtn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => this.resetSettings());
+            }
+
+            // Dosya yükleme
+            const fileUpload = document.getElementById('fileUpload');
+            if (fileUpload) {
+                fileUpload.addEventListener('change', (e) => this.handleFileUpload(e));
+            }
+
+            // Test başlığını AI konu alanına senkronize et
+            const testTitleInput = document.getElementById('testTitle');
+            if (testTitleInput) {
+                testTitleInput.addEventListener('input', () => {
+                    const topicInput = document.getElementById('testTopic');
+                    if (topicInput) {
+                        topicInput.value = testTitleInput.value;
+                    }
+                });
+            }
+
+            // Not ekleme butonu → App.addNote (içeride modal açıyor)
+            const addNoteBtn = document.getElementById('addNoteBtn');
+            if (addNoteBtn) {
+                addNoteBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.addNote();
+                });
+            }
+
+            // Tema değiştir - HTML'den erişim için
+            window.themeManager = this.themeManager;
+
+            console.log('✅ Event listener\'lar eklendi');
+        } catch (error) {
+            console.error('Event listener hatası:', error);
+            Utils.handleError(error, 'attachEventListeners');
+        }
+    }
+};
+
+// Uygulamayı başlat
+document.addEventListener('DOMContentLoaded', () => {
+    App.init();
+    App.handleInitialTabFromHash();
+
+    // TestifyAI'yi başlat (varsa)
+    try {
+        if (typeof TestifyAI !== 'undefined' && TestifyAI && typeof TestifyAI.init === 'function') {
+            TestifyAI.init();
+            window.TestifyAI = TestifyAI;
+            window.aiChat = TestifyAI;
+        }
+    } catch (e) {
+        console.error('TestifyAI init hatası (HTML):', e);
+    }
+});
+
+// Export
+window.App = App;
+
+// Tarayıcı geri/ileri butonları ile sekme senkronizasyonu
+window.addEventListener('popstate', (event) => {
+    try {
+        const stateTab = event.state && event.state.tab;
+        const hashTab = window.location.hash ? window.location.hash.replace('#', '') : null;
+        const targetTab = stateTab || hashTab || 'dashboard';
+
+        if (document.getElementById(targetTab)) {
+            App.switchTab(targetTab, { skipHistory: true });
+        }
+    } catch (error) {
+        console.error('popstate navigation error:', error);
+    }
+});
+
+// Eski örnekteki gibi kullanmak istersen: SPA içinde sekme değiştirme helper'ı
+window.navigateTo = function(tabName) {
+    if (!tabName) return;
+    if (!document.getElementById(tabName)) return;
+    App.switchTab(tabName);
+};
+
+// Basit oturum takibi (isteğe bağlı log)
+(function() {
+    const sessionStart = Date.now();
+    window.addEventListener('beforeunload', () => {
+        const duration = Math.round((Date.now() - sessionStart) / 1000);
+        console.log('📊 Oturum süresi:', duration, 'sn');
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            console.log('📊 Kullanıcı sayfadan ayrıldı');
+        } else {
+            console.log('📊 Kullanıcı sayfaya geri döndü');
+        }
+    });
+})();
+
+/* === NOT EKLE / DÜZENLE MODALI ===
+   HTML tarafında:
+   - #noteModalOverlay
+   - #noteModal
+   - #noteTitleInput
+   - #noteContentInput
+   - #noteCancelBtn
+   - #noteSaveBtn
+   elementleri olmalı (sana verdiğim HTML ile uyumlu) */
+(function () {
+    'use strict';
+
+    let initialized = false;
+    let overlay, modal, titleInput, contentInput, cancelBtn, saveBtn, modalTitle, messageEl;
+    let mode = 'create'; // 'create' | 'edit'
+    let editingNoteId = null;
+
+    function init() {
+        if (initialized) return;
+
+        overlay      = document.getElementById('noteModalOverlay');
+        modal        = document.getElementById('noteModal');
+        titleInput   = document.getElementById('noteTitleInput');
+        contentInput = document.getElementById('noteContentInput');
+        cancelBtn    = document.getElementById('noteCancelBtn');
+        saveBtn      = document.getElementById('noteSaveBtn');
+        modalTitle   = document.getElementById('noteModalTitle');
+        messageEl    = modal ? modal.querySelector('.confirm-dialog-message') : null;
+
+        if (!overlay || !modal || !titleInput || !contentInput || !cancelBtn || !saveBtn) {
+            // Not modalı HTML'de yoksa sessizce çık
+            return;
+        }
+
+        // Kapat butonu
+        cancelBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModal();
+        });
+
+        // Kaydet butonu
+        saveBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveNoteFromModal();
+        });
+
+        // Overlay boş alanına tıklayınca kapat
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal();
+            }
+        });
+
+        // Title input'ta Enter → kaydet
+        titleInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveNoteFromModal();
+            }
+        });
+
+        initialized = true;
+    }
+
+    function openCreate() {
+        if (!initialized) init();
+        if (!overlay) return;
+
+        mode = 'create';
+        editingNoteId = null;
+
+        if (modalTitle) {
+            modalTitle.textContent = t('notes.newNoteTitle', 'Yeni Not');
+        }
+        if (messageEl) {
+            messageEl.textContent = t(
+                'notes.newNoteMessage',
+                'Notun için bir başlık ve içerik ekle.'
+            );
+        }
+
+        titleInput.value = '';
+        contentInput.value = '';
+
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        setTimeout(() => titleInput.focus(), 10);
+    }
+
+    function openEdit(note) {
+        if (!initialized) init();
+        if (!overlay || !note) return;
+
+        mode = 'edit';
+        editingNoteId = note.id;
+
+        if (modalTitle) {
+            modalTitle.textContent = t('notes.editNoteTitle', 'Notu Düzenle');
+        }
+        if (messageEl) {
+            messageEl.textContent = t(
+                'notes.editNoteMessage',
+                'Not başlığını ve içeriğini güncelleyebilirsin.'
+            );
+        }
+
+        titleInput.value = note.title || '';
+        contentInput.value = note.content || '';
+
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        setTimeout(() => titleInput.focus(), 10);
+    }
+
+    function closeModal() {
+        if (!overlay) return;
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+        mode = 'create';
+        editingNoteId = null;
+    }
+
+    function saveNoteFromModal() {
+        if (!initialized || !overlay) return;
+
+        const title = titleInput.value.trim();
+        const content = contentInput.value.trim();
+
+        if (!title) {
+            titleInput.focus();
+            return;
+        }
+
+        let note = {
+            title,
+            content
+        };
+
+        // Düzenleme modundaysa id'yi ekle
+        if (mode === 'edit' && editingNoteId) {
+            note.id = editingNoteId;
+        }
+
+        if (StorageManager.saveNote(note)) {
+            // Aktivite kaydı (özellikle yeni not için)
+            try {
+                StorageManager.saveActivity({
+                    type: 'note_created',
+                    data: { title },
+                    timestamp: Date.now()
+                });
+            } catch (e) {
+                console.warn('Aktivite kaydı yapılamadı:', e);
+            }
+
+            if (window.App && typeof window.App.updateNotes === 'function') {
+                window.App.updateNotes();
+            }
+
+            closeModal();
+        }
+    }
+
+    // DOM yüklendikten sonra modalı hazırla
+    document.addEventListener('DOMContentLoaded', init);
+
+    // Global erişim için
+    window.NoteModal = {
+        openCreate,
+        openEdit,
+        close: closeModal
+    };
+})();
