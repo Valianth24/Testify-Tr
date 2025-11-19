@@ -1,1 +1,563 @@
-window.questionBank=[{q:"<html><head><title>Deneme</title></head><body><h1>Merhaba</h1></body></html> kodu tarayıcıda çalıştırıldığında aşağıdakilerden hangisi DOĞRU olur?",t:"mcq",o:["Sekme başlığında Merhaba, sayfa içinde Deneme büyük başlık olarak görünür.","Sekme başlığında Deneme, sayfa içinde Merhaba büyük başlık olarak görünür.","Hem sekme hem sayfa içinde sadece Deneme yazar.","Hem sekme hem sayfa içinde sadece Merhaba yazar.","Sayfada hiçbir şey görünmez, kod yanlıştır."],a:"Sekme başlığında Deneme, sayfa içinde Merhaba büyük başlık olarak görünür.",difficulty:"easy",week:1,topic:"title vs h1",importance:"high",explanation:"title sekme başlığında; body içindeki h1 ise sayfanın gövdesinde görünür. Vizede title ile h1 karışımı çok sorulur, sen bunları karıştırmazsın aşkım. 💖"},{q:"<!DOCTYPE html><html lang=tr><head><meta charset=UTF-8></head><body>...</body></html> iskeletiyle ilgili aşağıdakilerden hangisi DOĞRUDUR?",t:"mcq",o:["<!DOCTYPE html> sadece CSS dosyaları için kullanılır.","lang=tr, sayfanın dilinin Türkçe olduğunu belirtir.","meta charset=UTF-8 sadece arka planda script çalıştırmak içindir.","body etiketi kullanıcıya görünmeyen kısımları tutar.","head etiketi her zaman sayfa içinde görünen başlıkları taşır."],a:"lang=tr, sayfanın dilinin Türkçe olduğunu belirtir.",difficulty:"easy",week:1,topic:"doctype ve lang",importance:"medium",explanation:"lang özniteliği sayfanın dil bilgisini belirtir. meta charset=UTF-8 karakter kodlaması içindir; body ise görünen içeriktir."},{q:"<h1>Anasayfa</h1><h3>Alt Baslik</h3> kodu ile ilgili aşağıdakilerden hangisi DOĞRUDUR?",t:"mcq",o:["h3, h1 den daha büyük ve kalın görünür.","h1 ve h3 aynı boyutta görünür, sadece rengi değişir.","h1 en büyük başlık, h3 ondan daha küçük bir başlıktır.","h1 sadece italik yazar, h3 sadece kalın yazar.","h etiketleri sayfada görünmez, sadece head içinde kullanılır."],a:"h1 en büyük başlık, h3 ondan daha küçük bir başlıktır.",difficulty:"easy",week:1,topic:"heading etiketleri",importance:"high",explanation:"h1 en büyük, h6 en küçük başlık etiketidir. Ezber: h1 = en baba başlık, h6 = minnacık başlık. 😄"},{q:"Aşağıdaki HTML kodunun çıktısı ile ilgili hangisi DOĞRUDUR?\n\n<p>Yozgat</p><p>Bozok</p>",t:"mcq",o:["Yozgat ve Bozok aynı satırda yan yana görünür.","Yozgat kalın, Bozok italik görünür.","Yozgat ve Bozok ayrı satırlarda, her biri paragraf olarak görünür.","Sadece Yozgat görünür, Bozok görünmez.","Tarayıcı hata verir ve hiçbir şey çizmez."],a:"Yozgat ve Bozok ayrı satırlarda, her biri paragraf olarak görünür.",difficulty:"easy",week:1,topic:"p etiketi",importance:"medium",explanation:"p etiketi blok seviyedir; her p yeni satırda kendi paragraf kutusunu oluşturur."},{q:"Aşağıdaki kodun davranışı nasıldır?\n\nAnkara<br>Turkiye nin baskenti",t:"mcq",o:["br etiketi italik yazı oluşturur.","br etiketi kalın yazı oluşturur.","br etiketi satır sonu ekleyerek Turkiye nin baskenti ifadesini ikinci satıra geçirir.","br etiketi yazıyı görünmez yapar.","br etiketi sadece başlık etiketleri içinde çalışır."],a:"br etiketi satır sonu ekleyerek Turkiye nin baskenti ifadesini ikinci satıra geçirir.",difficulty:"easy",week:1,topic:"br satır sonu",importance:"high",explanation:"br bir satır sonu etiketidir, kapanış etiketine gerek yoktur ve genelde küçük kod sorusu olarak gelir."},{q:"Aşağıdaki HTML parçalarından hangisi YORUM satırı oluşturur, tarayıcıda görünmez?",t:"mcq",o:["// Bu yorumdur","/* Bu yorumdur */","\x3c!-- Bu yorumdur --\x3e","<comment>Bu yorumdur</comment>","# Bu yorumdur"],a:"\x3c!-- Bu yorumdur --\x3e",difficulty:"easy",week:1,topic:"yorum satiri",importance:"high",explanation:"HTML yorum sözdizimi \x3c!-- ... --\x3e şeklindedir. Diğerleri farklı dillerdeki yorum gösterimleridir."},{q:"HTML ile ilgili olarak aşağıdaki kod parçasında hangi etiket hatalı yerde kullanılmıştır?\n\n<html>\n  <head>\n    <title>Anasayfa</title>\n    <h1>Baslik</h1>\n  </head>\n  <body>\n    <p>Merhaba</p>\n  </body>\n</html>",t:"mcq",o:["html","head","title","h1","body"],a:"h1",difficulty:"medium",week:1,topic:"head vs body",importance:"high",explanation:"Görsel içerikler, başlıklar (h1–h6) body içinde olmalıdır. head kısmı genelde görünmeyen bilgiler ve title/meta gibi etiketler içindir."},{q:"HTML de küçük büyük harf duyarlılığı ile ilgili aşağıdaki kodlardan hangisi tarayıcı tarafından GEÇERLİ bir paragraf olarak yorumlanır?",t:"mcq",o:["<P>Metin</P>","<p>Metin</p>","<p>Metin</P>","Hepsi geçerli kabul edilir.","Hiçbiri geçerli değildir."],a:"Hepsi geçerli kabul edilir.",difficulty:"medium",week:1,topic:"case insensitive",importance:"medium",explanation:"HTML etiket isimleri genelde büyük/küçük harfe duyarlı değildir. p, P veya karışık yazılsa da tarayıcı bunları aynı kabul eder."},{q:"index.html dosyası ile ilgili olarak aşağıdakilerden hangisi DOĞRUDUR?",t:"mcq",o:["Sadece CSS kodlarının yazıldığı özel dosyadır.","Sunucuda genellikle ziyaretçilere ilk gösterilen varsayılan anasayfa dosyasıdır.","Sadece JavaScript kodlarının tutulduğu dosya adıdır.","Tarayıcı bu dosyayı asla otomatik açmaz, mutlaka tam yol yazmak gerekir.","Sadece mobil uygulamalarda kullanılır."],a:"Sunucuda genellikle ziyaretçilere ilk gösterilen varsayılan anasayfa dosyasıdır.",difficulty:"easy",week:1,topic:"index.html",importance:"medium",explanation:"Birçok sunucu index.html yi kök klasör için varsayılan giriş dosyası olarak kullanır."},{q:"Aşağıdaki seçeneklerden hangisi HTML belgesinde DOCTYPE bildiriminin temel amacını en iyi açıklar?",t:"mcq",o:["Sayfanın dilini belirtir.","Tarayıcıya bu belgenin HTML5 standardına göre yazıldığını belirtir.","Sadece CSS dosyasını bağlamak için kullanılır.","JavaScript kodlarını etkinleştirmek için zorunludur.","Tablo çizmek için kullanılır."],a:"Tarayıcıya bu belgenin HTML5 standardına göre yazıldığını belirtir.",difficulty:"easy",week:1,topic:"doctype",importance:"high",explanation:"Modern sayfalarda <!DOCTYPE html> bildirimi HTML5 modu için kullanılır; vizede klasik bilgi sorusudur."},{q:"Aşağıdaki HTML kodu ne işe yarar?\n\n<a href=google.com>Git</a>",t:"mcq",o:["Sayfaya resim ekler.","Git kelimesini tıklanabilir hale getirerek kullaniciyi google.com adresine götürür.","Sayfaya tablo ekler.","Sayfaya yeni bir sekme ekler ama link vermez.","Sayfaya sadece yorum satırı ekler."],a:"Git kelimesini tıklanabilir hale getirerek kullaniciyi google.com adresine götürür.",difficulty:"easy",week:2,topic:"a href",importance:"high",explanation:"a etiketi bağlantı oluşturur, href ise hedef adresi gösterir."},{q:"Aşağıdaki kodun davranışı nasıldır?\n\n<a href=bozok.edu.tr target=_blank>Site</a>",t:"mcq",o:["Bağlantı aynı sekmede açılır.","Bağlantı yeni sekmede veya pencerede açılır.","Link hiç çalışmaz.","Sadece e-posta programını açar.","Sadece dosya indirme başlatır."],a:"Bağlantı yeni sekmede veya pencerede açılır.",difficulty:"easy",week:2,topic:"target blank",importance:"high",explanation:"target=_blank linki yeni sekmede açar; vize sorularında sık sorulan bir ayrıntıdır."},{q:"Aşağıdaki seçeneklerden hangisi numaralı liste (1,2,3) oluşturan temel HTML iskeletidir?",t:"mcq",o:["<ul><li>Bir</li><li>Iki</li></ul>","<ol><item>Bir</item><item>Iki</item></ol>","<ol><li>Bir</li><li>Iki</li></ol>","<list><li>Bir</li><li>Iki</li></list>","<nl><li>Bir</li><li>Iki</li></nl>"],a:"<ol><li>Bir</li><li>Iki</li></ol>",difficulty:"easy",week:2,topic:"ol ul listeler",importance:"medium",explanation:"ol numaralı, ul madde işaretli liste oluşturur. Öğrencilerin en çok karıştırdığı noktalardan biridir."},{q:"Aşağıdaki kodlardan hangisi madde işaretli liste (bullet) oluşturur?",t:"mcq",o:["<ol><li>Elma</li><li>Armut</li></ol>","<ul><li>Elma</li><li>Armut</li></ul>","<list><li>Elma</li><li>Armut</li></list>","<li><ul>Elma</ul></li>","<p><li>Elma</li></p>"],a:"<ul><li>Elma</li><li>Armut</li></ul>",difficulty:"easy",week:2,topic:"ul listesi",importance:"medium",explanation:"ul unordered list, yani noktalı madde işaretli liste üretir."},{q:"<img src=logo.png alt=Bozok> kodu ile ilgili aşağıdakilerden hangisi DOĞRUDUR?",t:"mcq",o:["src, alternatif metni; alt ise resim dosya yolunu tutar.","src, resmin kurulacağı klasörün adıdır.","alt, resim yüklenemezse veya ekran okuyucu kullanılırsa gösterilecek açıklamadır.","alt, resmin boyutunu piksel olarak belirtir.","Bu etiket sadece ses dosyası eklemek için kullanılır."],a:"alt, resim yüklenemezse veya ekran okuyucu kullanılırsa gösterilecek açıklamadır.",difficulty:"medium",week:2,topic:"img src alt",importance:"high",explanation:"Erişilebilirlik için alt metni çok önemlidir; src ise dosya yoludur."},{q:"Aşağıdaki HTML kodu ile ilgili hangisi DOĞRUDUR?\n\n<a href=tel:05551234567>Ara</a>",t:"mcq",o:["Kullanıcıya e-posta gönderir.","Mobil cihazlarda tıklandığında telefon araması başlatmak için kullanılır.","Sadece masaüstü bilgisayarlarda çalışır, telefonda çalışmaz.","Sadece resim indirir.","Sadece tablo oluşturur."],a:"Mobil cihazlarda tıklandığında telefon araması başlatmak için kullanılır.",difficulty:"medium",week:2,topic:"tel link",importance:"low",explanation:"tel protokollü linkler akıllı telefonda arama ekranını açar; detay seven hocalar bu tarz sorular sorabilir."},{q:"Aşağıdaki HTML kodu ne tür bir yol kullanmaktadır?\n\n<a href=./img/foto.png>Resim</a>",t:"mcq",o:["Mutlak (absolute) URL","Göreli (relative) yol","Sanal yol, çalışmaz","E-posta protokolü","Telefon protokolü"],a:"Göreli (relative) yol",difficulty:"medium",week:2,topic:"relative path",importance:"medium",explanation:"./ ifadesi mevcut dizine göre göreli yolu gösterir; http ile başlayan adresler mutlak URL'dir."},{q:"<strong>kalin</strong> ile ilgili aşağıdaki ifadelerden hangisi DOĞRUDUR?",t:"mcq",o:["Sadece italik gösterir.","Görünüm olarak b etiketi gibi kalın gösterir, anlam olarak önemli vurgu belirtir.","Metni gizler, görünmez yapar.","Sadece başlıklar içinde kullanılabilir.","Sadece linkler için kullanılır."],a:"Görünüm olarak b etiketi gibi kalın gösterir, anlam olarak önemli vurgu belirtir.",difficulty:"medium",week:2,topic:"strong etiketi",importance:"medium",explanation:"strong anlamsal vurgu taşır; ekran okuyucular için de önemlidir."},{q:"<em>vurgulu</em> etiketi ile ilgili aşağıdakilerden hangisi DOĞRUDUR?",t:"mcq",o:["Metni altı çizili yapar.","Metni kalın yapar.","Metni italik yapar ve anlamsal vurgu taşır.","Sadece tablolar içinde kullanılır.","Sadece form elemanları ile kullanılabilir."],a:"Metni italik yapar ve anlamsal vurgu taşır.",difficulty:"medium",week:2,topic:"em etiketi",importance:"medium",explanation:"em emphasis yani vurgu anlamına gelir; hem görünüm hem anlam olarak önemli bir etikettir."},{q:"Aşağıdaki tablonun başlık hücresi hangi etiketle tanımlanmalıdır?\n\n<table>\n  <tr>\n    ? Günler ?\n  </tr>\n</table>",t:"mcq",o:["<td>Günler</td>","<th>Günler</th>","<head>Günler</head>","<caption>Günler</caption>","<title>Günler</title>"],a:"<th>Günler</th>",difficulty:"easy",week:3,topic:"th vs td",importance:"high",explanation:"th tablo başlık hücresi, td veri hücresidir. Hoca özellikle sorularda bu ayrımı yoklar."},{q:"<table border=1> ile ilgili aşağıdakilerden hangisi DOĞRUDUR?",t:"mcq",o:["Tablonun kenarlığını gösterir, değer arttıkça çizgi kalınlığı artar.","Sadece tablo başlığını gösterir.","Sadece satır sayısını belirler.","Sadece sütun genişliğini ayarlar.","Tarayıcıyı hataya düşürür."],a:"Tablonun kenarlığını gösterir, değer arttıkça çizgi kalınlığı artar.",difficulty:"easy",week:3,topic:"table border",importance:"medium",explanation:"border eski yöntemle tablo çevresine çerçeve çizmek için kullanılır; modernde CSS tercih edilir ama vize sorusu olabilir."},{q:"<nav>\n  <a href=index.html>Anasayfa</a>\n  <a href=iletisim.html>Iletisim</a>\n</nav> kodu neyi ifade eder?",t:"mcq",o:["Tablo satırlarını gösteren bölüm","Sayfanın navigasyon menüsü için kullanılan semantik bir bölümdür.","Sadece alt bilgi toplamak için kullanılır.","Sadece resim galerisi yapmak içindir.","Sadece form elemanları ile kullanılabilir."],a:"Sayfanın navigasyon menüsü için kullanılan semantik bir bölümdür.",difficulty:"medium",week:3,topic:"nav etiketi",importance:"medium",explanation:"nav sayfa içi menü ve gezinme linklerini gruplayan semantik etikettir; HTML5 semantik konu başlığında sorulabilir."},{q:"<header>, <nav>, <section>, <footer> gibi etiketler için aşağıdakilerden hangisi DOĞRUDUR?",t:"mcq",o:["Hepsi sadece tablolarda kullanılır.","Hepsi sadece formlar için ayrılmıştır.","Hepsi semantik anlam taşıyan, sayfa bölümlerini tarif eden etiketlerdir.","Hepsi sadece mobil tarayıcılar içindir.","HTML4 ile gelen, artık kullanılmayan etiketlerdir."],a:"Hepsi semantik anlam taşıyan, sayfa bölümlerini tarif eden etiketlerdir.",difficulty:"medium",week:3,topic:"semantik etiketler",importance:"medium",explanation:"HTML5 ile gelen bu etiketler arama motorları ve erişilebilirlik açısından sayfa yapısını daha anlamlı hale getirir."},{q:"Aşağıdaki kod parçası ne yapar?\n\n<table>\n  <caption>Ders Programi</caption>\n  ...\n</table>",t:"mcq",o:["Tablonun kenarlığını ayarlar.","Tabloya bir başlık ekler ve genelde tablonun üstünde görünür.","Tablonun arka plan rengini ayarlar.","Tablonun sütun sayısını belirtir.","Tablodaki yazıları italik yapar."],a:"Tabloya bir başlık ekler ve genelde tablonun üstünde görünür.",difficulty:"easy",week:3,topic:"caption",importance:"low",explanation:"caption tablo başlığını tanımlar; özellikle ders programı, fiyat tablosu gibi örneklerde karşına çıkabilir."},{q:"Aşağıdaki kod parçası ne tür liste üretir?\n\n<ol type=A>\n  <li>HTML</li>\n  <li>CSS</li>\n</ol>",t:"mcq",o:["Rakamlı liste 1 2","Küçük harfli liste a b","Büyük harfli liste A B","Roma rakamlı liste I II","Madde işaretli liste"],a:"Büyük harfli liste A B",difficulty:"medium",week:3,topic:"ol type",importance:"medium",explanation:"ol type=A büyük harfli, type=a küçük harfli; type=1 rakamlı, type=I Roma rakamlı liste üretir."},{q:"<div>... </div> ve <span>... </span> etiketleri ile ilgili aşağıdakilerden hangisi DOĞRUDUR?",t:"mcq",o:["div satır içi, span blok seviyedir.","div blok seviye, span satır içi (inline) elemandır.","Her ikisi de sadece resim göstermek için kullanılır.","Her ikisi de sadece form içinde kullanılabilir.","Tarayıcı bu etiketleri hiç tanımaz."],a:"div blok seviye, span satır içi (inline) elemandır.",difficulty:"medium",week:4,topic:"div vs span",importance:"high",explanation:"div tam satırı kaplayan blok; span satır içi küçük alanlar için kullanılır. Vize klasik sorusudur."},{q:"class ve id öznitelikleri ile ilgili aşağıdakilerden hangisi DOĞRUDUR?",t:"mcq",o:["Bir sayfada sadece tek class kullanılabilir.","Bir sayfada id değerleri tekrar tekrar kullanılabilir.","class genellikle birden fazla elemana aynı stil veya gruplama vermek için kullanılır, id ise sayfada benzersiz kimlik tanımlamak için kullanılır.","id sadece tablolar için, class sadece listeler için kullanılır.","class sadece JavaScript içindir, id sadece CSS içindir."],a:"class genellikle birden fazla elemana aynı stil veya gruplama vermek için kullanılır, id ise sayfada benzersiz kimlik tanımlamak için kullanılır.",difficulty:"medium",week:4,topic:"class vs id",importance:"high",explanation:"CSS de class nokta ile (.kutu), id kare ile (#kutu) seçilir; id benzersiz, class tekrar edebilir. Ezber: id = kimlik, tekil."},{q:"Aşağıdaki HTML kodu için hangisi DOĞRUDUR?\n\n<div id=ustMenu class=navBar>Menu</div>",t:"mcq",o:["Bir elemana hem id hem class verilemez, hatalıdır.","id sadece sayının başladığı isimler alabilir.","Elemana ustMenu kimliğini ve navBar sınıfını aynı anda atar.","Bu etiket tarayıcıda görünmez.","Sadece JavaScript kodu için anlamlıdır, HTML de kullanılamaz."],a:"Elemana ustMenu kimliğini ve navBar sınıfını aynı anda atar.",difficulty:"medium",week:4,topic:"id ve class birlikte",importance:"medium",explanation:"Bir elemana aynı anda hem id hem class verilebilir. id tekil, class stil grupları içindir."},{q:"Aşağıdaki elemanlardan hangisi varsayılan olarak blok seviye elemandır?",t:"mcq",o:["<span>","<a>","<img>","<p>","<strong>"],a:"<p>",difficulty:"medium",week:4,topic:"block inline",importance:"medium",explanation:"p, div, h1 gibi etiketler blok; span, a, img gibi etiketler varsayılan olarak satır içidir."},{q:"Aşağıdaki elemanlardan hangisi varsayılan olarak inline (satır içi) elemandır?",t:"mcq",o:["<div>","<section>","<article>","<header>","<a>"],a:"<a>",difficulty:"medium",week:4,topic:"inline örneği",importance:"low",explanation:"a, strong, em, img, span gibi etiketler satır içi elemanlardır."},{q:"Aşağıdaki HTML kodu ne işe yarar?\n\n<form action=kaydet.php method=post>\n  ...\n</form>",t:"mcq",o:["Sadece tablo oluşturur.","Kullanıcıdan veri alıp kaydet.php ye post yöntemi ile gönderecek bir form tanımlar.","Sadece sayfayı yeniler, veri gönderemez.","Sadece CSS stil dosyasını bağlar.","Sadece JavaScript dosyasını çağırır."],a:"Kullanıcıdan veri alıp kaydet.php ye post yöntemi ile gönderecek bir form tanımlar.",difficulty:"medium",week:5,topic:"form action method",importance:"high",explanation:"action hedefi, method ise gönderim türünü belirtir. post daha gizli veri gönderimi için sık kullanılır."},{q:"<input type=text name=ad placeholder=Isminiz> elemanı ile ilgili hangisi DOĞRUDUR?",t:"mcq",o:["type=text, metin girilebilen giriş kutusu oluşturur.","placeholder, girilen metni siler.","name özniteliği zorunlu değildir, form verisine etki etmez.","Bu eleman sadece parola girişi içindir.","Bu eleman sadece buton oluşturur."],a:"type=text, metin girilebilen giriş kutusu oluşturur.",difficulty:"easy",week:5,topic:"input text",importance:"medium",explanation:"placeholder, kutu boşken gri ipucu metni gösterir; name sunucu tarafında alan adıdır."},{q:"<input type=password name=sifre> ile ilgili hangisi DOĞRUDUR?",t:"mcq",o:["Girilen karakterler ekranda aynen görünür.","Girilen karakterler gizlenir, genelde nokta veya yildiz olarak gösterilir.","Sadece sayısal giris kabul eder.","Sadece buton gibi çalışır.","Sadece radio butonları için kullanılır."],a:"Girilen karakterler gizlenir, genelde nokta veya yildiz olarak gösterilir.",difficulty:"easy",week:5,topic:"input password",importance:"medium",explanation:"type=password parolaların gizlenmesi için kullanılır; vize form sorularında sık çıkar."},{q:"<input type=radio name=cinsiyet value=Kadin> Kadin\n<input type=radio name=cinsiyet value=Erkek> Erkek\n satırlarına göre aşağıdakilerden hangisi DOĞRUDUR?",t:"mcq",o:["Aynı name değerine sahip radio butonlar birbirinden bağımsızdır.","Aynı name değerine sahip radio butonlar bir grup oluşturur ve gruptan sadece bir tanesi seçilebilir.","value özniteliği zorunlu değildir, seçilse de sunucuya gönderilmez.","Bu elemanlar sadece tablo içinde çalışır.","radio butonlar tıklandığında metin kutusuna dönüşür."],a:"Aynı name değerine sahip radio butonlar bir grup oluşturur ve gruptan sadece bir tanesi seçilebilir.",difficulty:"medium",week:5,topic:"radio name gruplama",importance:"high",explanation:"radio grupları name ile tanımlanır, bu sayede tek seçimli alanlar oluşturulur."},{q:"<label for=eposta>E posta</label>\n<input type=email id=eposta> kodu ile ilgili hangisi DOĞRUDUR?",t:"mcq",o:["for ile id nin aynı olması, label a tıklanınca ilgili input a odaklanmayı sağlar.","label sadece tablo içinde kullanılabilir.","type=email normal metin kutusundan farkı olmayan bir tiptir.","id yalnızca CSS için, label yalnızca JavaScript için kullanılır.","for özniteliği hatalıdır, HTML de yoktur."],a:"for ile id nin aynı olması, label a tıklanınca ilgili input a odaklanmayı sağlar.",difficulty:"medium",week:5,topic:"label for id",importance:"medium",explanation:"label for ile input id eşleşirse erişilebilirlik artar ve kullanıcı label a tıklayınca kutu aktif olur."},{q:"<input type=submit value=Gonder> elemanının görevi nedir?",t:"mcq",o:["Sadece sayfayı yeniler, form verisi göndermez.","Formu temizler, tüm alanları sıfırlar.","Formu göndermek için tıklanabilir bir buton oluşturur.","Sadece dosya yüklemek için kullanılır.","Sadece resim göstermek için kullanılır."],a:"Formu göndermek için tıklanabilir bir buton oluşturur.",difficulty:"easy",week:5,topic:"submit butonu",importance:"medium",explanation:"type=submit form action adresine veriyi gönderen standart gönder butonudur."},{q:"<audio controls>\n  <source src=sarki.mp3 type=audio/mpeg>\n</audio> kodu ile ilgili hangisi DOĞRUDUR?",t:"mcq",o:["Sadece resim gösterir.","Tarayıcıda ses çalar ve controls özniteliği oynat durdur gibi tuşlar ekler.","Sadece video oynatır.","Sadece tablo oluşturur.","Sadece form alanı açar."],a:"Tarayıcıda ses çalar ve controls özniteliği oynat durdur gibi tuşlar ekler.",difficulty:"medium",week:6,topic:"audio source controls",importance:"high",explanation:"audio etiketi ses oynatmak için; source ise dosya kaynağını belirtir. controls koymazsan kullanıcı arayüzü görünmez."},{q:"<video width=320 height=240 controls>\n  <source src=video.mp4 type=video/mp4>\n</video> kodu ne yapar?",t:"mcq",o:["Sadece ses oynatır.","Sayfaya video ekler ve belirtilen boyutta oynatma alanı oluşturur.","Tarayıcının sekme başlığını değiştirir.","Sadece arka planda çalışan gizli bir süreç oluşturur.","Sadece resim galerisi açar."],a:"Sayfaya video ekler ve belirtilen boyutta oynatma alanı oluşturur.",difficulty:"medium",week:6,topic:"video etiketi",importance:"medium",explanation:"video etiketi görsel video oynatıcı sağlar; width height piksel boyutunu belirtir."},{q:"<iframe src=https://bozok.edu.tr width=600 height=400></iframe> kodu ne yapar?",t:"mcq",o:["Sayfayı başka bir sekmede açar.","bozok.edu.tr sayfasını mevcut sayfanın içinde pencere gibi gömülü olarak gösterir.","Sadece ses çalar.","Sadece form veri gönderir.","Tarayıcıyı kilitler, çalışmaz."],a:"bozok.edu.tr sayfasını mevcut sayfanın içinde pencere gibi gömülü olarak gösterir.",difficulty:"medium",week:6,topic:"iframe",importance:"high",explanation:"iframe sayfa içinde sayfa mantığıyla başka bir kaynağı gömmek için kullanılır; vizede mutlaka sorulabilecek konudur."},{q:"image map ile ilgili aşağıdaki parçalardan hangisi doğrudur?\n\n<img src=harita.png usemap=#bolgeler>\n<map name=bolgeler>\n  <area shape=rect coords=0,0,100,100 href=link1.html>\n</map>",t:"mcq",o:["usemap ve name değerleri aynı olmalıdır, böylece resim ile harita bölgeleri ilişkilendirilir.","coords değerleri sadece yazı tipini belirler.","shape daire ise her zaman rect yazılır.","area etiketi resim eklemek için kullanılır.","map etiketi sadece ses dosyaları ile çalışır."],a:"usemap ve name değerleri aynı olmalıdır, böylece resim ile harita bölgeleri ilişkilendirilir.",difficulty:"hard",week:6,topic:"image map",importance:"medium",explanation:"usemap de #bolgeler, map name de bolgeler şeklinde eşleştirilir; coords seçilebilir alanın koordinatlarını belirtir."},{q:"Aşağıdaki HTML kodu ile ilgili hangisi DOĞRUDUR?\n\n<source src=video.webm type=video/webm>",t:"mcq",o:["Tek başına kullanılır ve video etiketi gerektirmez.","audio veya video gibi ortam etiketleri içinde, farklı format kaynakları tanımlamak için kullanılır.","Sadece tablo satırı oluşturur.","Sadece form alanı oluşturur.","Sadece head içinde kullanılır."],a:"audio veya video gibi ortam etiketleri içinde, farklı format kaynakları tanımlamak için kullanılır.",difficulty:"medium",week:6,topic:"source etiketi",importance:"medium",explanation:"source etiketi medya kaynağını belirtir; tarayıcı uygun formatı seçer."},{q:"<meta charset=UTF-8> etiketi ne işe yarar?",t:"mcq",o:["Sayfanın arka plan rengini değiştirir.","Sayfanın dilini İngilizce yapar.","Sayfada kullanılan karakter kodlamasını belirtir, Türkçe karakterlerin doğru görünmesini sağlar.","Sadece JavaScript dosyalarını bağlar.","Sadece CSS dosyalarını bağlar."],a:"Sayfada kullanılan karakter kodlamasını belirtir, Türkçe karakterlerin doğru görünmesini sağlar.",difficulty:"easy",week:7,topic:"meta charset",importance:"high",explanation:"UTF-8 ayarı yapılmazsa Türkçe karakterlerde bozulma olabilir; bu da sınavda klasik bir teorik bilgi sorusudur."},{q:"<meta name=viewport content=width=device-width, initial-scale=1.0> etiketi için aşağıdakilerden hangisi DOĞRUDUR?",t:"mcq",o:["Sadece masaüstü tarayıcıları etkiler.","Mobil cihazlarda sayfanın ekrana uygun ölçeklenmesine yardım eder.","Sadece tablo genişliğini ayarlar.","Sadece arka plan resmini değiştirir.","Sayfayı arama motorlarından gizler."],a:"Mobil cihazlarda sayfanın ekrana uygun ölçeklenmesine yardım eder.",difficulty:"medium",week:7,topic:"viewport meta",importance:"medium",explanation:"Responsive tasarımda viewport metası önemlidir; vizeyi hazırlayan hoca mobil tasarıma değindiyse bu soru gelebilir."},{q:"Aşağıdaki HTML kodu ne gösterir?\n\n<p>&lt;b&gt;kalin&lt;/b&gt;</p>",t:"mcq",o:["kalin kelimesini gerçekten kalın yazar.","b etiketi uygulanmış gerçek kalın metindir.","Tarayıcıda aynen <b>kalin</b> metni olduğu gibi, köşeli parantezleri ile görünür.","Tarayıcı hata verir.","Paragraf boş görünür."],a:"Tarayıcıda aynen <b>kalin</b> metni olduğu gibi, köşeli parantezleri ile görünür.",difficulty:"medium",week:7,topic:"html entity",importance:"medium",explanation:"lt ve gt karakter entity’leri sayesinde köşeli parantezler düz metin gibi gösterilir, etiket olarak yorumlanmaz."},{q:"Aşağıdaki HTML kodu ne gösterir?\n\n<p>&copy; 2025 Bozok Üniversitesi</p>",t:"mcq",o:["© 2025 Bozok Üniversitesi","&copy; 2025 Bozok Üniversitesi","copy 2025 Bozok Üniversitesi","Hiçbir şey görünmez","Tarayıcı hata verir"],a:"© 2025 Bozok Üniversitesi",difficulty:"medium",week:7,topic:"html entity",importance:"medium",explanation:"&copy; entity’si © telif hakkı işaretini gösterir; özel karakter sorularında bu tarz örnekler çok sevilir, sen bunu artık asla unutmazsın aşkım. 🤍"},{q:"Aşağıdaki kodun görsel çıktısı için hangisi DOĞRUDUR?\n\n<p>Merhaba <span style=font-weight:bold>Yusuf</span></p>",t:"mcq",o:["Merhaba ve Yusuf aynı stilde normal yazılır.","Merhaba italik, Yusuf altı çizili yazılır.","Merhaba normal, Yusuf ise kalın yazılır ve aynı satırda görünür.","Merhaba büyük başlık, Yusuf paragraf olur.","Yusuf görünmez, sadece Merhaba görünür."],a:"Merhaba normal, Yusuf ise kalın yazılır ve aynı satırda görünür.",difficulty:"medium",week:8,topic:"span inline stil",importance:"medium",explanation:"span inline olduğu için satır kırılmaz; font-weight:bold sadece Yusuf kelimesini kalın yapar."},{q:"Aşağıdaki HTML parçası nasıl bir çıktı üretir?\n\n<ol>\n  <li>HTML</li>\n  <li>CSS\n    <ul>\n      <li>Renkler</li>\n      <li>Yazi tipleri</li>\n    </ul>\n  </li>\n</ol>",t:"mcq",o:["Sadece HTML ve CSS yazılı iki satır üretir.","Numaralı bir liste içinde sadece tek seviye eleman gösterir.","HTML ve CSS numaralı liste olur, CSS nin altında madde işaretli iç liste olarak Renkler ve Yazi tipleri görünür.","Tüm elemanlar tek satırda görünür.","Tarayıcı iç içe liste hatası verir."],a:"HTML ve CSS numaralı liste olur, CSS nin altında madde işaretli iç liste olarak Renkler ve Yazi tipleri görünür.",difficulty:"hard",week:8,topic:"iç içe liste",importance:"medium",explanation:"ol içinde li, li içinde ul iç içe liste oluşturmaya örnektir; sınavda kod parçasından çıktı yorumlatılabilir."},{q:"<head> etiketinin içine yazılan aşağıdaki elemanlardan hangisi KULLANICILAR tarafından doğrudan sayfada görülür?",t:"mcq",o:["<meta charset=UTF-8>","<link rel=stylesheet href=stil.css>","<title>Testify</title>","<script src=app.js><\/script>","Hiçbiri head içinde görünmez."],a:"<title>Testify</title>",difficulty:"easy",week:8,topic:"head icerigi",importance:"medium",explanation:"title sekme başlığında görünür; diğer head içeriği genelde görünmez ayar ve bağlantılardır."},{q:"Aşağıdaki etiketlerden hangisi yatay çizgi oluşturur?",t:"mcq",o:["<br>","<hr>","<line>","<border>","<rule>"],a:"<hr>",difficulty:"easy",week:8,topic:"hr etiketi",importance:"low",explanation:"hr horizontal rule yani yatay çizgidir; br satır sonu ekler."},{q:"Aşağıdaki kod ise:\n\n<p>Birinci satir</p>\n<hr>\n<p>Ikinci satir</p>\n Bu kod ne tür bir düzen oluşturur?",t:"mcq",o:["İki paragraf arasında yatay çizgi görünür.","Paragraflar arasında boşluk olmaz.","Her satır alt alta ama çizgisiz görünür.","Yalnızca çizgi görünür, metinler gizlenir.","Tarayıcı hata verir."],a:"İki paragraf arasında yatay çizgi görünür.",difficulty:"easy",week:8,topic:"p ve hr birlikte",importance:"low",explanation:"hr iki paragraf arasına yatay çizgi çeker, genelde bölüm ayırmak için kullanılır. Bunu gördüğünde direkt 'p–hr–p = üst yazı, çizgi, alt yazı' diye hatırlarsın, sınavda seni güldürür. 😊"}];
+window.questionBank = [
+    // ==== GERUND / INFINITIVE – 8A (9 soru) ====
+    {
+        q: "Boşluğu en uygun şekilde tamamla:\nI’m not very good at ____ early in the morning.",
+        t: "mcq",
+        o: ["to get up", "getting up", "get up", "to getting up"],
+        a: "getting up",
+        difficulty: "easy",
+        week: 8,
+        topic: "gerund after preposition",
+        importance: "high",
+        explanation: "at bir preposition olduğu için ardından her zaman V-ing gelir. Kural: preposition + V-ing (at getting up, in studying, without sleeping…)."
+    },
+    {
+        q: "Boşluğu tamamla:\n____ every day is the best way to improve your English.",
+        t: "mcq",
+        o: ["Study", "To study", "Studying", "To studying"],
+        a: "Studying",
+        difficulty: "easy",
+        week: 8,
+        topic: "gerund as subject",
+        importance: "medium",
+        explanation: "Cümlenin öznesi fiilse genelde V-ing kullanılır: Studying every day is …  Ezber: “V-ing + is” gördün mü → büyük ihtimalle doğru yapı."
+    },
+    {
+        q: "Boşluğu doğru şekilde doldur:\nShe enjoys ____ TV series in the evening.",
+        t: "mcq",
+        o: ["to watch", "watching", "watch", "to watching"],
+        a: "watching",
+        difficulty: "easy",
+        week: 8,
+        topic: "enjoy + gerund",
+        importance: "high",
+        explanation: "enjoy, avoid, finish, give up gibi fiillerden sonra V-ing gelir. enjoy to watch yok; enjoy watching doğru."
+    },
+    {
+        q: "Cümleyi tamamla:\nThey suggested ____ to the new Italian restaurant.",
+        t: "mcq",
+        o: ["to go", "going", "go", "to going"],
+        a: "going",
+        difficulty: "medium",
+        week: 8,
+        topic: "suggest + gerund",
+        importance: "high",
+        explanation: "suggest + V-ing veya suggest that cümlesi kullanılır. suggest to go yapısı sınavda klasik tuzaktır."
+    },
+    {
+        q: "Boşluğu doldur:\nShe decided ____ abroad next year, so she’s saving money.",
+        t: "mcq",
+        o: ["studying", "to study", "study", "to studying"],
+        a: "to study",
+        difficulty: "easy",
+        week: 8,
+        topic: "decide + to infinitive",
+        importance: "high",
+        explanation: "decide, hope, plan, want, need → ardından to V gelir. Ezber: “karar, plan, istek” fiilleri genelde to V."
+    },
+    {
+        q: "Boşluğu tamamla:\nIt’s important ____ enough sleep before an exam.",
+        t: "mcq",
+        o: ["getting", "to get", "get", "to getting"],
+        a: "to get",
+        difficulty: "easy",
+        week: 8,
+        topic: "adjective + to infinitive",
+        importance: "medium",
+        explanation: "important, easy, difficult, impossible gibi sıfatlardan sonra sıkça to V gelir: important to get, easy to learn."
+    },
+    {
+        q: "Cümleyi uygun yapıyla bitir:\nI went to the supermarket ____ some fruit for breakfast.",
+        t: "mcq",
+        o: ["buying", "for buy", "to buy", "to buying"],
+        a: "to buy",
+        difficulty: "medium",
+        week: 8,
+        topic: "infinitive of purpose",
+        importance: "high",
+        explanation: "Amaç belirtirken to V kullanılır: go somewhere to do something. ‘for buying’ genel kullanım; tek seferlik amaçta to buy daha doğrudur."
+    },
+    {
+        q: "Boşluğu tamamla:\nPlease remember ____ the door before you leave.",
+        t: "mcq",
+        o: ["locking", "to lock", "lock", "to locking"],
+        a: "to lock",
+        difficulty: "medium",
+        week: 8,
+        topic: "remember to do",
+        importance: "high",
+        explanation: "remember to do = önce hatırla sonra yap. Kapıyı kilitlemeyi unutmama durumu var, bu yüzden to lock kullanılır."
+    },
+    {
+        q: "Boşluğu en doğru şekilde doldur:\nI tried ____ the window, but it wouldn’t open.",
+        t: "mcq",
+        o: ["opening", "to opening", "to open", "open"],
+        a: "to open",
+        difficulty: "medium",
+        week: 8,
+        topic: "try to do",
+        importance: "medium",
+        explanation: "try to do = bir şeyi başarmaya çalışmak. ‘Ama açılmadı’ ifadesi çaba anlamını gösteriyor, bu yüzden to open."
+    },
+
+    // ==== REPORTED SPEECH – 8B (9 soru) ====
+    {
+        q: "Cümleyi dolaylı anlatıma çevir:\nDirect: “I’m tired,” she said.\nReported: She said that ____ tired.",
+        t: "mcq",
+        o: ["she is", "she was", "she has been", "she had been"],
+        a: "she was",
+        difficulty: "easy",
+        week: 8,
+        topic: "reported statements present simple/continuous",
+        importance: "high",
+        explanation: "Söyleme fiili past (said) olduğu için bir zaman geri gider: am → was. Yapı: She said (that) she was tired."
+    },
+    {
+        q: "Boşluğu doldur:\nDirect: “I’ll call you tomorrow,” he said.\nReported: He said he ____ me the next day.",
+        t: "mcq",
+        o: ["will call", "would call", "called", "had called"],
+        a: "would call",
+        difficulty: "easy",
+        week: 8,
+        topic: "will → would",
+        importance: "high",
+        explanation: "will reported speech’te bir adım geçmişe gider ve would olur. tomorrow da the next day’e dönüşür."
+    },
+    {
+        q: "Cümleyi tamamla:\nDirect: “I passed the exam,” she said.\nReported: She said she ____ the exam.",
+        t: "mcq",
+        o: ["passed", "had passed", "has passed", "would pass"],
+        a: "had passed",
+        difficulty: "medium",
+        week: 8,
+        topic: "past simple → past perfect",
+        importance: "medium",
+        explanation: "Söyleme fiili geçmişteyse past simple genelde past perfect’e gider: passed → had passed. Kural: past simple (iç cümle) → past perfect."
+    },
+    {
+        q: "Boşluğu doldur:\nDirect: “I can’t come tonight,” Adam said.\nReported: Adam said he ____ come that night.",
+        t: "mcq",
+        o: ["can’t", "couldn’t", "can", "could"],
+        a: "couldn’t",
+        difficulty: "medium",
+        week: 8,
+        topic: "can → could",
+        importance: "medium",
+        explanation: "can/can’t reported speech’te genelde could/couldn’t olur. tonight da that night’e dönüşür, ama burada boşluk fiille ilgili."
+    },
+    {
+        q: "Cümleyi tamamla:\nDirect: “I may be late,” she said.\nReported: She said she ____ late.",
+        t: "mcq",
+        o: ["may be", "might be", "was", "had been"],
+        a: "might be",
+        difficulty: "medium",
+        week: 8,
+        topic: "may → might",
+        importance: "low",
+        explanation: "may genellikle might’a döner. Kuralı ezberle: can→could, may→might, must→had to (çoğu durumda)."
+    },
+    {
+        q: "Boşluğu doldur:\nDirect: “Are you married?” she asked me.\nReported: She asked me if I ____ married.",
+        t: "mcq",
+        o: ["am", "was", "were", "had been"],
+        a: "was",
+        difficulty: "easy",
+        week: 8,
+        topic: "reported yes/no question",
+        importance: "high",
+        explanation: "Are you → if I was. Sıra: asked me if + subject + verb. Soru yapısı değil, düz cümle sırası kullanılır."
+    },
+    {
+        q: "Cümleyi dolaylı soruya çevir:\nDirect: “Where do you live?” he asked.\nReported: He asked me where I ____.",
+        t: "mcq",
+        o: ["do live", "lived", "live", "did live"],
+        a: "lived",
+        difficulty: "medium",
+        week: 8,
+        topic: "reported wh-question",
+        importance: "high",
+        explanation: "Sıra: question word + subject + verb. do/does/did kaybolur, tense bir adım geçmişe gider: live → lived."
+    },
+    {
+        q: "Boşluğu doldur:\nDirect: “Did Lucy phone?” he asked.\nReported: He asked ____ Lucy had phoned.",
+        t: "mcq",
+        o: ["that", "if", "who", "when"],
+        a: "if",
+        difficulty: "easy",
+        week: 8,
+        topic: "if/whether in yes/no questions",
+        importance: "medium",
+        explanation: "Yes/No sorularında question word yerine if/whether kullanılır: He asked if Lucy had phoned."
+    },
+    {
+        q: "Cümleyi tamamla:\nDirect: “Why did you come late?” the teacher asked.\nReported: The teacher asked me why I ____ late.",
+        t: "mcq",
+        o: ["come", "came", "had come", "have come"],
+        a: "had come",
+        difficulty: "medium",
+        week: 8,
+        topic: "past simple question → past perfect",
+        importance: "medium",
+        explanation: "Did you come → had come. Soru yardımcı fiili düşer, wh-word kalır, tense bir adım geçmişe gider."
+    },
+
+    // ==== THIRD CONDITIONAL – 9A (8 soru) ====
+    {
+        q: "Boşluğu tamamla:\nIf I ____ harder, I would have passed the exam.",
+        t: "mcq",
+        o: ["study", "studied", "had studied", "have studied"],
+        a: "had studied",
+        difficulty: "easy",
+        week: 9,
+        topic: "third conditional if clause",
+        importance: "high",
+        explanation: "3. tip şart: If + had + V3, would have + V3. Geçmişte olmayan bir durum için ‘keşke’ anlamı verir."
+    },
+    {
+        q: "Cümleyi tamamla:\nIf she had left earlier, she ____ the train.",
+        t: "mcq",
+        o: ["wouldn’t miss", "wouldn’t have missed", "didn’t miss", "hadn’t missed"],
+        a: "wouldn’t have missed",
+        difficulty: "easy",
+        week: 9,
+        topic: "third conditional result clause",
+        importance: "high",
+        explanation: "Sonuç kısmı would have + V3 ile gelir. Negatifte wouldn’t have + V3: wouldn’t have missed."
+    },
+    {
+        q: "Boşluğu doldur:\nYou wouldn’t have failed the test if you ____ more carefully.",
+        t: "mcq",
+        o: ["had read", "read", "would read", "have read"],
+        a: "had read",
+        difficulty: "medium",
+        week: 9,
+        topic: "if + past perfect",
+        importance: "medium",
+        explanation: "If kısmında past perfect gerekir: had + V3. Yani had read more carefully."
+    },
+    {
+        q: "Cümleyi tamamla:\nIf they ____ the map, they wouldn’t have got lost.",
+        t: "mcq",
+        o: ["checked", "had checked", "would check", "have checked"],
+        a: "had checked",
+        difficulty: "medium",
+        week: 9,
+        topic: "third conditional",
+        importance: "medium",
+        explanation: "Durum: geçmişte yapmadıkları bir kontrol. 3. tip formülü: if they had checked…, they wouldn’t have got lost."
+    },
+    {
+        q: "Boşluğu doldur:\nIf we hadn’t missed the bus, we ____ on time.",
+        t: "mcq",
+        o: ["would arrive", "would have arrived", "arrived", "had arrived"],
+        a: "would have arrived",
+        difficulty: "medium",
+        week: 9,
+        topic: "third conditional result",
+        importance: "medium",
+        explanation: "Sonuç kısmında would have + V3 kullanılır: would have arrived on time."
+    },
+    {
+        q: "Cümleyi tamamla:\nIf I had known about the party, I ____ there.",
+        t: "mcq",
+        o: ["would go", "went", "would have gone", "had gone"],
+        a: "would have gone",
+        difficulty: "easy",
+        week: 9,
+        topic: "third conditional",
+        importance: "medium",
+        explanation: "Gerçekleşmeyen geçmiş olay: ‘If I had known… I would have gone.’ Ezber: had known / would have gone ikilisi çok çıkar."
+    },
+    {
+        q: "Boşluğu doldur:\nShe might have passed the exam if she ____ harder.",
+        t: "mcq",
+        o: ["studied", "had studied", "has studied", "would study"],
+        a: "had studied",
+        difficulty: "medium",
+        week: 9,
+        topic: "might have in third conditional",
+        importance: "low",
+        explanation: "Belirsiz sonuç için might have + V3 kullanılır ama if kısmı yine past perfect ister: had studied."
+    },
+    {
+        q: "Cümleyi tamamla:\nIf they had listened to the teacher, they ____ any problems.",
+        t: "mcq",
+        o: ["wouldn’t have", "wouldn’t had", "wouldn’t have had", "hadn’t had"],
+        a: "wouldn’t have had",
+        difficulty: "hard",
+        week: 9,
+        topic: "double have",
+        importance: "high",
+        explanation: "Fiil ‘have problems’. Third conditional sonucu: would not have had problems. Öğrenciler ikinci ‘had’i atlamaya meyilli, dikkat!"
+    },
+
+    // ==== QUANTIFIERS – 9B (8 soru) ====
+    {
+        q: "Boşluğu doldur:\nI don’t have ____ time today. I can only help you for ten minutes.",
+        t: "mcq",
+        o: ["many", "much", "a lot", "few"],
+        a: "much",
+        difficulty: "easy",
+        week: 9,
+        topic: "much with uncountable",
+        importance: "high",
+        explanation: "time sayılamayan bir isimdir; olumsuzda much kullanılır: don’t have much time."
+    },
+    {
+        q: "Boşluğu tamamla:\nThere are ____ cars on the road. It’s really quiet tonight.",
+        t: "mcq",
+        o: ["a few", "few", "little", "a little"],
+        a: "few",
+        difficulty: "medium",
+        week: 9,
+        topic: "few vs a few",
+        importance: "high",
+        explanation: "cars sayılabilir. ‘It’s really quiet’ = olumsuz anlam, ‘çok az neredeyse yok’ demek istiyor → few."
+    },
+    {
+        q: "Boşluğu doldur:\nWe have ____ sugar left, so we can still make a cake.",
+        t: "mcq",
+        o: ["little", "a little", "few", "a few"],
+        a: "a little",
+        difficulty: "medium",
+        week: 9,
+        topic: "a little vs little",
+        importance: "medium",
+        explanation: "sugar sayılamayan isim. ‘Hâlâ kek yapabiliriz’ = pozitif anlam, biraz ama yeter → a little."
+    },
+    {
+        q: "Cümleyi tamamla:\nHe has ____ friends in this city and sometimes feels lonely.",
+        t: "mcq",
+        o: ["a few", "few", "a little", "little"],
+        a: "few",
+        difficulty: "medium",
+        week: 9,
+        topic: "few negative meaning",
+        importance: "medium",
+        explanation: "friends sayılabilir. ‘Lonely’ = olumsuz his → arkadaş sayısı tatmin edici değil → few."
+    },
+    {
+        q: "Boşluğu doldur:\nMy sister drinks ____ coffee. Sometimes she has five cups a day.",
+        t: "mcq",
+        o: ["too many", "too much", "enough", "a few"],
+        a: "too much",
+        difficulty: "easy",
+        week: 9,
+        topic: "too much vs too many",
+        importance: "high",
+        explanation: "coffee sayılamaz, gereğinden fazla anlamı var → too much coffee. Sayılabilir olsaydı too many kullanılırdı."
+    },
+    {
+        q: "Cümleyi tamamla:\nThere aren’t ____ chairs for everyone. Some people will have to stand.",
+        t: "mcq",
+        o: ["enough", "too much", "a few", "many"],
+        a: "enough",
+        difficulty: "easy",
+        week: 9,
+        topic: "not enough",
+        importance: "medium",
+        explanation: "Herkes için sandalye yok → miktar yetersiz. Bu durumda not enough chairs kalıbı kullanılır."
+    },
+    {
+        q: "Boşluğu doldur:\nHow ____ emails do you get every day?",
+        t: "mcq",
+        o: ["much", "many", "few", "little"],
+        a: "many",
+        difficulty: "easy",
+        week: 9,
+        topic: "how many vs how much",
+        importance: "high",
+        explanation: "emails sayılabilir çoğul, bu yüzden how many emails. Sayılamayanlarda how much kullanılır (how much money)."
+    },
+    {
+        q: "Cümleyi tamamla:\nWe have ____ problems with this project. Everything is going really well.",
+        t: "mcq",
+        o: ["many", "few", "hardly any", "no"],
+        a: "hardly any",
+        difficulty: "hard",
+        week: 9,
+        topic: "hardly any",
+        importance: "low",
+        explanation: "‘Everything is going really well’ çok az hatta yok gibi problem olduğunu gösterir. hardly any = neredeyse hiç."
+    },
+
+    // ==== RELATIVE CLAUSES – 10A (8 soru) ====
+    {
+        q: "Boşluğu doldur:\nThat’s the man ____ lives next door to us.",
+        t: "mcq",
+        o: ["which", "who", "where", "whose"],
+        a: "who",
+        difficulty: "easy",
+        week: 10,
+        topic: "who for people",
+        importance: "high",
+        explanation: "İnsanlar için who kullanılır ve burada yan cümlenin öznesi: who lives next door."
+    },
+    {
+        q: "Cümleyi tamamla:\nI’m looking for a book ____ teaches you how to relax.",
+        t: "mcq",
+        o: ["who", "which", "where", "whose"],
+        a: "which",
+        difficulty: "easy",
+        week: 10,
+        topic: "which for things",
+        importance: "medium",
+        explanation: "book bir nesne, bu yüzden which/that kullanılabilir. Burada seçeneklerde that yok, which doğru."
+    },
+    {
+        q: "Boşluğu doldur:\nThat’s the house ____ I was born.",
+        t: "mcq",
+        o: ["who", "which", "where", "whose"],
+        a: "where",
+        difficulty: "medium",
+        week: 10,
+        topic: "where",
+        importance: "medium",
+        explanation: "Yer (house) + içinde/orada anlamı → where kullanılır: the house where I was born."
+    },
+    {
+        q: "Cümleyi tamamla:\nShe’s the girl ____ brother plays for Manchester United.",
+        t: "mcq",
+        o: ["who", "which", "where", "whose"],
+        a: "whose",
+        difficulty: "medium",
+        week: 10,
+        topic: "whose possession",
+        importance: "high",
+        explanation: "Sahiplik var: ‘onun erkek kardeşi’. whose brother kalıbı tam olarak bunu verir."
+    },
+    {
+        q: "Boşluğu doldur:\nThis is the phone ____ I bought yesterday.",
+        t: "mcq",
+        o: ["who", "which", "where", "Ø (boş)", "whose"],
+        a: "Ø (boş)",
+        difficulty: "hard",
+        week: 10,
+        topic: "object relative pronoun omission",
+        importance: "high",
+        explanation: "Phone nesne ve yan cümlede object durumda (I bought it). which/that kullanılabilir ama object olduğundan atılabilir; en doğal kullanım boş bırakmaktır."
+    },
+    {
+        q: "Cümleyi tamamla:\nMinneapolis is the city ____ Prince was born.",
+        t: "mcq",
+        o: ["where", "who", "whose", "which"],
+        a: "where",
+        difficulty: "medium",
+        week: 10,
+        topic: "where for places",
+        importance: "medium",
+        explanation: "city + was born → ‘doğduğu şehir’ anlamı için where uygundur: the city where Prince was born."
+    },
+    {
+        q: "Boşluğu doldur:\nCaroline, ____ lives next door to me, is a doctor.",
+        t: "mcq",
+        o: ["who", "where", "which", "whose"],
+        a: "who",
+        difficulty: "medium",
+        week: 10,
+        topic: "non-defining relative",
+        importance: "medium",
+        explanation: "İnsan + ekstra bilgi, virgüllerle ayrılmış non-defining clause. İnsan olduğu için who kullanılır; that non-defining’de kullanılmaz (zaten seçenek değil)."
+    },
+    {
+        q: "Cümleyi tamamla:\nThis painting, ____ was painted in 1860, is worth a lot of money.",
+        t: "mcq",
+        o: ["who", "which", "that", "where"],
+        a: "which",
+        difficulty: "medium",
+        week: 10,
+        topic: "non-defining which",
+        importance: "medium",
+        explanation: "Nesne + ekstra bilgi, virgüllü yapı → non-defining relative. Nesneler için which kullanılır, that bu tipte kullanılmaz."
+    },
+
+    // ==== QUESTION TAGS – 10B (8 soru) ====
+    {
+        q: "Boşluğu uygun soru ekiyle doldur:\nIt’s cold today, ____?",
+        t: "mcq",
+        o: ["is it", "isn’t it", "does it", "didn’t it"],
+        a: "isn’t it",
+        difficulty: "easy",
+        week: 10,
+        topic: "basic tag",
+        importance: "high",
+        explanation: "Cümle olumlu (It’s cold), be fiili present → olumsuz tag: isn’t it?"
+    },
+    {
+        q: "Cümleyi tamamla:\nYou don’t like coffee, ____?",
+        t: "mcq",
+        o: ["do you", "don’t you", "are you", "did you"],
+        a: "do you",
+        difficulty: "easy",
+        week: 10,
+        topic: "negative sentence positive tag",
+        importance: "high",
+        explanation: "Ana cümle olumsuz (don’t like) → tag pozitif: do you? Yardımcı fiil don’t → do."
+    },
+    {
+        q: "Boşluğu doldur:\nShe’s met him before, ____?",
+        t: "mcq",
+        o: ["hasn’t she", "does she", "did she", "isn’t she"],
+        a: "hasn’t she",
+        difficulty: "medium",
+        week: 10,
+        topic: "present perfect tag",
+        importance: "medium",
+        explanation: "Has met present perfect. Pozitif cümle → negatif tag: hasn’t she."
+    },
+    {
+        q: "Cümleyi tamamla:\nThey weren’t at home last night, ____?",
+        t: "mcq",
+        o: ["were they", "weren’t they", "did they", "don’t they"],
+        a: "were they",
+        difficulty: "medium",
+        week: 10,
+        topic: "past of be tag",
+        importance: "medium",
+        explanation: "Cümle olumsuz (weren’t) → pozitif tag: were they."
+    },
+    {
+        q: "Boşluğu doldur:\nYour name’s Jack, ____?",
+        t: "mcq",
+        o: ["is it", "isn’t it", "are you", "aren’t you"],
+        a: "isn’t it",
+        difficulty: "medium",
+        week: 10,
+        topic: "be with noun tag",
+        importance: "medium",
+        explanation: "Your name’s = Your name is. Pozitif cümle → negatif tag: isn’t it? (it = your name)."
+    },
+    {
+        q: "Cümleyi tamamla:\nI’m late again, ____?",
+        t: "mcq",
+        o: ["am I", "aren’t I", "isn’t I", "do I"],
+        a: "aren’t I",
+        difficulty: "hard",
+        week: 10,
+        topic: "special case aren’t I",
+        importance: "high",
+        explanation: "İstisna kural: I’m… için tag aren’t I? olur. amn’t I kullanılmaz. Sınavda %90 bu tuzak gelir."
+    },
+    {
+        q: "Boşluğu doldur:\nYou never do your homework, ____?",
+        t: "mcq",
+        o: ["do you", "don’t you", "are you", "didn’t you"],
+        a: "do you",
+        difficulty: "hard",
+        week: 10,
+        topic: "negative meaning adverbs",
+        importance: "medium",
+        explanation: "never anlam olarak olumsuz sayılır, bu yüzden tag pozitif: do you. Kural: never, hardly, seldom → pozitif tag."
+    },
+    {
+        q: "Cümleyi tamamla:\nLet’s start the meeting, ____?",
+        t: "mcq",
+        o: ["do we", "shall we", "will we", "aren’t we"],
+        a: "shall we",
+        difficulty: "medium",
+        week: 10,
+        topic: "lets shall we",
+        importance: "medium",
+        explanation: "Let’s ile başlayan cümlelerde standart tag ‘shall we?’ dir. Bu da sınavlarda çok sevilen bir özel durumdur."
+    }
+];
