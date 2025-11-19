@@ -1,9 +1,4 @@
-/**
- * TESTIFY UTILS
- * Yardımcı fonksiyonlar (storage, tarih, format, toast, confirm, validation, vb.)
- * 
- * 🔇 TOAST BİLDİRİMLERİ DEVRE DIŞI (Kullanıcı talebi)
- */
+
 
 'use strict';
 
