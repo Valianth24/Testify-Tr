@@ -1,4 +1,7 @@
-
+/**
+ * TESTIFY MAIN APPLICATION - TAM HATASIZ
+ * Tüm özellikler çalışır hale getiren ana uygulama
+ */
 
 'use strict';
 
@@ -201,6 +204,31 @@ const App = {
     },
 
     /**
+     * YKS Yolculuğum sekmesini başlatır (yeni YKSJourneyManager ile uyumlu)
+     * Eski dosyalarla da çakışmasın diye defansif yazıldı.
+     */
+    initYKSJourneyTab() {
+        try {
+            // Yeni sistem: window.YKSJourneyManager.init()
+            if (window.YKSJourneyManager && typeof window.YKSJourneyManager.init === 'function') {
+                window.YKSJourneyManager.init();
+                return;
+            }
+
+            // Eski bir global init fonksiyonu varsa (ileride kullanmak istersen)
+            if (typeof window.initYKSJourney === 'function') {
+                window.initYKSJourney();
+                return;
+            }
+
+            console.warn('⚠️ YKSJourney modülü bulunamadı. yks-journey.js dosyasının yüklü olduğundan emin ol.');
+        } catch (error) {
+            console.error('YKS Yolculuğu başlatma hatası:', error);
+            Utils.handleError(error, 'initYKSJourneyTab');
+        }
+    },
+
+    /**
      * Tab navigasyonu - Library kontrolü + sayfa/advert yenileme
      */
     switchTab(tabName, options = {}) {
@@ -247,6 +275,10 @@ const App = {
                     break;
                 case 'dashboard':
                     this.updateDashboard();
+                    break;
+                case 'journey':
+                    // ✅ Yeni YKS Yolculuğu sekmesi
+                    this.initYKSJourneyTab();
                     break;
             }
 
@@ -467,7 +499,6 @@ const App = {
             notesList.innerHTML = notes.map(note => {
                 const editText = t('notes.edit', 'Düzenle');
                 const deleteText = t('notes.delete', 'Sil');
-
                 return `
                     <div class="note-card">
                         <h3 class="note-title">${Utils.sanitizeHTML(note.title || 'Başlıksız Not')}</h3>
