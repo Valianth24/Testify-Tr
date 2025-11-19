@@ -18,26 +18,26 @@ const App = {
      */
     init() {
         console.log('🎓 Testify başlatılıyor...');
-        
+
         try {
             // Storage'ı kontrol et
             this.checkStorage();
-            
+
             // Kullanıcı verilerini yükle
             this.loadUserData();
-            
+
             // Tema yükle
             this.loadTheme();
-            
+
             // Event listener'ları ekle
             this.attachEventListeners();
-            
+
             // Dashboard'ı güncelle
             this.updateDashboard();
-            
+
             // Leaderboard'ı güncelle
             this.updateLeaderboard();
-            
+
             console.log('✅ Testify hazır!');
         } catch (error) {
             console.error('❌ Başlatma hatası:', error);
@@ -65,18 +65,18 @@ const App = {
     loadUserData() {
         try {
             const userData = StorageManager.getUserData();
-            
+
             // Header'daki bilgileri güncelle
             const userAvatar = document.getElementById('userAvatar');
             const streak = document.getElementById('streak');
             const totalPoints = document.getElementById('totalPoints');
             const rank = document.getElementById('rank');
-            
+
             if (userAvatar) {
                 const username = userData.username || 'U';
                 userAvatar.textContent = username.charAt(0).toUpperCase();
             }
-            
+
             if (streak) {
                 const streakText = t('header.streak', 'Gün');
                 const streakSpan = streak.querySelector('span[data-i18n="header.streak"]');
@@ -86,7 +86,7 @@ const App = {
                     streak.textContent = userData.stats.streak + ' ' + streakText;
                 }
             }
-            
+
             if (totalPoints) {
                 const xpText = t('header.points', 'XP');
                 const xpSpan = totalPoints.querySelector('span[data-i18n="header.points"]');
@@ -96,7 +96,7 @@ const App = {
                     totalPoints.textContent = userData.stats.xp + ' ' + xpText;
                 }
             }
-            
+
             if (rank) {
                 rank.textContent = userData.stats.rank ? '#' + userData.stats.rank : '#--';
             }
@@ -114,21 +114,21 @@ const App = {
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
+
             html.setAttribute('data-theme', newTheme);
-            
+
             const themeIcon = document.getElementById('themeIcon');
             if (themeIcon) {
                 // Phosphor ikonlarını kullan: light → güneş, dark → ay
                 const iconClass = newTheme === 'light' ? 'ph-sun-dim' : 'ph-moon-stars';
                 themeIcon.className = `ph ${iconClass} icon`;
             }
-            
+
             const themeBtn = document.querySelector('.theme-toggle');
             if (themeBtn) {
                 themeBtn.setAttribute('aria-pressed', newTheme === 'dark');
             }
-            
+
             Utils.setToStorage(Config.STORAGE_KEYS.THEME, newTheme);
         }
     },
@@ -139,13 +139,13 @@ const App = {
     loadTheme() {
         const savedTheme = Utils.getFromStorage(Config.STORAGE_KEYS.THEME, 'light');
         document.documentElement.setAttribute('data-theme', savedTheme);
-        
+
         const themeIcon = document.getElementById('themeIcon');
         if (themeIcon) {
             const iconClass = savedTheme === 'light' ? 'ph-sun-dim' : 'ph-moon-stars';
             themeIcon.className = `ph ${iconClass} icon`;
         }
-        
+
         const themeBtn = document.querySelector('.theme-toggle');
         if (themeBtn) {
             themeBtn.setAttribute('aria-pressed', savedTheme === 'dark');
@@ -289,16 +289,16 @@ const App = {
 
             if (totalTests) totalTests.textContent = stats.totalTests;
             if (totalQuestions) totalQuestions.textContent = stats.totalQuestions;
-            
+
             if (successRate) {
-                const rate = stats.totalQuestions > 0 
+                const rate = stats.totalQuestions > 0
                     ? Math.round((stats.correctAnswers / stats.totalQuestions) * 100)
                     : 0;
                 successRate.textContent = rate + '%';
             }
-            
+
             if (avgTime) {
-                const avg = stats.totalTests > 0 
+                const avg = stats.totalTests > 0
                     ? Math.round(stats.totalTime / stats.totalTests)
                     : 0;
                 avgTime.textContent = avg + 's';
@@ -319,12 +319,12 @@ const App = {
         try {
             const activities = StorageManager.getActivities(5);
             const activityList = document.getElementById('activityList');
-            
+
             if (!activityList) return;
 
             if (activities.length === 0) {
                 const emptyText = t('dashboard.empty', 'Henüz aktivite yok. Test çözerek başla!');
-                
+
                 activityList.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">
@@ -397,12 +397,12 @@ const App = {
         try {
             const leaderboard = StorageManager.getLeaderboard(100);
             const tbody = document.getElementById('leaderboardBody');
-            
+
             if (!tbody) return;
 
             if (leaderboard.length === 0) {
                 const emptyText = t('leaderboard.empty', 'Henüz veri bulunmuyor');
-                
+
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="5" class="empty-cell">${emptyText}</td>
@@ -450,12 +450,12 @@ const App = {
         try {
             const notes = StorageManager.getNotes();
             const notesList = document.getElementById('notesList');
-            
+
             if (!notesList) return;
 
             if (notes.length === 0) {
                 const emptyText = t('notes.empty', 'Henüz not eklemedin');
-                
+
                 notesList.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">
@@ -470,7 +470,7 @@ const App = {
             notesList.innerHTML = notes.map(note => {
                 const editText = t('notes.edit', 'Düzenle');
                 const deleteText = t('notes.delete', 'Sil');
-                
+
                 return `
                     <div class="note-card">
                         <h3 class="note-title">${Utils.sanitizeHTML(note.title || 'Başlıksız Not')}</h3>
@@ -509,7 +509,7 @@ const App = {
             // Fallback: tarayıcı prompt (teoride artık kullanılmayacak)
             const titlePrompt = t('notes.titlePrompt', 'Not Başlığı:');
             const contentPrompt = t('notes.contentPrompt', 'Not İçeriği:');
-            
+
             const title = prompt(titlePrompt);
             if (!title) return;
 
@@ -536,7 +536,7 @@ const App = {
         try {
             const notes = StorageManager.getNotes();
             const note = notes.find(n => n.id === noteId);
-            
+
             if (!note) return;
 
             // Modal sistemimiz varsa onu kullan
@@ -548,7 +548,7 @@ const App = {
             // Fallback: eski prompt tabanlı düzenleme
             const titlePrompt = t('notes.titlePrompt', 'Not Başlığı:');
             const contentPrompt = t('notes.contentPrompt', 'Not İçeriği:');
-            
+
             const title = prompt(titlePrompt, note.title);
             if (title === null) return;
 
@@ -574,7 +574,7 @@ const App = {
         try {
             const confirmMsg = t('notes.deleteConfirm', 'Bu notu silmek istediğinizden emin misiniz?');
             const confirmed = await Utils.confirm(confirmMsg);
-            
+
             if (confirmed && StorageManager.deleteNote(noteId)) {
                 this.updateNotes();
             }
@@ -592,12 +592,12 @@ const App = {
             const userData = StorageManager.getUserData();
             const stats = userData.stats;
             const analysisContent = document.getElementById('analysisContent');
-            
+
             if (!analysisContent) return;
 
             if (stats.totalTests === 0) {
                 const emptyText = t('analysis.empty', 'Analiz için daha fazla test çöz');
-                
+
                 analysisContent.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">
@@ -755,9 +755,9 @@ const App = {
                 'settings.resetConfirm',
                 'Ayarlar varsayılan değerlere dönecek. Emin misiniz?'
             );
-            
+
             const confirmed = await Utils.confirm(confirmMsg);
-            
+
             if (!confirmed) return;
 
             const userData = StorageManager.getUserData();
@@ -939,14 +939,14 @@ window.addEventListener('popstate', (event) => {
 });
 
 // Eski örnekteki gibi kullanmak istersen: SPA içinde sekme değiştirme helper'ı
-window.navigateTo = function(tabName) {
+window.navigateTo = function (tabName) {
     if (!tabName) return;
     if (!document.getElementById(tabName)) return;
     App.switchTab(tabName);
 };
 
 // Basit oturum takibi (isteğe bağlı log)
-(function() {
+(function () {
     const sessionStart = Date.now();
     window.addEventListener('beforeunload', () => {
         const duration = Math.round((Date.now() - sessionStart) / 1000);
@@ -982,14 +982,14 @@ window.navigateTo = function(tabName) {
     function init() {
         if (initialized) return;
 
-        overlay      = document.getElementById('noteModalOverlay');
-        modal        = document.getElementById('noteModal');
-        titleInput   = document.getElementById('noteTitleInput');
+        overlay = document.getElementById('noteModalOverlay');
+        modal = document.getElementById('noteModal');
+        titleInput = document.getElementById('noteTitleInput');
         contentInput = document.getElementById('noteContentInput');
-        cancelBtn    = document.getElementById('noteCancelBtn');
-        saveBtn      = document.getElementById('noteSaveBtn');
-        modalTitle   = document.getElementById('noteModalTitle');
-        messageEl    = modal ? modal.querySelector('.confirm-dialog-message') : null;
+        cancelBtn = document.getElementById('noteCancelBtn');
+        saveBtn = document.getElementById('noteSaveBtn');
+        modalTitle = document.getElementById('noteModalTitle');
+        messageEl = modal ? modal.querySelector('.confirm-dialog-message') : null;
 
         if (!overlay || !modal || !titleInput || !contentInput || !cancelBtn || !saveBtn) {
             // Not modalı HTML'de yoksa sessizce çık
