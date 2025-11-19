@@ -1,7 +1,4 @@
-/**
- * TESTIFY MAIN APPLICATION - TAM HATASIZ
- * Tüm özellikler çalışır hale getiren ana uygulama
- */
+
 
 'use strict';
 
