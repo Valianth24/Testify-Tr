@@ -3737,6 +3737,165 @@ a:hover {
     }
 }
 
+/* ============================================
+   YKS JOURNEY DASHBOARD WIDGET (v1)
+   ============================================ */
+
+.yks-journey-widget {
+    margin: var(--spacing-2xl) 0;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.yks-widget-card {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(99, 102, 241, 0.02));
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.yks-widget-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--primary), var(--primary-light));
+}
+
+.yks-widget-card .widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.yks-widget-card .widget-header h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--primary);
+}
+
+.yks-widget-card .widget-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+    padding: var(--spacing-lg) 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.yks-widget-card .widget-stat {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.yks-widget-card .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+.yks-widget-card .stat-info {
+    flex: 1;
+}
+
+.yks-widget-card .stat-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.yks-widget-card .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.yks-widget-card .widget-goals {
+    margin-top: var(--spacing-lg);
+}
+
+.yks-widget-card .widget-goals h4 {
+    margin: 0 0 var(--spacing-md);
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.yks-widget-card .goal-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--spacing-sm);
+}
+
+.yks-widget-card .goal-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    transition: all var(--transition-fast);
+}
+
+.yks-widget-card .goal-list li:hover {
+    background: var(--bg-tertiary);
+    transform: translateX(5px);
+}
+
+.yks-widget-card .goal-list li.completed {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.yks-widget-card .goal-list li i {
+    font-size: 1.1rem;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .yks-widget-card {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.1), rgba(129, 140, 248, 0.05));
+    border-color: var(--primary);
+}
+
+[data-theme="dark"] .yks-widget-card .stat-icon {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .yks-widget-card .goal-list li {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .yks-widget-card .goal-list li:hover {
+    background: var(--bg-hover);
+}
+
+@media (max-width: 768px) {
+    .yks-widget-card .widget-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .yks-widget-card .widget-header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: flex-start;
+    }
+}
+
 /* =========================================================
    YKS JOURNEY v2 - Testify stil uyumlu tasarım
    ========================================================= */
@@ -4588,3 +4747,179 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     border-color: var(--accent-yellow);
 }
 
+/* =========================================================
+   EK: YKS YOLCULUĞU GELİŞMİŞ TASARIM OVERRIDELARI
+   (Pomodoro kartı + bölüm kartları + animasyon + doğru/yanlış)
+   ========================================================= */
+
+/* Bölüm kartlarını #journey içinde biraz daha kartlı hale getir */
+#journey .yks-section-card {
+    border-radius: 18px;
+    padding: 0.95rem 1.1rem 1.05rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+/* Kartın üst ve alt yapısı – HTML’de kullanırsan hazır olsun */
+#journey .yks-section-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+#journey .yks-section-card-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+#journey .yks-section-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary, #6b7280);
+}
+
+#journey .yks-section-card-meta-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+#journey .yks-section-card-meta-left span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.18rem;
+}
+
+/* Küçük progress bar – JS tarafında style="--progress: 45%" diyebilirsin */
+#journey .yks-section-card-progress {
+    position: relative;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.35);
+    overflow: hidden;
+    margin-top: 0.25rem;
+}
+
+#journey .yks-section-card-progress-fill {
+    position: absolute;
+    inset: 0;
+    width: var(--progress, 0%);
+    background: linear-gradient(90deg, var(--accent, #6366f1), #8b5cf6);
+    border-radius: inherit;
+    transition: width 0.3s ease-out;
+}
+
+/* Sağ üstte durum pill’i */
+#journey .yks-section-card-pill {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.9rem;
+    padding: 0.16rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgba(129, 140, 248, 0.18);
+    color: var(--accent, #6366f1);
+    border: 1px solid rgba(129, 140, 248, 0.4);
+}
+
+/* Durum renk varyantları */
+#journey .yks-section-card-pill.is-completed,
+#journey .yks-section-card-pill.completed {
+    background: rgba(34, 197, 94, 0.16);
+    border-color: rgba(22, 163, 74, 0.75);
+    color: #4ade80;
+}
+
+#journey .yks-section-card-pill.is-warning,
+#journey .yks-section-card-pill.overdue {
+    background: rgba(250, 204, 21, 0.16);
+    border-color: rgba(234, 179, 8, 0.8);
+    color: #fde047;
+}
+
+#journey .yks-section-card-pill.is-locked {
+    background: rgba(148, 163, 184, 0.15);
+    border-color: rgba(148, 163, 184, 0.8);
+    color: rgba(209, 213, 219, 0.95);
+}
+
+/* Detay view’lara hafif fade animasyonu ekle */
+#journey .yks-section-view {
+    animation: yksFadeIn 0.2s ease-out;
+}
+
+@keyframes yksFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Journey içi tüm kartların görünümünü biraz daha premium yap */
+#journey .yks-card,
+#journey .yks-widget-card,
+#journey .yks-coach-card {
+    background:
+        radial-gradient(circle at top left, rgba(148, 163, 184, 0.18), transparent 55%),
+        var(--bg-elevated, #020617);
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.9);
+    box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.85),
+        0 0 0 1px rgba(15, 23, 42, 1);
+}
+
+/* Pomodoro kartını eski güzel haline getir (gradient + glow) */
+#journey .yks-pomodoro-card {
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.45), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.25), transparent 55%),
+        var(--bg-elevated, #020617);
+    border-radius: 18px;
+    border: 1px solid rgba(129, 140, 248, 0.9);
+    padding: 20px 22px;
+    box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(15, 23, 42, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Pomodoro butonları biraz daha parlak olsun */
+#journey .yks-pomodoro-button {
+    border: 1px solid rgba(148, 163, 184, 0.65);
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.7);
+}
+
+#journey .yks-pomodoro-button:hover {
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.8);
+}
+
+/* Şıklar için doğru / yanlış renkleri – kullanırsan hazır */
+#journey .question-option.is-correct,
+#journey .answer-option.is-correct,
+#journey .option-card.is-correct {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.65);
+}
+
+#journey .question-option.is-wrong,
+#journey .answer-option.is-wrong,
+#journey .option-card.is-wrong {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.65);
+}
