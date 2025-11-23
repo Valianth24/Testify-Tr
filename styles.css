@@ -4348,3 +4348,243 @@ a:hover {
 [data-theme="dark"] .yks-section-card .yks-section-card-desc {
     color: rgba(249, 250, 251, 0.78);
 }
+
+/* ===========================
+   ORTAK KART STİLİ
+   (Pomodoro, koçluk kartları vs.)
+   =========================== */
+
+:root {
+    /* Yoksa ekle, varsa aynen kalsın */
+    --accent-yellow: #facc15;
+    --accent-yellow-soft: rgba(250, 204, 21, 0.16);
+}
+
+/* Journey içindeki tüm kartlar tekrar düzgün görünsün */
+#journey .yks-card,
+#journey .yks-widget-card,
+#journey .yks-pomodoro-card,
+#journey .yks-coach-card {
+    background: var(--bg-elevated, #020617);
+    border-radius: 18px;
+    border: 1px solid var(--border-subtle, #1f2937);
+    padding: 20px 22px;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.55);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Koçluk içerikleri sayfasındaki listeyi kart gibi göster */
+#journey .yks-coach-layout {
+    display: grid;
+    gap: 1.25rem;
+}
+
+#journey .yks-coach-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#journey .yks-coach-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--text-primary, #e5e7eb);
+}
+
+#journey .yks-coach-card-title-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    background: var(--accent-yellow-soft);
+    color: var(--accent-yellow);
+}
+
+#journey .yks-coach-card-desc {
+    font-size: 0.93rem;
+    color: var(--text-secondary, #9ca3af);
+}
+
+#journey .yks-coach-card-tag {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent-yellow);
+}
+
+/* Pomodoro ve sayaçların grid hâli */
+#journey .yks-timers-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+@media (min-width: 900px) {
+    #journey .yks-timers-grid {
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+}
+
+#journey .yks-pomodoro-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#journey .yks-pomodoro-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary, #e5e7eb);
+}
+
+#journey .yks-pomodoro-badge {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgba(37, 99, 235, 0.12);
+    color: #93c5fd;
+}
+
+#journey .yks-pomodoro-timer {
+    font-variant-numeric: tabular-nums;
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--accent-yellow);
+    margin-bottom: 10px;
+}
+
+#journey .yks-pomodoro-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#journey .yks-pomodoro-button {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    background: rgba(15, 23, 42, 0.6);
+    color: var(--text-primary, #e5e7eb);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease,
+        transform 0.04s ease;
+}
+
+#journey .yks-pomodoro-button:hover {
+    background: rgba(30, 64, 175, 0.75);
+    border-color: rgba(129, 140, 248, 0.9);
+    transform: translateY(-1px);
+}
+
+/* ===========================
+   SEVİYE SINAVI – ŞIK TASARIMI
+   (Koyu modda sarı ile aynı tonda)
+   =========================== */
+
+/* Buradaki selector’larda kendi şık class’ını da ekleyebilirsin:
+   .question-option, .answer-option, .option-card gibi… */
+
+#journey .question-option,
+#journey .answer-option,
+#journey .option-card,
+.level-exam-options .option-card {
+    background: rgba(15, 23, 42, 0.9);
+    border-radius: 14px;
+    border: 1px solid rgba(75, 85, 99, 0.8);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.04s ease;
+    color: var(--text-primary, #e5e7eb);
+}
+
+/* Soldaki harf/ikon yuvarlakları */
+#journey .question-option .option-letter,
+#journey .answer-option .option-letter,
+#journey .option-card .option-letter,
+.level-exam-options .option-card .option-letter {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: var(--accent-yellow);
+    color: #111827; /* sarının üstünde koyu metin */
+    flex-shrink: 0;
+}
+
+/* Şık metni */
+#journey .question-option .option-text,
+#journey .answer-option .option-text,
+#journey .option-card .option-text,
+.level-exam-options .option-card .option-text {
+    font-size: 0.95rem;
+}
+
+/* Hover ve focus */
+#journey .question-option:hover,
+#journey .answer-option:hover,
+#journey .option-card:hover,
+.level-exam-options .option-card:hover {
+    border-color: var(--accent-yellow);
+    background: var(--accent-yellow-soft);
+    box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.55);
+    transform: translateY(-1px);
+}
+
+/* Seçili şık (class’ı JS’de ne ise ona ekle:
+   is-selected / selected / active… ) */
+#journey .question-option.is-selected,
+#journey .answer-option.is-selected,
+#journey .option-card.is-selected,
+#journey .option-card.selected,
+.level-exam-options .option-card.is-selected,
+.level-exam-options .option-card.selected {
+    border-color: var(--accent-yellow);
+    background: var(--accent-yellow-soft);
+    box-shadow:
+        0 0 0 1px rgba(250, 204, 21, 0.7),
+        0 12px 30px rgba(15, 23, 42, 0.7);
+}
+
+/* Aydınlık tema için ufak rötuş – sarı tonu koru ama zemin aç */
+html[data-theme="light"] #journey .question-option,
+html[data-theme="light"] #journey .answer-option,
+html[data-theme="light"] #journey .option-card,
+html[data-theme="light"] .level-exam-options .option-card {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+    color: #111827;
+}
+
+html[data-theme="light"] #journey .question-option:hover,
+html[data-theme="light"] #journey .answer-option:hover,
+html[data-theme="light"] #journey .option-card:hover,
+html[data-theme="light"] .level-exam-options .option-card:hover {
+    background: #fef9c3; /* açık sarı */
+    border-color: var(--accent-yellow);
+}
+
