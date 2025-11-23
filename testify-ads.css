@@ -1,0 +1,191 @@
+/**
+ * TESTIFY ADS STYLES v3.0 - stable
+ * Global reklam yerleşimi (TÜM sayfalar)
+ */
+
+/* ÜST / ALT SATIRLAR */
+.global-ad-row,
+.tfy-ad-row {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 8px;
+  box-sizing: border-box;
+}
+
+.global-ad-row--top,
+.tfy-ad-row--top {
+  margin-top: 8px;
+}
+
+.global-ad-row--bottom,
+.tfy-ad-row--bottom {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+/* ÜST / ALT BANNER KUTULARI */
+.ad-slot,
+.tfy-ad-slot {
+  background: radial-gradient(circle at top, #23232a, #050609 65%);
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* YAN REKLAMLAR (SOL / SAĞ) */
+.global-side-ad,
+.tfy-side-ad {
+  background: radial-gradient(circle at top, #23232a, #050609 65%);
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  position: fixed;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Küçük "REKLAM" etiketi */
+.ad-slot::after,
+.tfy-ad-slot::after,
+.global-side-ad::after,
+.tfy-side-ad::after {
+  content: "REKLAM";
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Placeholder yazısı */
+.ad-placeholder,
+.tfy-ad-placeholder {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #a0a0b8);
+  opacity: 0.8;
+  text-align: center;
+}
+
+/* Hover */
+.ad-slot:hover,
+.tfy-ad-slot:hover,
+.global-side-ad:hover,
+.tfy-side-ad:hover {
+  border-color: rgba(187, 134, 252, 0.45);
+  box-shadow: 0 0 0 1px rgba(187, 134, 252, 0.28);
+}
+
+/* Mobil extra slotlar default gizli */
+.ad-slot--mobile-only,
+.tfy-ad-slot--mobile-extra {
+  display: none;
+}
+
+/* ─────────────────────────────── */
+/* MOBİL (≤ 768px)                */
+/* ─────────────────────────────── */
+
+@media (max-width: 768px) {
+  .global-ad-row,
+  .tfy-ad-row {
+    flex-direction: column;
+    gap: 10px;
+    padding-inline: 10px;
+  }
+
+  .ad-slot,
+  .tfy-ad-slot {
+    min-height: 112px;
+    border-radius: 12px;
+    max-width: 100%;
+  }
+
+  .ad-slot--mobile-only,
+  .tfy-ad-slot--mobile-extra {
+    display: flex;
+  }
+
+  /* Mobilde yan reklam yok */
+  .global-side-ad,
+  .tfy-side-ad {
+    display: none;
+  }
+}
+
+/* ─────────────────────────────── */
+/* TABLET / DESKTOP (≥ 769px)     */
+/* ─────────────────────────────── */
+
+@media (min-width: 769px) {
+  .ad-slot,
+  .tfy-ad-slot {
+    min-height: 165px;
+  }
+
+  .ad-slot--mobile-only,
+  .tfy-ad-slot--mobile-extra {
+    display: none;
+  }
+}
+
+/* ─────────────────────────────── */
+/* BÜYÜK EKRANLAR (yan reklamlar) */
+/* KESİN ÇÖZÜM - MAXIMUM ÖNCELİK  */
+/* ─────────────────────────────── */
+
+@media (min-width: 1400px) {
+  div.global-side-ad,
+  .global-side-ad.global-side-ad--left,
+  .global-side-ad.global-side-ad--right {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+
+    /* ↓↓ İSTEDİĞİN AYARLAR ↓↓ */
+    /* Eski: top: 20%, max-height: 60vh civarıydı */
+
+    /* Konum: şu anki yerinden ~%40 daha aşağı (20% → 28% civarı) */
+    top: 28vh !important;
+    bottom: auto !important;
+
+    /* Uzun kenar: ~%20 daha uzun (60vh → 72vh) */
+    width: 191px !important;          /* kısa kenar aynı */
+    height: 72vh !important;          /* toplam yükseklik */
+    min-height: 480px !important;     /* 400px → 480px (≈%20 uzadı) */
+    max-height: 72vh !important;
+
+    z-index: 40 !important;
+    position: fixed !important;
+  }
+
+  .global-side-ad--left,
+  div.global-side-ad.global-side-ad--left {
+    left: 10px !important;
+    right: auto !important;
+  }
+
+  .global-side-ad--right,
+  div.global-side-ad.global-side-ad--right {
+    right: 10px !important;
+    left: auto !important;
+  }
+}

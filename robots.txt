@@ -1,0 +1,55 @@
+# ==========================
+# Testify - robots.txt
+# ==========================
+# Amaç:
+# - Arama motorlarına tarama kurallarını bildirir
+# - Özel / gizli alanları indeksleme dışı bırakır
+# - Sitemap ve host bilgisi ile SEO'ya yardımcı olur
+# ==========================
+
+# Varsayılan kurallar (tüm botlar için)
+User-agent: *
+# Eğer tüm siteyi açmak istiyorsan, aşağıdaki Disallow satırlarını silebilirsin.
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+Disallow: /tmp/
+Disallow: /internal/
+
+# Bazı sistem klasörleri ve teknik endpoint'ler var ise bunlar da indekslenmesin:
+# Disallow: /logs/
+# Disallow: /backup/
+
+# Özel klasörlere özellikle izin ver (çoğu bot zaten izinli sayar, ama açık belirtmek faydalı):
+Allow: /.well-known/
+Allow: /assets/
+Allow: /static/
+Allow: /images/
+Allow: /img/
+Allow: /js/
+Allow: /css/
+
+# ==========================
+# Google reklam botları (AdSense için ÇOK ÖNEMLİ)
+# Burada herhangi bir Disallow KULLANMA.
+# ==========================
+
+User-agent: AdsBot-Google
+Allow: /
+
+User-agent: AdsBot-Google-Mobile
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
+# ==========================
+# Host ve Sitemap bilgileri
+# ==========================
+
+# Ana domain (opsiyonel ama Yandex vb. için faydalı olabilir)
+Host: testify.com
+
+# Sitemap dosyaların varsa aktif et:
+# Sitemap: https://testify.com/sitemap.xml
+# Sitemap: https://testify.com/sitemap-tests.xml
