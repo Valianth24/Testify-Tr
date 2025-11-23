@@ -3578,7 +3578,7 @@ a:hover {
     }
 }
 
-/* ============================================
+//* ============================================
    YKS JOURNEY DASHBOARD WIDGET (v2 - ENHANCED)
    ============================================ */
 
@@ -5590,6 +5590,283 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
 }
 
 /* =========================================================
+   FOCUS TIMER (ODAK ZAMANI) PAGE - HEAVILY ENHANCED
+   ========================================================= */
+
+#journey .yks-focus-page,
+#journey .focus-timer-page {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+#journey .yks-focus-page .yks-detail-main,
+#journey .focus-timer-container {
+    background:
+        radial-gradient(circle at top left, rgba(139, 92, 246, 0.25), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.18), transparent 60%),
+        var(--bg-elevated, #020617);
+    border-radius: 24px;
+    padding: 2rem 2.2rem;
+    border: 1px solid rgba(139, 92, 246, 0.6);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.95),
+                0 0 60px rgba(139, 92, 246, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    position: relative;
+    overflow: hidden;
+    animation: scaleIn 0.6s ease-out;
+}
+
+#journey .yks-focus-page .yks-detail-main::before,
+#journey .focus-timer-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 150%;
+    height: 150%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent 70%);
+    animation: rotate 20s linear infinite;
+    pointer-events: none;
+}
+
+/* Focus Timer Display */
+#journey .focus-timer-display {
+    text-align: center;
+    margin: 2rem 0 2.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+#journey .focus-timer-time {
+    font-size: 5rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, #a78bfa, #ec4899, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 80px rgba(167, 139, 250, 0.5);
+    margin: 0;
+    line-height: 1;
+    animation: pulse 3s ease-in-out infinite;
+    position: relative;
+}
+
+#journey .focus-timer-time::after {
+    content: attr(data-time);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.3), rgba(236, 72, 153, 0.3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: blur(20px);
+    opacity: 0.6;
+    z-index: -1;
+}
+
+#journey .focus-timer-label {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgba(167, 139, 250, 0.8);
+    margin-top: 0.75rem;
+    font-weight: 600;
+}
+
+/* Timer Stats Row */
+#journey .focus-timer-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1.5rem 0 2rem;
+    flex-wrap: wrap;
+}
+
+#journey .focus-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 16px;
+    min-width: 100px;
+    transition: all 0.3s ease;
+}
+
+#journey .focus-stat-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(139, 92, 246, 0.3);
+    border-color: rgba(167, 139, 250, 0.6);
+}
+
+#journey .focus-stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(209, 213, 219, 0.7);
+}
+
+#journey .focus-stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #a78bfa;
+}
+
+/* Timer Controls - PREMIUM STYLE */
+#journey .focus-timer-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+#journey .focus-control-btn {
+    position: relative;
+    padding: 0.85rem 1.8rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s var(--transition-smooth);
+    overflow: hidden;
+    min-width: 130px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Start Button - Gradient Purple/Pink */
+#journey .focus-control-btn.btn-start,
+#journey .focus-control-btn:first-child {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    color: #fff;
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4),
+                0 0 30px rgba(139, 92, 246, 0.3);
+}
+
+#journey .focus-control-btn.btn-start::before,
+#journey .focus-control-btn:first-child::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#journey .focus-control-btn.btn-start:hover,
+#journey .focus-control-btn:first-child:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 16px 40px rgba(139, 92, 246, 0.6),
+                0 0 50px rgba(139, 92, 246, 0.5);
+}
+
+#journey .focus-control-btn.btn-start:hover::before,
+#journey .focus-control-btn:first-child:hover::before {
+    opacity: 1;
+}
+
+#journey .focus-control-btn.btn-start:active,
+#journey .focus-control-btn:first-child:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+/* Pause Button - Amber */
+#journey .focus-control-btn.btn-pause,
+#journey .focus-control-btn:nth-child(2) {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 2px solid rgba(245, 158, 11, 0.4);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.2);
+}
+
+#journey .focus-control-btn.btn-pause:hover,
+#journey .focus-control-btn:nth-child(2):hover {
+    background: rgba(245, 158, 11, 0.25);
+    border-color: rgba(251, 191, 36, 0.6);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(245, 158, 11, 0.4);
+}
+
+/* Reset Button - Slate */
+#journey .focus-control-btn.btn-reset,
+#journey .focus-control-btn:nth-child(3),
+#journey .focus-control-btn:last-child {
+    background: rgba(71, 85, 105, 0.3);
+    color: #cbd5e1;
+    border: 2px solid rgba(100, 116, 139, 0.5);
+    box-shadow: 0 6px 15px rgba(15, 23, 42, 0.4);
+}
+
+#journey .focus-control-btn.btn-reset:hover,
+#journey .focus-control-btn:nth-child(3):hover,
+#journey .focus-control-btn:last-child:hover {
+    background: rgba(71, 85, 105, 0.5);
+    border-color: rgba(148, 163, 184, 0.7);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(15, 23, 42, 0.6);
+}
+
+/* Active Timer State */
+#journey .focus-timer-display.is-active .focus-timer-time {
+    animation: pulse 1.5s ease-in-out infinite;
+    text-shadow: 0 0 100px rgba(167, 139, 250, 0.8);
+}
+
+/* Timer Progress Ring (optional circular progress) */
+#journey .focus-timer-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 280px;
+    height: 280px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+#journey .focus-timer-ring circle {
+    stroke: rgba(139, 92, 246, 0.3);
+    stroke-width: 4;
+    fill: none;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear;
+}
+
+#journey .focus-timer-ring circle.progress {
+    stroke: url(#focusGradient);
+    stroke-width: 6;
+    filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.6));
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    #journey .focus-timer-time {
+        font-size: 3.5rem;
+    }
+
+    #journey .focus-timer-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    #journey .focus-control-btn {
+        width: 100%;
+        max-width: 280px;
+    }
+}
+
+/* =========================================================
    TASKS PAGE - ENHANCED
    ========================================================= */
 
@@ -5624,15 +5901,39 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
 
 #journey .yks-task-item {
     position: relative;
-    padding: 0.7rem 0.95rem 0.75rem 2.3rem;
-    border-radius: 16px;
-    background: rgba(15, 23, 42, 0.98);
+    padding: 0.9rem 1.1rem 0.95rem 3rem;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.95));
     border: 1px solid rgba(55, 65, 81, 0.9);
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    transition: all 0.15s ease;
+    gap: 0.4rem;
+    transition: all 0.3s var(--transition-smooth);
     animation: fadeInUp 0.4s ease-out backwards;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+#journey .yks-task-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, rgba(129, 140, 248, 0.6), rgba(99, 102, 241, 0.4));
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.3s ease;
+}
+
+#journey .yks-task-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(129, 140, 248, 0.1), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 #journey .yks-task-item:nth-child(1) { animation-delay: 0.05s; }
@@ -5640,67 +5941,228 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
 #journey .yks-task-item:nth-child(3) { animation-delay: 0.15s; }
 #journey .yks-task-item:nth-child(4) { animation-delay: 0.2s; }
 #journey .yks-task-item:nth-child(5) { animation-delay: 0.25s; }
+#journey .yks-task-item:nth-child(6) { animation-delay: 0.3s; }
+#journey .yks-task-item:nth-child(7) { animation-delay: 0.35s; }
 
 #journey .yks-task-item:hover {
     border-color: rgba(129, 140, 248, 0.9);
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95),
-                0 0 30px rgba(129, 140, 248, 0.2);
-    transform: translateY(-2px);
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.95),
+                0 0 40px rgba(129, 140, 248, 0.3),
+                inset 0 1px 0 rgba(129, 140, 248, 0.2);
+    transform: translateY(-4px) translateX(4px);
+}
+
+#journey .yks-task-item:hover::before {
+    transform: scaleY(1);
+}
+
+#journey .yks-task-item:hover::after {
+    opacity: 1;
 }
 
 #journey .yks-task-check {
     position: absolute;
-    left: 0.85rem;
+    left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 22px;
-    height: 22px;
-    border-radius: 999px;
-    border: 2px solid rgba(148, 163, 184, 0.95);
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: 2px solid rgba(129, 140, 248, 0.5);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: transparent;
-    transition: all 0.3s ease;
+    background: rgba(15, 23, 42, 0.6);
+    transition: all 0.35s var(--transition-bounce);
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+#journey .yks-task-check::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#journey .yks-task-check::after {
+    content: '✓';
+    position: absolute;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    opacity: 0;
+    transform: scale(0) rotate(-45deg);
+    transition: all 0.35s var(--transition-bounce);
 }
 
 #journey .yks-task-item:hover .yks-task-check {
     border-color: rgba(129, 140, 248, 0.95);
-    box-shadow: 0 0 10px rgba(129, 140, 248, 0.4);
+    box-shadow: 0 0 20px rgba(129, 140, 248, 0.4),
+                inset 0 0 15px rgba(129, 140, 248, 0.2);
+    transform: translateY(-50%) scale(1.1);
+}
+
+#journey .yks-task-item:hover .yks-task-check::before {
+    opacity: 1;
 }
 
 #journey .yks-task-title {
-    font-size: 0.95rem;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;
     color: #f9fafb;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+#journey .yks-task-item:hover .yks-task-title {
+    color: #e0e7ff;
+    transform: translateX(2px);
 }
 
 #journey .yks-task-meta {
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     color: rgba(148, 163, 184, 0.95);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+#journey .yks-task-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+#journey .yks-task-meta i {
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+#journey .yks-task-item:hover .yks-task-meta {
+    color: rgba(199, 210, 254, 0.95);
+}
+
+/* XP Badge in task meta */
+#journey .yks-task-xp {
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(250, 204, 21, 0.15);
+    color: #fbbf24;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(250, 204, 21, 0.3);
+    transition: all 0.3s ease;
+}
+
+#journey .yks-task-item:hover .yks-task-xp {
+    background: rgba(250, 204, 21, 0.25);
+    border-color: rgba(251, 191, 36, 0.6);
+    box-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
+    transform: scale(1.05);
 }
 
 #journey .yks-task-item.is-done {
-    background: rgba(22, 163, 74, 0.14);
+    background: linear-gradient(135deg, rgba(22, 163, 74, 0.18), rgba(34, 197, 94, 0.12));
     border-color: rgba(34, 197, 94, 0.8);
+    box-shadow: 0 12px 30px rgba(22, 163, 74, 0.3),
+                inset 0 1px 0 rgba(34, 197, 94, 0.2);
+    animation: completePulse 0.6s ease-out;
+}
+
+@keyframes completePulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 12px 30px rgba(22, 163, 74, 0.3);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 16px 40px rgba(34, 197, 94, 0.5);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 12px 30px rgba(22, 163, 74, 0.3);
+    }
+}
+
+#journey .yks-task-item.is-done::before {
+    background: linear-gradient(180deg, #22c55e, #16a34a);
+    transform: scaleY(1);
 }
 
 #journey .yks-task-item.is-done .yks-task-title {
     text-decoration: line-through;
     color: #bbf7d0;
+    opacity: 0.8;
 }
 
 #journey .yks-task-item.is-done .yks-task-meta {
-    color: rgba(187, 247, 208, 0.85);
+    color: rgba(187, 247, 208, 0.7);
 }
 
 #journey .yks-task-item.is-done .yks-task-check {
-    background: #22c55e;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
     border-color: #22c55e;
-    color: #022c22;
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
+    color: #fff;
+    box-shadow: 0 0 25px rgba(34, 197, 94, 0.8),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    transform: translateY(-50%) scale(1);
+}
+
+#journey .yks-task-item.is-done .yks-task-check::after {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+#journey .yks-task-item.is-done:hover .yks-task-check {
+    transform: translateY(-50%) scale(1.15) rotate(10deg);
+    box-shadow: 0 0 35px rgba(34, 197, 94, 1);
+}
+
+/* Task Edit Button */
+#journey .task-edit-btn,
+#journey .yks-tasks-edit-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    background: rgba(99, 102, 241, 0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+#journey .task-edit-btn:hover,
+#journey .yks-tasks-edit-btn:hover {
+    background: rgba(99, 102, 241, 0.25);
+    border-color: rgba(129, 140, 248, 0.7);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+}
+
+#journey .task-edit-btn i,
+#journey .yks-tasks-edit-btn i {
+    font-size: 0.9rem;
+    transition: transform 0.3s var(--transition-bounce);
+}
+
+#journey .task-edit-btn:hover i,
+#journey .yks-tasks-edit-btn:hover i {
+    transform: rotate(15deg) scale(1.1);
 }
 
 /* =========================================================
