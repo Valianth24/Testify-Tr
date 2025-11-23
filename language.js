@@ -20,6 +20,7 @@ const LanguageManager = {
             
             // Navigation
             'nav.dashboard': 'Dashboard',
+            'nav.journey': 'YKS Yolculuğum',
             'nav.test': 'Test Çöz',
             'nav.create': 'Test Oluştur',
             'nav.library': 'Kütüphanem',
@@ -178,6 +179,7 @@ const LanguageManager = {
             
             // Navigation
             'nav.dashboard': 'Dashboard',
+            'nav.journey': 'YKS Journey',
             'nav.test': 'Take Test',
             'nav.create': 'Create Test',
             'nav.library': 'My Library',
