@@ -1,6 +1,95 @@
-﻿// yks-journey.js - BİRLEŞİK VE GELİŞMİŞ SÜRÜM
-// Eski YKS Journey + Yeni YKS Journey Manager tek dosyada
+<!-- YKS Journey Test İçeriği - #journeyContent içine yapıştır -->
+<div id="journey">
+    <!-- Onboarding başlangıç ekranı -->
+    <div class="yks-onboarding">
+        <div class="onboarding-header">
+            <h1>🎓 YKS Yolculuğuna Hoş Geldin!</h1>
+            <p>Seninle birlikte YKS hazırlık sürecini en verimli şekilde geçirmeni sağlayacağız.</p>
+        </div>
 
+        <div class="onboarding-form">
+            <div class="onboarding-step">
+                <div class="step-label">
+                    <span class="step-number">1</span>
+                    <span>Alan Seçimi</span>
+                </div>
+                <p class="step-description">Hedeflediğin YKS alanını seç</p>
+                
+                <div class="field-options">
+                    <button class="field-option" data-field="sayisal">
+                        <i class="fas fa-calculator"></i>
+                        <span>Sayısal</span>
+                    </button>
+                    <button class="field-option" data-field="sozel">
+                        <i class="fas fa-book"></i>
+                        <span>Sözel</span>
+                    </button>
+                    <button class="field-option" data-field="ea">
+                        <i class="fas fa-balance-scale"></i>
+                        <span>Eşit Ağırlık</span>
+                    </button>
+                    <button class="field-option" data-field="dil">
+                        <i class="fas fa-language"></i>
+                        <span>Dil</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="onboarding-step">
+                <div class="step-label">
+                    <span class="step-number">2</span>
+                    <span>Öncelikli Dersler</span>
+                </div>
+                <p class="step-description">Fizik seçildiğinde ilgili dersler gösterilecek</p>
+                
+                <div class="select-field-first">
+                    <i class="fas fa-arrow-up"></i>
+                    <p>Önce yukarıdan alan seçimi yap</p>
+                </div>
+            </div>
+
+            <div class="onboarding-step">
+                <div class="step-label">
+                    <span class="step-number">3</span>
+                    <span>Seviye Testi</span>
+                </div>
+                <p class="step-description">Mevcut seviyeni belirlemek için kısa bir test çöz</p>
+                
+                <div class="level-test-options">
+                    <button class="level-option" data-test="now">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Şimdi Başla</span>
+                        <small>15 dakika • 10 soru</small>
+                    </button>
+                    <button class="level-option" data-test="later">
+                        <i class="fas fa-clock"></i>
+                        <span>Daha Sonra</span>
+                        <small>İstersen sonra çözebilirsin</small>
+                    </button>
+                </div>
+            </div>
+
+            <div class="onboarding-actions">
+                <div class="progress-indicator">
+                    <span class="progress-text">İlerleme: 0%</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-large" id="startJourneyBtn">
+                    <i class="fas fa-rocket"></i>
+                    Yolculuğa Başla
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// =======================
+// yks-journey.js - BİRLEŞİK VE GELİŞMİŞ SÜRÜM
+// Eski YKS Journey + Yeni YKS Journey Manager + Legacy starter köprüsü
+// =======================
 (function () {
     'use strict';
 
@@ -315,7 +404,7 @@
                                 </label>
                                 <div class="field-options">
                                     ${Object.entries(this.FIELDS).map(([key, field]) => `
-                                        <label class="field-option">
+                                        <label class="field-option" data-field="${key}">
                                             <input type="radio" name="field" value="${key}">
                                             <div class="option-card">
                                                 <i class="ph ${field.icon}"></i>
@@ -420,9 +509,9 @@
                                 </label>
                                 <div class="subject-checkboxes">
                                     ${[
-                    'Matematik', 'Geometri', 'Fizik', 'Kimya', 'Biyoloji',
-                    'Türkçe', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'
-                ].map(subject => `
+                                        'Matematik', 'Geometri', 'Fizik', 'Kimya', 'Biyoloji',
+                                        'Türkçe', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'
+                                    ].map(subject => `
                                         <label class="subject-checkbox">
                                             <input type="checkbox" name="weakSubjects" value="${subject}">
                                             <span>${subject}</span>
@@ -1022,8 +1111,6 @@
                             <div class="card-sub">Strateji ve motivasyon</div>
                         </button>
                     </section>
-
-                    <!-- Görünümler -->
 
                     <!-- 1) ÖZET -->
                     <section class="yks-section-view" data-section="overview">
@@ -2346,3 +2433,212 @@
         YKSJourneyManager.init();
     }
 })();
+
+// ========================
+// Legacy 3 Adımlı Onboarding + YKSJourneyManager köprüsü
+// ========================
+(function () {
+    'use strict';
+
+    // Eğer manager yüklü değilse sadece görsel çalışır
+    if (window.YKSJourneyManager && !window.YKSJourneyManager._originalInit) {
+        const manager = window.YKSJourneyManager;
+        // Orijinal init'i sakla
+        manager._originalInit = manager.init.bind(manager);
+
+        // init'i patch et: eğer kayıtlı profil varsa direkt dashboard, yoksa
+        // ama #journey içindeki basit onboarding varsa onu bekle
+        manager.init = function () {
+            const container = document.getElementById('journeyContent');
+            if (!container) return manager._originalInit();
+
+            const state = manager.loadState();
+            if (state && state.profile) {
+                // Kullanıcının profili varsa direkt eski davranış
+                return manager._originalInit();
+            }
+
+            const legacyOnboarding = container.querySelector('#journey .yks-onboarding');
+            if (legacyOnboarding) {
+                // İlk sefer: basit 3 adımlı onboarding gösterilecek
+                return;
+            }
+
+            return manager._originalInit();
+        };
+    }
+
+    const SUBJECT_OPTIONS = {
+        sayisal: [
+            { icon: 'calculator', name: 'Matematik', code: 'mat' },
+            { icon: 'atom', name: 'Fizik', code: 'fiz' },
+            { icon: 'flask', name: 'Kimya', code: 'kim' },
+            { icon: 'dna', name: 'Biyoloji', code: 'bio' }
+        ],
+        sozel: [
+            { icon: 'book', name: 'Türkçe', code: 'tur' },
+            { icon: 'landmark', name: 'Tarih', code: 'tar' },
+            { icon: 'globe', name: 'Coğrafya', code: 'cog' },
+            { icon: 'balance-scale', name: 'Felsefe', code: 'fel' }
+        ],
+        ea: [
+            { icon: 'calculator', name: 'Matematik', code: 'mat' },
+            { icon: 'book', name: 'Türkçe', code: 'tur' },
+            { icon: 'landmark', name: 'Tarih', code: 'tar' },
+            { icon: 'globe', name: 'Coğrafya', code: 'cog' }
+        ],
+        dil: [
+            { icon: 'language', name: 'İngilizce', code: 'eng' },
+            { icon: 'book', name: 'Türkçe', code: 'tur' },
+            { icon: 'globe', name: 'Coğrafya', code: 'cog' }
+        ]
+    };
+
+    function initLegacyStarter() {
+        const root = document.getElementById('journey');
+        if (!root) return;
+
+        // Alan seçimi
+        root.querySelectorAll('.field-option').forEach(btn => {
+            btn.addEventListener('click', function () {
+                root.querySelectorAll('.field-option').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+
+                const field = this.dataset.field;
+                showSubjectsForField(field);
+                updateProgress();
+            });
+        });
+
+        // Test seçimi
+        root.querySelectorAll('.level-option').forEach(btn => {
+            btn.addEventListener('click', function () {
+                root.querySelectorAll('.level-option').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                updateProgress();
+            });
+        });
+
+        function updateProgress() {
+            const fieldSelected = root.querySelector('.field-option.selected');
+            const testSelected = root.querySelector('.level-option.selected');
+
+            let progress = 0;
+            if (fieldSelected) progress += 50;
+            if (testSelected) progress += 50;
+
+            const progressBar = root.querySelector('.progress-fill');
+            const progressText = root.querySelector('.progress-text');
+
+            if (progressBar) progressBar.style.width = progress + '%';
+            if (progressText) progressText.textContent = `İlerleme: ${progress}%`;
+
+            const startBtn = root.querySelector('#startJourneyBtn');
+            if (startBtn) {
+                if (progress === 100) {
+                    startBtn.disabled = false;
+                    startBtn.style.opacity = '1';
+                } else {
+                    startBtn.disabled = true;
+                    startBtn.style.opacity = '0.5';
+                }
+            }
+        }
+
+        function showSubjectsForField(field) {
+            const placeholder = root.querySelector('.select-field-first');
+            if (!placeholder) return;
+            const container = placeholder.parentElement;
+
+            const selectedSubjects = SUBJECT_OPTIONS[field] || [];
+
+            let html = '<div class="subjects-grid">';
+            selectedSubjects.forEach(subject => {
+                html += `
+                    <label class="subject-checkbox">
+                        <input type="checkbox" value="${subject.code}">
+                        <i class="fas fa-${subject.icon}"></i>
+                        <span>${subject.name}</span>
+                    </label>
+                `;
+            });
+            html += '</div>';
+
+            container.innerHTML = html;
+
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', updateProgress);
+            });
+        }
+
+        const startBtn = root.querySelector('#startJourneyBtn');
+        if (startBtn) {
+            startBtn.disabled = true;
+            startBtn.style.opacity = '0.5';
+
+            startBtn.addEventListener('click', function () {
+                if (!window.YKSJourneyManager || !window.YKSJourneyManager._originalInit) {
+                    alert('🚀 YKS Yolculuğun başlıyor! (Dashboard bileşeni yüklenemedi, lütfen YKSJourneyManager scriptini kontrol et.)');
+                    return;
+                }
+
+                const fieldBtn = root.querySelector('.field-option.selected');
+                const levelBtn = root.querySelector('.level-option.selected');
+
+                const field = fieldBtn ? fieldBtn.dataset.field : 'genel';
+                const testPref = levelBtn ? (levelBtn.dataset.test || 'later') : 'later';
+
+                const selectedCodes = Array
+                    .from(root.querySelectorAll('.subjects-grid input[type="checkbox"]:checked'))
+                    .map(cb => cb.value);
+
+                let weakSubjects = [];
+                if (selectedCodes.length) {
+                    const fieldSubjects = SUBJECT_OPTIONS[field] || [];
+                    weakSubjects = fieldSubjects
+                        .filter(s => selectedCodes.includes(s.code))
+                        .map(s => s.name);
+                } else if (window.YKSJourneyManager && window.YKSJourneyManager.FIELDS && window.YKSJourneyManager.FIELDS[field]) {
+                    weakSubjects = window.YKSJourneyManager.FIELDS[field].subjects.slice();
+                }
+
+                const manager = window.YKSJourneyManager;
+                const state = manager.createDefaultState();
+
+                state.profile = {
+                    field,
+                    grade: null,
+                    targetDepartment: '',
+                    targetRank: null,
+                    dailyTime: 2,
+                    weakSubjects,
+                    subjects: weakSubjects.slice(),
+                    levelTestPreference: testPref,
+                    createdAt: new Date().toISOString()
+                };
+
+                state.weeklyPlan = manager.generateWeeklyPlan(state.profile);
+                state.dailyTasks = manager.generateDailyTasks(state.profile, state.weeklyPlan);
+                state.weakPoints = manager.analyzeWeakPoints(state.profile);
+
+                state.levelTest = state.levelTest || { status: 'not_started', lastResult: null };
+                state.levelTest.status = testPref === 'now' ? 'in_progress' : 'not_started';
+
+                manager.saveState(state);
+
+                // Artık gerçek init'i çalıştır → seviye testi veya dashboard açılır
+                manager._originalInit();
+            });
+        }
+
+        // İlk yüklemede progress 0
+        updateProgress();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLegacyStarter);
+    } else {
+        initLegacyStarter();
+    }
+})();
+</script>
