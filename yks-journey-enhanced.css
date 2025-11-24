@@ -1,4 +1,4 @@
-burada sonrasına devam ettir /* ============================================
+/* ============================================
    YKS JOURNEY DASHBOARD - ULTIMATE EDITION
    Phosphor Icons + All Original Features + Enhanced
    ============================================ */
@@ -7,7 +7,7 @@ burada sonrasına devam ettir /* ============================================
 @import url('https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css');
 
 :root {
-    /* Original Variables */
+    /* Accent & effects */
     --accent-yellow: #facc15;
     --accent-yellow-soft: rgba(250, 204, 21, 0.16);
     --glow-primary: rgba(99, 102, 241, 0.5);
@@ -15,6 +15,31 @@ burada sonrasına devam ettir /* ============================================
     --glow-warning: rgba(250, 204, 21, 0.5);
     --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Bu dosyada sık geçen yardımcı accentler */
+    --accent: #6366f1;
+    --accent-soft: rgba(99, 102, 241, 0.45);
+}
+
+/* =========================================================
+   THEME-SPECIFIC (LIGHT / DARK) UYUM
+   ========================================================= */
+
+/* Light modda kartların arka planı sayfayla kaybolmasın diye
+   hafif gri ton + belirgin border/gölge veriyoruz. */
+html[data-theme="light"] {
+    --journey-card-bg: #f9fafb;
+    --journey-card-border: rgba(148, 163, 184, 0.6);
+    --journey-card-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+/* Dark mod için kart arkası daha koyu, glow daha belirgin */
+html[data-theme="dark"] {
+    --journey-card-bg: #020617;
+    --journey-card-border: #1f2937;
+    --journey-card-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.75),
+        0 0 30px rgba(15, 23, 42, 0.5);
 }
 
 /* ============================================
@@ -55,48 +80,28 @@ burada sonrasına devam ettir /* ============================================
 }
 
 @keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.7;
-    }
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.7; }
 }
 
 @keyframes shimmer {
-    0% {
-        background-position: -1000px 0;
-    }
-    100% {
-        background-position: 1000px 0;
-    }
+    0%   { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
 }
 
 @keyframes float {
-    0%, 100% {
-        transform: translateY(0px);
-    }
-    50% {
-        transform: translateY(-8px);
-    }
+    0%, 100% { transform: translateY(0px); }
+    50%      { transform: translateY(-8px); }
 }
 
 @keyframes glow {
-    0%, 100% {
-        box-shadow: 0 0 20px var(--glow-primary);
-    }
-    50% {
-        box-shadow: 0 0 40px var(--glow-primary);
-    }
+    0%, 100% { box-shadow: 0 0 20px var(--glow-primary); }
+    50%      { box-shadow: 0 0 40px var(--glow-primary); }
 }
 
 @keyframes rotate {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
 }
 
 @keyframes slideInFromRight {
@@ -122,9 +127,7 @@ burada sonrasına devam ettir /* ============================================
 }
 
 @keyframes progressFill {
-    from {
-        width: 0;
-    }
+    from { width: 0; }
 }
 
 @keyframes checkmark {
@@ -142,12 +145,8 @@ burada sonrasına devam ettir /* ============================================
 }
 
 @keyframes bounce {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-8px);
-    }
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
 }
 
 @keyframes completePulse {
@@ -254,17 +253,9 @@ burada sonrasına devam ettir /* ============================================
     animation: scaleIn 0.4s ease-out backwards;
 }
 
-.yks-widget-card .widget-stat:nth-child(1) {
-    animation-delay: 0.1s;
-}
-
-.yks-widget-card .widget-stat:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.yks-widget-card .widget-stat:nth-child(3) {
-    animation-delay: 0.3s;
-}
+.yks-widget-card .widget-stat:nth-child(1) { animation-delay: 0.1s; }
+.yks-widget-card .widget-stat:nth-child(2) { animation-delay: 0.2s; }
+.yks-widget-card .widget-stat:nth-child(3) { animation-delay: 0.3s; }
 
 .yks-widget-card .stat-icon {
     width: 40px;
@@ -412,6 +403,13 @@ burada sonrasına devam ettir /* ============================================
 [data-theme="dark"] .yks-widget-card .goal-list li:hover {
     background: var(--bg-hover);
     box-shadow: 0 8px 25px rgba(129, 140, 248, 0.15);
+}
+
+/* Light mode için widget kart biraz daha belirgin olsun */
+html[data-theme="light"] .yks-widget-card {
+    background: linear-gradient(135deg, #ffffff, #eef2ff);
+    border-color: rgba(148, 163, 184, 0.55);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
 }
 
 @media (max-width: 768px) {
@@ -877,6 +875,18 @@ burada sonrasına devam ettir /* ============================================
     opacity: 1;
 }
 
+/* Light theme override – Seni Tanıyalım kartı sayfadan ayrışsın */
+html[data-theme="light"] .yks-onboarding {
+    background: radial-gradient(circle at top left, rgba(129, 140, 248, 0.12), transparent 55%), #ffffff;
+    border-color: rgba(148, 163, 184, 0.45);
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+}
+
+html[data-theme="light"] .yks-onboarding .form-section {
+    background: #f3f4f6;
+    border-color: rgba(148, 163, 184, 0.5);
+}
+
 /* =========================================================
    YKS DASHBOARD - ENHANCED
    ========================================================= */
@@ -1152,6 +1162,12 @@ burada sonrasına devam ettir /* ============================================
     opacity: 0.7;
 }
 
+[data-theme="light"] .yks-dashboard .today-progress-card {
+    background: #0b1220;
+    border-color: rgba(30, 64, 175, 0.9);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.55);
+}
+
 .yks-dashboard .progress-header {
     display: flex;
     justify-content: space-between;
@@ -1303,12 +1319,11 @@ burada sonrasına devam ettir /* ============================================
 #journey .yks-widget-card,
 #journey .yks-pomodoro-card,
 #journey .yks-coach-card {
-    background: var(--bg-elevated, #020617);
+    background: var(--journey-card-bg);
     border-radius: 18px;
-    border: 1px solid var(--border-subtle, #1f2937);
+    border: 1px solid var(--journey-card-border);
     padding: 20px 22px;
-    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.55),
-                0 0 30px rgba(15, 23, 42, 0.3);
+    box-shadow: var(--journey-card-shadow);
     position: relative;
     overflow: hidden;
     transition: all 0.3s var(--transition-smooth);
@@ -1319,8 +1334,9 @@ burada sonrasına devam ettir /* ============================================
 #journey .yks-widget-card:hover,
 #journey .yks-coach-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.7),
-                0 0 50px rgba(129, 140, 248, 0.2);
+    box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.7),
+        0 0 50px rgba(129, 140, 248, 0.2);
 }
 
 #journey .yks-coach-layout {
@@ -2052,6 +2068,20 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     color: rgba(148, 163, 184, 0.95);
 }
 
+/* Light theme – günlük özet kartları kaybolmasın */
+html[data-theme="light"] #journey .yks-daily-page .yks-detail-main {
+    background:
+        radial-gradient(circle at top left, rgba(52, 211, 153, 0.16), transparent 60%),
+        #f9fafb;
+    border-color: rgba(52, 211, 153, 0.55);
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+}
+
+html[data-theme="light"] #journey .yks-daily-progress,
+html[data-theme="light"] #journey .yks-metric-card {
+    background: #111827;
+}
+
 /* =========================================================
    FOCUS TIMER (ODAK ZAMANI) PAGE - ULTIMATE
    ========================================================= */
@@ -2164,23 +2194,19 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
 #journey .focus-stat-item:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 30px rgba(139, 92, 246, 0.3);
+}
 
-#journey .focus-stat-item-label {
+#journey .focus-stat-label {
     font-size: 0.8rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     color: rgba(196, 181, 253, 0.9);
 }
 
-#journey .focus-stat-item-value {
-    font-size: 1.1rem;
+#journey .focus-stat-value {
+    font-size: 1.05rem;
     font-weight: 600;
-    color: #f9fafb;
-}
-
-#journey .focus-stat-item-sub {
-    font-size: 0.78rem;
-    color: rgba(209, 213, 219, 0.85);
+    color: #fefce8;
 }
 
 /* Focus Timer Controls */
@@ -2196,17 +2222,16 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
 #journey .focus-timer-button {
     padding: 0.6rem 1.4rem;
     border-radius: 999px;
-    border: 1px solid rgba(129, 140, 248, 0.7);
-    background: radial-gradient(circle at top left, rgba(129, 140, 248, 0.2), transparent 55%),
-                rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(129, 140, 248, 0.8);
+    background: rgba(15, 23, 42, 0.9);
     color: #e5e7eb;
     font-size: 0.9rem;
     font-weight: 500;
-    cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
-    transition: all 0.2s var(--transition-bounce);
+    gap: 0.35rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
 }
@@ -2215,19 +2240,14 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(120deg, rgba(236, 72, 153, 0.4), transparent 60%);
+    background: radial-gradient(circle at top, rgba(167, 139, 250, 0.5), transparent 55%);
     opacity: 0;
-    transition: opacity 0.25s ease;
-}
-
-#journey .focus-timer-button i {
-    font-size: 1.05rem;
+    transition: opacity 0.3s ease;
 }
 
 #journey .focus-timer-button:hover {
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 14px 35px rgba(139, 92, 246, 0.45);
-    border-color: rgba(236, 72, 153, 0.85);
+    box-shadow: 0 12px 30px rgba(129, 140, 248, 0.4);
 }
 
 #journey .focus-timer-button:hover::before {
@@ -2238,369 +2258,195 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     background: linear-gradient(135deg, #a855f7, #ec4899);
     border-color: transparent;
     color: #f9fafb;
-    box-shadow: 0 16px 40px rgba(236, 72, 153, 0.6);
-}
-
-#journey .focus-timer-button.is-primary::before {
-    background: linear-gradient(135deg, rgba(248, 250, 252, 0.18), transparent 60%);
+    box-shadow:
+        0 18px 45px rgba(236, 72, 153, 0.45),
+        0 0 40px rgba(236, 72, 153, 0.25);
 }
 
 #journey .focus-timer-button.is-primary:hover {
     transform: translateY(-2px) scale(1.03);
 }
 
-/* Focus Sidebar (Session presets, tags, notes) */
-#journey .focus-timer-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    gap: 1.6rem;
-    align-items: stretch;
-}
-
-@media (max-width: 900px) {
-    #journey .focus-timer-layout {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
-
-#journey .focus-sidebar-card {
-    padding: 1rem 1.1rem 1.15rem;
-    border-radius: 18px;
-    background: rgba(15, 23, 42, 0.96);
-    border: 1px solid rgba(75, 85, 99, 0.9);
-    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.75);
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-#journey .focus-sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-}
-
-#journey .focus-sidebar-header h3 {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-#journey .focus-sidebar-header h3 i {
-    font-size: 1rem;
-    color: #a855f7;
-}
-
-#journey .focus-tag-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-}
-
-#journey .focus-tag {
-    padding: 0.28rem 0.6rem;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    border: 1px solid rgba(148, 163, 184, 0.75);
-    color: rgba(209, 213, 219, 0.95);
-    background: rgba(15, 23, 42, 0.85);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-#journey .focus-tag i {
-    font-size: 0.9rem;
-    color: rgba(196, 181, 253, 0.9);
-}
-
-#journey .focus-tag:hover {
-    transform: translateY(-2px);
-    border-color: #a855f7;
-    color: #ede9fe;
-    box-shadow: 0 8px 20px rgba(88, 28, 135, 0.55);
-}
-
-/* Focus notes textarea */
-#journey .focus-notes {
-    margin-top: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-}
-
-#journey .focus-notes label {
-    font-size: 0.8rem;
-    color: rgba(209, 213, 219, 0.9);
-}
-
-#journey .focus-notes textarea {
-    width: 100%;
-    min-height: 90px;
-    resize: vertical;
-    border-radius: 14px;
-    border: 1px solid rgba(75, 85, 99, 0.9);
-    background: rgba(15, 23, 42, 0.93);
-    color: #f9fafb;
-    font-size: 0.88rem;
-    padding: 0.6rem 0.7rem;
-    outline: none;
-    transition: all 0.2s ease;
-}
-
-#journey .focus-notes textarea::placeholder {
-    color: rgba(148, 163, 184, 0.9);
-}
-
-#journey .focus-notes textarea:focus {
-    border-color: #a855f7;
-    box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.8),
-                0 12px 32px rgba(46, 16, 101, 0.75);
+/* Light theme – odak sayfası */
+html[data-theme="light"] #journey .yks-focus-page .yks-detail-main,
+html[data-theme="light"] #journey .focus-timer-container {
+    background:
+        radial-gradient(circle at top left, rgba(139, 92, 246, 0.25), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.18), transparent 60%),
+        #f9fafb;
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.15);
 }
 
 /* =========================================================
-   STREAK & ACHIEVEMENTS
+   BUGÜNKÜ GÖREVLER LISTESI (TASK CARDS)
    ========================================================= */
 
-#journey .yks-streak-card {
-    padding: 1rem 1.2rem;
-    border-radius: 18px;
-    background:
-        radial-gradient(circle at top left, rgba(251, 191, 36, 0.24), transparent 55%),
-        rgba(15, 23, 42, 0.98);
-    border: 1px solid rgba(252, 211, 77, 0.8);
-    box-shadow: 0 18px 40px rgba(120, 53, 15, 0.6);
+/* Ana görev kartı – hem dark hem light için ayrılsın */
+#journey .tasks-card {
+    background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 60%),
+                var(--journey-card-bg);
+    border-radius: 22px;
+    border: 1px solid var(--journey-card-border);
+    box-shadow: var(--journey-card-shadow);
+    padding: 1.2rem 1.4rem 1.4rem;
+    animation: scaleIn 0.55s ease-out;
+}
+
+html[data-theme="light"] #journey .tasks-card {
+    background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.16), transparent 60%),
+                #ffffff;
+}
+
+/* Başlık satırı */
+#journey .tasks-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
 }
 
-#journey .yks-streak-main {
+#journey .tasks-card-title {
     display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+#journey .tasks-card-title i {
+    font-size: 1.05rem;
+    color: var(--accent, #6366f1);
+}
+
+/* Tek tek görev satırları */
+#journey .task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #020617, #020617);
+    border: 1px solid rgba(31, 41, 55, 0.9);
+    color: #e5e7eb;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.45);
+    transition: all 0.18s ease-out;
+}
+
+#journey .task-item + .task-item {
+    margin-top: 0.55rem;
+}
+
+#journey .task-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
+    border-color: rgba(79, 70, 229, 0.8);
+}
+
+/* Light modda görev kutuları da koyu kalsın ki arka plandan ayrılsın */
+html[data-theme="light"] #journey .task-item {
+    background: linear-gradient(135deg, #0b1120, #020617);
+    border-color: rgba(30, 64, 175, 0.9);
+}
+
+/* Checkbox / durum göstergesi */
+#journey .task-item-left {
+    display: inline-flex;
     align-items: center;
     gap: 0.75rem;
 }
 
-#journey .yks-streak-icon {
-    width: 38px;
-    height: 38px;
+#journey .task-checkbox {
+    width: 24px;
+    height: 24px;
     border-radius: 999px;
-    background: radial-gradient(circle at top left, #fde68a, #facc15);
+    border: 2px solid rgba(148, 163, 184, 0.9);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #92400e;
-    font-size: 1.3rem;
-    box-shadow: 0 0 25px rgba(250, 204, 21, 0.8);
-    animation: bounce 2.1s ease-in-out infinite;
+    flex-shrink: 0;
+    background: transparent;
+    color: #22c55e;
+    transition: all 0.18s ease-out;
 }
 
-#journey .yks-streak-text h3 {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #fef3c7;
+#journey .task-item:hover .task-checkbox {
+    border-color: #a855f7;
 }
 
-#journey .yks-streak-text span {
-    font-size: 0.82rem;
-    color: #fcd34d;
+#journey .task-item.is-completed .task-checkbox {
+    background: #22c55e;
+    border-color: #22c55e;
+    color: #0f172a;
+    animation: checkmark 0.4s ease-out;
 }
 
-#journey .yks-streak-count {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #fffbeb;
-}
-
-/* Achievements pills */
-#journey .yks-achievement-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-top: 0.5rem;
-}
-
-#journey .yks-achievement-pill {
-    padding: 0.3rem 0.6rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    background: rgba(15, 23, 42, 0.95);
-    border: 1px solid rgba(253, 224, 71, 0.7);
-    color: #fef9c3;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-#journey .yks-achievement-pill i {
-    font-size: 0.9rem;
-    color: #facc15;
-}
-
-/* =========================================================
-   COACHING FEED (GÜNLÜK ÖNERİLER)
-   ========================================================= */
-
-#journey .yks-coach-feed {
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-    gap: 1.3rem;
-}
-
-@media (max-width: 960px) {
-    #journey .yks-coach-feed {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
-
-#journey .coach-message-card {
-    padding: 1rem 1.1rem 1.1rem;
-    border-radius: 18px;
-    background:
-        radial-gradient(circle at top left, rgba(59, 130, 246, 0.2), transparent 55%),
-        rgba(15, 23, 42, 0.96);
-    border: 1px solid rgba(59, 130, 246, 0.8);
-    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.85);
+/* Metin */
+#journey .task-text-main {
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
+    gap: 0.15rem;
 }
 
-#journey .coach-message-header {
-    display: flex;
+#journey .task-title {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+#journey .task-meta {
+    font-size: 0.82rem;
+    color: rgba(148, 163, 184, 0.95);
+}
+
+/* Sağdaki play butonu */
+#journey .task-item-right {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
 }
 
-#journey .coach-message-header-main {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-}
-
-#journey .coach-avatar {
+#journey .task-play-btn {
     width: 32px;
     height: 32px;
     border-radius: 999px;
-    background: radial-gradient(circle at top left, #60a5fa, #1d4ed8);
+    border: 1px solid rgba(148, 163, 184, 0.7);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #eff6ff;
-    font-size: 1.1rem;
-    box-shadow: 0 0 24px rgba(59, 130, 246, 0.8);
-}
-
-#journey .coach-name {
-    font-size: 0.92rem;
-    font-weight: 600;
+    font-size: 1rem;
+    background: rgba(15, 23, 42, 0.9);
     color: #e5e7eb;
-}
-
-#journey .coach-label {
-    font-size: 0.8rem;
-    color: #93c5fd;
-}
-
-#journey .coach-message-body {
-    font-size: 0.88rem;
-    color: rgba(229, 231, 235, 0.95);
-    line-height: 1.5;
-}
-
-#journey .coach-bullets {
-    margin: 0.25rem 0 0;
-    padding-left: 1.1rem;
-    display: grid;
-    gap: 0.25rem;
-}
-
-#journey .coach-bullets li {
-    font-size: 0.85rem;
-    color: rgba(209, 213, 219, 0.96);
-}
-
-#journey .coach-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
-    color: rgba(156, 163, 175, 0.95);
-}
-
-#journey .coach-actions {
-    display: flex;
-    gap: 0.4rem;
-}
-
-#journey .coach-actions button {
-    padding: 0.28rem 0.6rem;
-    border-radius: 999px;
-    border: 1px solid rgba(148, 163, 184, 0.9);
-    background: rgba(15, 23, 42, 0.95);
-    color: #e5e7eb;
-    font-size: 0.78rem;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    transition: all 0.18s ease;
+    transition: all 0.18s ease-out;
 }
 
-#journey .coach-actions button i {
-    font-size: 0.85rem;
+#journey .task-play-btn:hover {
+    transform: translateY(-1px) scale(1.05);
+    border-color: rgba(56, 189, 248, 0.95);
+    box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
 }
 
-#journey .coach-actions button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.5);
-    border-color: #60a5fa;
+/* Light theme play butonu */
+html[data-theme="light"] #journey .task-play-btn {
+    background: #111827;
 }
 
 /* =========================================================
-   RESPONSIVE TWEAKS (MOBILE FINE TUNING)
+   RESPONSIVE TUNING
    ========================================================= */
 
-@media (max-width: 640px) {
-    #journeyContent {
-        padding: 0.9rem 0.75rem 1.2rem;
-    }
-
-    .yks-onboarding {
-        border-radius: 16px;
+@media (max-width: 768px) {
+    #journey .tasks-card {
         padding: 1rem 1rem 1.2rem;
     }
 
-    .yks-dashboard .dashboard-header-card {
-        flex-direction: column;
-        align-items: flex-start;
+    #journey .task-item {
+        padding: 0.8rem 0.85rem;
     }
 
-    #journey .focus-timer-time {
-        font-size: 3.4rem;
-    }
-
-    #journey .yks-pomodoro-timer {
-        font-size: 2.2rem;
-    }
-
-    #journey .yks-streak-card {
-        flex-direction: column;
-        align-items: flex-start;
+    #journey .yks-focus-page .yks-detail-main,
+    #journey .focus-timer-container {
+        padding: 1.5rem 1.4rem;
     }
 }
-
-/* ============================================
-   END OF YKS JOURNEY DASHBOARD - ULTIMATE EDITION
-   ============================================ */
