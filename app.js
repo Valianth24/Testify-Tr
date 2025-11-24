@@ -221,34 +221,64 @@ const App = {
     },
 
     /**
-     * YKS Yolculuğum sekmesini başlatır (yeni YKSJourneyManager ile uyumlu)
-     * Eski dosyalarla da çakışmasın diye defansif yazıldı.
+     * YKS Yolculuğum sekmesini başlatır
+     * (YKSJourneyManager / YKSJourney / initYKSJourney ne varsa hepsiyle uyumlu)
      */
     initYKSJourneyTab() {
         try {
+            // Root elemanı: önce #journeyContent, yoksa #journey, en son body
             const root =
                 document.getElementById('journeyContent') ||
                 document.querySelector('#journey #journeyContent') ||
-                null;
+                document.getElementById('journey') ||
+                document.body;
 
-            // Yeni sistem: window.YKSJourneyManager.init(root)
-            if (window.YKSJourneyManager && typeof window.YKSJourneyManager.init === 'function') {
-                if (window.YKSJourneyManager._initialized && typeof window.YKSJourneyManager.render === 'function') {
-                    // Zaten başlatılmışsa sadece tekrar render et
-                    window.YKSJourneyManager.render();
-                } else {
-                    window.YKSJourneyManager.init(root);
+            if (!root) {
+                console.warn('⚠️ YKSJourney: root bulunamadı');
+            }
+
+            // 1) Yeni sistem: window.YKSJourneyManager nesnesi
+            if (window.YKSJourneyManager) {
+                const jm = window.YKSJourneyManager;
+
+                // İlk defa çalıştırılıyorsa init + (varsa) render
+                if (typeof jm.init === 'function' && !jm._initialized) {
+                    jm.init(root);
+                    jm._initialized = true;
+
+                    if (typeof jm.render === 'function') {
+                        jm.render();
+                    }
                 }
+                // Daha önce init edilmişse sadece render
+                else if (typeof jm.render === 'function') {
+                    jm.render();
+                }
+
                 return;
             }
 
-            // Eski bir global init fonksiyonu varsa (ileride kullanmak istersen)
+            // 2) Eski tarz: window.YKSJourney nesnesi
+            if (window.YKSJourney && typeof window.YKSJourney.init === 'function') {
+                window.YKSJourney.init(root);
+
+                if (typeof window.YKSJourney.render === 'function') {
+                    window.YKSJourney.render();
+                }
+
+                return;
+            }
+
+            // 3) Sadece fonksiyon olarak tanımlanmışsa
             if (typeof window.initYKSJourney === 'function') {
                 window.initYKSJourney(root);
                 return;
             }
 
-            console.warn('⚠️ YKSJourney modülü bulunamadı. yks-journey.js dosyasının yüklü olduğundan emin ol.');
+            console.warn(
+                '⚠️ YKSJourney modülü bulunamadı. ' +
+                'yks-journey.js içinde YKSJourneyManager / YKSJourney / initYKSJourney tanımlı olduğundan emin ol.'
+            );
         } catch (error) {
             console.error('YKS Yolculuğu başlatma hatası:', error);
             if (window.Utils && typeof Utils.handleError === 'function') {
