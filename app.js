@@ -1,5 +1,5 @@
 /**
- * TESTIFY MAIN APPLICATION - TAM HATASIZ
+ * TESTIFY MAIN APPLICATION - TAM HATASIZ (v2 - YKS Journey uyumlu)
  * Tüm özellikler çalışır hale getiren ana uygulama
  */
 
@@ -41,7 +41,9 @@ const App = {
             console.log('✅ Testify hazır!');
         } catch (error) {
             console.error('❌ Başlatma hatası:', error);
-            Utils.handleError(error, 'App.init');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'App.init');
+            }
         }
     },
 
@@ -54,7 +56,9 @@ const App = {
             localStorage.setItem(test, test);
             localStorage.removeItem(test);
         } catch (e) {
-            Utils.showToast('LocalStorage kullanılamıyor! Veriler kaydedilmeyecek.', 'warning');
+            if (window.Utils && typeof Utils.showToast === 'function') {
+                Utils.showToast('LocalStorage kullanılamıyor! Veriler kaydedilmeyecek.', 'warning');
+            }
             console.error('Storage hatası:', e);
         }
     },
@@ -102,7 +106,9 @@ const App = {
             }
         } catch (error) {
             console.error('Kullanıcı verisi yükleme hatası:', error);
-            Utils.handleError(error, 'loadUserData');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'loadUserData');
+            }
         }
     },
 
@@ -129,7 +135,11 @@ const App = {
                 themeBtn.setAttribute('aria-pressed', newTheme === 'dark');
             }
 
-            Utils.setToStorage(Config.STORAGE_KEYS.THEME, newTheme);
+            if (window.Utils && window.Config && Config.STORAGE_KEYS) {
+                Utils.setToStorage(Config.STORAGE_KEYS.THEME, newTheme);
+            } else if (window.localStorage) {
+                localStorage.setItem('theme', newTheme);
+            }
         }
     },
 
@@ -137,7 +147,14 @@ const App = {
      * Temayı yükler
      */
     loadTheme() {
-        const savedTheme = Utils.getFromStorage(Config.STORAGE_KEYS.THEME, 'light');
+        let savedTheme = 'light';
+
+        if (window.Utils && window.Config && Config.STORAGE_KEYS) {
+            savedTheme = Utils.getFromStorage(Config.STORAGE_KEYS.THEME, 'light');
+        } else if (window.localStorage) {
+            savedTheme = localStorage.getItem('theme') || 'light';
+        }
+
         document.documentElement.setAttribute('data-theme', savedTheme);
 
         const themeIcon = document.getElementById('themeIcon');
@@ -209,22 +226,34 @@ const App = {
      */
     initYKSJourneyTab() {
         try {
-            // Yeni sistem: window.YKSJourneyManager.init()
+            const root =
+                document.getElementById('journeyContent') ||
+                document.querySelector('#journey #journeyContent') ||
+                null;
+
+            // Yeni sistem: window.YKSJourneyManager.init(root)
             if (window.YKSJourneyManager && typeof window.YKSJourneyManager.init === 'function') {
-                window.YKSJourneyManager.init();
+                if (window.YKSJourneyManager._initialized && typeof window.YKSJourneyManager.render === 'function') {
+                    // Zaten başlatılmışsa sadece tekrar render et
+                    window.YKSJourneyManager.render();
+                } else {
+                    window.YKSJourneyManager.init(root);
+                }
                 return;
             }
 
             // Eski bir global init fonksiyonu varsa (ileride kullanmak istersen)
             if (typeof window.initYKSJourney === 'function') {
-                window.initYKSJourney();
+                window.initYKSJourney(root);
                 return;
             }
 
             console.warn('⚠️ YKSJourney modülü bulunamadı. yks-journey.js dosyasının yüklü olduğundan emin ol.');
         } catch (error) {
             console.error('YKS Yolculuğu başlatma hatası:', error);
-            Utils.handleError(error, 'initYKSJourneyTab');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'initYKSJourneyTab');
+            }
         }
     },
 
@@ -298,7 +327,9 @@ const App = {
             }, 200);
         } catch (error) {
             console.error('Tab değiştirme hatası:', error);
-            Utils.handleError(error, 'switchTab');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'switchTab');
+            }
             this.hideLoadingOverlay();
         }
     },
@@ -337,7 +368,9 @@ const App = {
             this.updateActivityList();
         } catch (error) {
             console.error('Dashboard güncelleme hatası:', error);
-            Utils.handleError(error, 'updateDashboard');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'updateDashboard');
+            }
         }
     },
 
@@ -458,7 +491,9 @@ const App = {
             `).join('');
         } catch (error) {
             console.error('Leaderboard güncelleme hatası:', error);
-            Utils.handleError(error, 'updateLeaderboard');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'updateLeaderboard');
+            }
         }
     },
 
@@ -519,7 +554,9 @@ const App = {
             }).join('');
         } catch (error) {
             console.error('Notlar güncelleme hatası:', error);
-            Utils.handleError(error, 'updateNotes');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'updateNotes');
+            }
         }
     },
 
@@ -553,7 +590,9 @@ const App = {
             }
         } catch (error) {
             console.error('Not ekleme hatası:', error);
-            Utils.handleError(error, 'addNote');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'addNote');
+            }
         }
     },
 
@@ -591,7 +630,9 @@ const App = {
             }
         } catch (error) {
             console.error('Not düzenleme hatası:', error);
-            Utils.handleError(error, 'editNote');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'editNote');
+            }
         }
     },
 
@@ -608,7 +649,9 @@ const App = {
             }
         } catch (error) {
             console.error('Not silme hatası:', error);
-            Utils.handleError(error, 'deleteNote');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'deleteNote');
+            }
         }
     },
 
@@ -686,7 +729,9 @@ const App = {
             `;
         } catch (error) {
             console.error('Analiz güncelleme hatası:', error);
-            Utils.handleError(error, 'updateAnalysis');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'updateAnalysis');
+            }
         }
     },
 
@@ -770,7 +815,9 @@ const App = {
             }
         } catch (error) {
             console.error('Ayar kaydetme hatası:', error);
-            Utils.handleError(error, 'saveSettings');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'saveSettings');
+            }
         }
     },
 
@@ -803,7 +850,9 @@ const App = {
             Utils.showToast(infoMsg, 'info');
         } catch (error) {
             console.error('Ayar sıfırlama hatası:', error);
-            Utils.handleError(error, 'resetSettings');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'resetSettings');
+            }
         }
     },
 
@@ -855,7 +904,9 @@ const App = {
             Utils.showToast(successMsg, 'success');
         } catch (error) {
             console.error('Dosya yükleme hatası:', error);
-            Utils.handleError(error, 'handleFileUpload');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'handleFileUpload');
+            }
         }
     },
 
@@ -920,13 +971,15 @@ const App = {
                 });
             }
 
-            // Tema değiştir - HTML'den erişim için
+            // Tema değiştir - HTML'den erişim için (onclick="themeManager.toggle()")
             window.themeManager = this.themeManager;
 
             console.log('✅ Event listener\'lar eklendi');
         } catch (error) {
             console.error('Event listener hatası:', error);
-            Utils.handleError(error, 'attachEventListeners');
+            if (window.Utils && typeof Utils.handleError === 'function') {
+                Utils.handleError(error, 'attachEventListeners');
+            }
         }
     }
 };
