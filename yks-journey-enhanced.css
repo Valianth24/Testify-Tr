@@ -1,6 +1,6 @@
 /* ============================================
    YKS JOURNEY DASHBOARD - ULTIMATE EDITION
-   Phosphor Icons + All Original Features + Enhanced
+   Phosphor Icons + All Original Features + Color Fixes
    ============================================ */
 
 /* Phosphor Icons Import */
@@ -477,7 +477,7 @@
     font-weight: 700;
     margin-bottom: 0.25rem;
     color: var(--text-primary, #ffffff);
-    background: linear-gradient(135deg, #ffffff, #a4aec0);
+    background: linear-gradient(135deg, #ffffff, #cbd5e1);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1112,17 +1112,22 @@
     gap: 0.35rem;
     padding: 0.35rem 0.75rem;
     border-radius: 999px;
-    background: rgba(59, 130, 246, 0.12);
-    color: var(--accent, #3b82f6);
+    background: rgba(59, 130, 246, 0.2);
+    color: #1e40af;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
     animation: pulse 2s ease-in-out infinite;
     transition: all 0.3s ease;
 }
 
+[data-theme="dark"] .yks-dashboard .countdown-timer {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+}
+
 .yks-dashboard .countdown-timer:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
 }
 
 .yks-dashboard .countdown-timer i {
@@ -1229,7 +1234,11 @@
     flex-wrap: wrap;
     gap: 0.6rem 1.1rem;
     font-size: 0.9rem;
-    color: var(--text-secondary, #a4aec0);
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .yks-dashboard .progress-stats {
+    color: #cbd5e1;
 }
 
 .yks-dashboard .progress-stats .stat {
@@ -1245,7 +1254,7 @@
 }
 
 /* =========================================================
-   TEXT COLORS
+   TEXT COLORS - FIXED
    ========================================================= */
 
 .yks-onboarding,
@@ -1272,14 +1281,13 @@
 }
 
 [data-theme="dark"] .yks-dashboard .task-meta,
-[data-theme="dark"] .yks-dashboard .progress-stats .stat,
 [data-theme="dark"] .weak-point-item .subject-info span,
 [data-theme="dark"] .weak-point-item .session-topic,
 [data-theme="dark"] .report-stat .label,
 [data-theme="dark"] .report-message p,
 [data-theme="dark"] .report-recommendations li,
 [data-theme="dark"] .coaching-item p {
-    color: rgba(249, 250, 251, 0.78);
+    color: rgba(249, 250, 251, 0.9);
 }
 
 [data-theme="dark"] .yks-section-card .card-title,
@@ -1293,6 +1301,17 @@
 [data-theme="dark"] .yks-section-card .card-sub,
 [data-theme="dark"] .yks-section-card .yks-section-card-desc {
     color: rgba(249, 250, 251, 0.78);
+}
+
+/* LIGHT MODE COLOR FIXES */
+html[data-theme="light"] #journey .yks-section-card-meta,
+html[data-theme="light"] .yks-section-card .card-sub,
+html[data-theme="light"] .yks-section-card-desc {
+    color: #475569;
+}
+
+html[data-theme="light"] #journey .yks-section-card-meta-left span {
+    color: #64748b;
 }
 
 /* =========================================================
@@ -1723,7 +1742,11 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     gap: 0.5rem;
     margin-top: 0.4rem;
     font-size: 0.78rem;
-    color: var(--text-secondary, #6b7280);
+    color: #64748b;
+}
+
+[data-theme="dark"] #journey .yks-section-card-meta {
+    color: #cbd5e1;
 }
 
 #journey .yks-section-card-meta-left {
@@ -1775,7 +1798,7 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     animation: progressFill 1s ease-out;
 }
 
-/* Status pills */
+/* Status pills - FIXED COLORS */
 #journey .yks-section-card-pill {
     position: absolute;
     top: 0.75rem;
@@ -1807,10 +1830,15 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
 
 #journey .yks-section-card-pill.is-warning,
 #journey .yks-section-card-pill.overdue {
-    background: rgba(250, 204, 21, 0.16);
-    border-color: rgba(234, 179, 8, 0.8);
-    color: #fde047;
+    background: rgba(250, 204, 21, 0.3);
+    border-color: rgba(234, 179, 8, 0.9);
+    color: #854d0e;
     animation: pulse 2s ease-in-out infinite;
+}
+
+[data-theme="dark"] #journey .yks-section-card-pill.is-warning,
+[data-theme="dark"] #journey .yks-section-card-pill.overdue {
+    color: #fef08a;
 }
 
 #journey .yks-section-card-pill.is-locked {
@@ -1871,7 +1899,11 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
 
 #journey .yks-detail-header-title span {
     font-size: 0.86rem;
-    color: rgba(148, 163, 184, 0.95);
+    color: #94a3b8;
+}
+
+[data-theme="dark"] #journey .yks-detail-header-title span {
+    color: #cbd5e1;
 }
 
 #journey .yks-detail-header-badge {
@@ -2038,7 +2070,11 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     font-size: 0.82rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: rgba(148, 163, 184, 0.95);
+    color: #94a3b8;
+}
+
+[data-theme="dark"] #journey .yks-metric-label {
+    color: #cbd5e1;
 }
 
 #journey .yks-metric-value {
@@ -2134,7 +2170,7 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    color: rgba(167, 139, 250, 0.8);
+    color: #c4b5fd;
     margin-top: 0.75rem;
     font-weight: 600;
 }
@@ -2171,7 +2207,7 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(209, 213, 219, 0.7);
+    color: #cbd5e1;
 }
 
 #journey .focus-stat-value {
@@ -2324,8 +2360,11 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     flex-wrap: wrap;
     gap: 0.7rem 1.2rem;
     font-size: 0.9rem;
-    color: rgba(209, 213, 219, 0.92);
-    margin-bottom: 0.9rem;
+    color: #94a3b8;
+}
+
+[data-theme="dark"] #journey .yks-tasks-summary {
+    color: #cbd5e1;
 }
 
 #journey .yks-tasks-list {
@@ -2396,7 +2435,7 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
 }
 
 #journey .yks-task-item:hover::after {
-    opacity: 1;
+   opacity: 1;
 }
 
 /* FIXED CHECKBOX - PROPER POSITIONING */
@@ -2429,7 +2468,7 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
 }
 
 #journey .yks-task-check::after {
-   content: '✓';
+    content: '✓';
     position: absolute;
     font-size: 1rem;
     font-weight: 700;
@@ -2473,12 +2512,16 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
 
 #journey .yks-task-meta {
     font-size: 0.85rem;
-    color: rgba(148, 163, 184, 0.95);
+    color: #94a3b8;
     display: flex;
     align-items: center;
     gap: 0.75rem;
     flex-wrap: wrap;
     transition: all 0.3s ease;
+}
+
+[data-theme="dark"] #journey .yks-task-meta {
+    color: #cbd5e1;
 }
 
 #journey .yks-task-meta span {
@@ -2789,7 +2832,11 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     font-size: 0.82rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: rgba(148, 163, 184, 0.95);
+    color: #94a3b8;
+}
+
+[data-theme="dark"] #journey .yks-stat-label {
+    color: #cbd5e1;
 }
 
 #journey .yks-stat-value {
@@ -3010,15 +3057,4 @@ html {
     background: rgba(99, 102, 241, 0.5);
 }
 
-/* =========================================================
-   END OF YKS JOURNEY DASHBOARD CSS
-   ========================================================= */
-
-
-
-
-
-
-
-
-
+   
