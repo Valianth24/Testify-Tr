@@ -3057,4 +3057,27 @@ html {
     background: rgba(99, 102, 241, 0.5);
 }
 
-   
+/* 1) "Seni Tanıyalım" başlığını light modda siyah yap */
+html[data-theme="light"] .yks-onboarding .onboarding-header h1 {
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    -webkit-text-fill-color: initial;
+    color: #0f172a; /* koyu siyaha yakın */
+}
+
+/* 2) Bugünkü İlerleme çubuğu - light modda daha koyu zemin */
+html[data-theme="light"] .yks-dashboard .progress-bar {
+    background: #d1d5db; /* gri, light modda net görünecek */
+}
+
+/* 3) Bugünkü Görevler – dark modda görev yazıları beyaza yakın olsun */
+[data-theme="dark"] #journey .yks-task-title {
+    color: #f9fafb; /* tam beyaza yakın */
+}
+
+[data-theme="dark"] #journey .yks-task-meta {
+    color: #f9fafb; /* alt satır açıklamalar da beyaza yakın */
+}
+
+
