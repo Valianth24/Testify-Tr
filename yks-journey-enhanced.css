@@ -3092,3 +3092,41 @@ html[data-theme="light"] .yks-dashboard .progress-bar {
 [data-theme="dark"] #journey .yks-task-progress-fill span {
     color: #f9fafb !important;
 }
+
+/* === BUGÜNKÜ GÖREVLER - LIGHT MODE ÖZEL AYARLAR === */
+
+/* Light modda görevler konteynerini aç */
+html[data-theme="light"] #journey .yks-tasks-page .yks-detail-main {
+    background:
+        radial-gradient(circle at top left, rgba(129, 140, 248, 0.08), transparent 58%),
+        #f9fafb;
+    border-color: rgba(148, 163, 184, 0.5);
+    box-shadow: 0 14px 32px rgba(148, 163, 184, 0.35);
+}
+
+/* Light modda tek tek görev kartlarını da aç */
+html[data-theme="light"] #journey .yks-task-item {
+    background: linear-gradient(135deg, #ffffff, #e5e7eb);
+    border-color: rgba(148, 163, 184, 0.9);
+}
+
+/* Başlık ve meta yazıları koyu yapsın */
+html[data-theme="light"] #journey .yks-task-title {
+    color: #0f172a;
+}
+
+html[data-theme="light"] #journey .yks-task-meta {
+    color: #475569;
+}
+
+/* Progress bar zemini gri olsun, koyu değil */
+html[data-theme="light"] #journey .yks-task-progress-bar {
+    background: #e5e7eb;
+}
+
+/* Yüzde metni de koyu olsun */
+html[data-theme="light"] #journey .yks-task-progress-text {
+    color: #111827;
+}
+
+
