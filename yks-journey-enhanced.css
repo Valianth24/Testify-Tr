@@ -3128,3 +3128,231 @@ html {
 [data-theme="light"] #journey .yks-task-progress-text {
     color: #111827;
 }
+
+/* =========================================================
+   COACHING CONTENTS PAGE (YKS KOÇLUK İÇERİKLERİ)
+   ========================================================= */
+
+/* Koçluk sayfasının ana container'ı */
+#journey .yks-coach-page .yks-detail-main {
+    background:
+        radial-gradient(circle at top left, rgba(129, 140, 248, 0.22), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.18), transparent 60%),
+        var(--bg-elevated, #020617);
+    border-radius: 20px;
+    padding: 1.4rem 1.6rem 1.6rem;
+    border: 1px solid rgba(129, 140, 248, 0.75);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.97),
+                0 0 60px rgba(129, 140, 248, 0.25);
+    animation: scaleIn 0.6s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hafif glow */
+#journey .yks-coach-page .yks-detail-main::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -40%;
+    width: 160%;
+    height: 160%;
+    background: radial-gradient(circle, rgba(129, 140, 248, 0.18), transparent 70%);
+    opacity: 0.9;
+    pointer-events: none;
+    animation: rotate 22s linear infinite;
+}
+
+/* Üst açıklama alanı (isteğe bağlı) */
+#journey .yks-coach-intro {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1rem;
+}
+
+#journey .yks-coach-intro-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #e5e7eb;
+    margin: 0 0 0.25rem;
+}
+
+#journey .yks-coach-intro-text {
+    font-size: 0.9rem;
+    color: #cbd5e1;
+    max-width: 540px;
+}
+
+/* Koçluk içerik kartlarının listesi */
+#journey .yks-coach-topics {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-top: 0.75rem;
+}
+
+/* Tek tek koçluk içerik kartı */
+#journey .yks-coach-topic {
+    position: relative;
+    padding: 0.9rem 1.1rem 0.95rem;
+    border-radius: 18px;
+    background: rgba(15, 23, 42, 0.98);
+    border: 1px solid rgba(55, 65, 81, 0.95);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.8rem;
+    align-items: flex-start;
+    transition: all 0.3s var(--transition-smooth);
+    animation: fadeInUp 0.45s ease-out backwards;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+#journey .yks-coach-topic:nth-child(1) { animation-delay: 0.05s; }
+#journey .yks-coach-topic:nth-child(2) { animation-delay: 0.1s; }
+#journey .yks-coach-topic:nth-child(3) { animation-delay: 0.15s; }
+#journey .yks-coach-topic:nth-child(4) { animation-delay: 0.2s; }
+#journey .yks-coach-topic:nth-child(5) { animation-delay: 0.25s; }
+#journey .yks-coach-topic:nth-child(6) { animation-delay: 0.3s; }
+
+#journey .yks-coach-topic::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, rgba(129, 140, 248, 0.9), rgba(56, 189, 248, 0.8));
+    transform-origin: bottom;
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+#journey .yks-coach-topic::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(129, 140, 248, 0.14), transparent 75%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Hover animasyonu */
+#journey .yks-coach-topic:hover {
+    transform: translateY(-4px) translateX(4px);
+    border-color: rgba(129, 140, 248, 0.9);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95),
+                0 0 40px rgba(129, 140, 248, 0.3);
+}
+
+#journey .yks-coach-topic:hover::before {
+    transform: scaleY(1);
+}
+
+#journey .yks-coach-topic:hover::after {
+    opacity: 1;
+}
+
+/* Sol taraftaki ikon */
+#journey .yks-coach-topic-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(129, 140, 248, 0.2);
+    color: #c7d2fe;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    transition: all 0.3s var(--transition-bounce);
+}
+
+#journey .yks-coach-topic:hover .yks-coach-topic-icon {
+    transform: scale(1.15) rotate(10deg);
+    box-shadow: 0 0 18px rgba(129, 140, 248, 0.7);
+}
+
+/* Başlık + açıklama */
+#journey .yks-coach-topic-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+#journey .yks-coach-topic-title {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #f9fafb;
+    margin: 0;
+}
+
+#journey .yks-coach-topic-desc {
+    font-size: 0.88rem;
+    color: rgba(203, 213, 225, 0.92);
+}
+
+/* İçerik alt maddeleri (isteğe bağlı liste) */
+#journey .yks-coach-topic-outline {
+    margin: 0.35rem 0 0;
+    padding-left: 1rem;
+    font-size: 0.84rem;
+    color: rgba(203, 213, 225, 0.9);
+}
+
+#journey .yks-coach-topic-outline li + li {
+    margin-top: 0.12rem;
+}
+
+/* Sağ taraftaki etiket: Önerilen / Yeni vb. */
+#journey .yks-coach-topic-tag {
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(56, 189, 248, 0.16);
+    color: #7dd3fc;
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    align-self: flex-start;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+#journey .yks-coach-topic:hover .yks-coach-topic-tag {
+    transform: translateY(-2px);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.45);
+}
+
+/* Özel durum etiketleri */
+#journey .yks-coach-topic-tag.is-focus {
+    background: rgba(251, 191, 36, 0.18);
+    border-color: rgba(251, 191, 36, 0.6);
+    color: #facc15;
+}
+
+#journey .yks-coach-topic-tag.is-critical {
+    background: rgba(248, 113, 113, 0.18);
+    border-color: rgba(248, 113, 113, 0.7);
+    color: #fecaca;
+}
+
+/* Mobilde düzen */
+@media (max-width: 768px) {
+    #journey .yks-coach-topic {
+        grid-template-columns: auto 1fr;
+        gap: 0.7rem;
+    }
+
+    #journey .yks-coach-topic-tag {
+        grid-column: 1 / -1;
+        margin-left: 38px;
+        margin-top: 0.1rem;
+    }
+}
+
+
