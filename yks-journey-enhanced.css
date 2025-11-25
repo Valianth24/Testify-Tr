@@ -3355,4 +3355,514 @@ html {
     }
 }
 
+/* =========================================================
+   COACHING CONTENTS PAGE (KOÇLUK İÇERİKLERİ)
+   ========================================================= */
+
+#journey .yks-coach-page .yks-detail-main,
+#journey .yks-coach-contents-page .yks-detail-main {
+    background:
+        radial-gradient(circle at top left, rgba(129, 140, 248, 0.18), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(45, 212, 191, 0.18), transparent 60%),
+        var(--bg-elevated, #020617);
+    border-radius: 20px;
+    padding: 1.5rem 1.6rem 1.6rem;
+    border: 1px solid rgba(148, 163, 184, 0.8);
+    box-shadow: 0 20px 55px rgba(15, 23, 42, 0.95),
+                0 0 40px rgba(45, 212, 191, 0.18);
+    animation: scaleIn 0.6s ease-out;
+}
+
+#journey .coach-contents-intro {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: rgba(226, 232, 240, 0.9);
+}
+
+html[data-theme="light"] #journey .coach-contents-intro {
+    color: #475569;
+}
+
+#journey .coach-contents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.9rem;
+}
+
+#journey .coaching-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    background: rgba(15, 23, 42, 0.96);
+    border-radius: 16px;
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s var(--transition-smooth);
+    animation: fadeInUp 0.4s ease-out backwards;
+}
+
+#journey .coaching-item:nth-child(1) { animation-delay: 0.05s; }
+#journey .coaching-item:nth-child(2) { animation-delay: 0.1s; }
+#journey .coaching-item:nth-child(3) { animation-delay: 0.15s; }
+#journey .coaching-item:nth-child(4) { animation-delay: 0.2s; }
+
+#journey .coaching-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(129, 140, 248, 0.22), transparent 65%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#journey .coaching-item:hover {
+    transform: translateY(-3px);
+    border-color: rgba(129, 140, 248, 0.95);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.9),
+                0 0 30px rgba(129, 140, 248, 0.25);
+}
+
+#journey .coaching-item:hover::before {
+    opacity: 1;
+}
+
+#journey .coaching-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(129, 140, 248, 0.2);
+    color: #c7d2fe;
+    font-size: 1rem;
+    box-shadow: 0 0 15px rgba(129, 140, 248, 0.5);
+    transition: all 0.3s var(--transition-bounce);
+}
+
+#journey .coaching-item:hover .coaching-icon {
+    transform: scale(1.15) rotate(10deg);
+}
+
+#journey .coaching-text h3 {
+    margin: 0 0 0.25rem;
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: #e5e7eb;
+}
+
+#journey .coaching-text p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: rgba(209, 213, 219, 0.9);
+}
+
+html[data-theme="light"] #journey .coaching-item {
+    background: #ffffff;
+    border-color: rgba(148, 163, 184, 0.9);
+}
+
+html[data-theme="light"] #journey .coaching-text h3 {
+    color: #0f172a;
+}
+
+html[data-theme="light"] #journey .coaching-text p {
+    color: #4b5563;
+}
+
+/* =========================================================
+   WEEKLY REPORT PAGE (HAFTALIK RAPOR)
+   ========================================================= */
+
+#journey .yks-report-page .yks-detail-main {
+    background:
+        radial-gradient(circle at top left, rgba(52, 211, 153, 0.22), transparent 60%),
+        var(--bg-elevated, #020617);
+    border-radius: 20px;
+    padding: 1.4rem 1.6rem 1.6rem;
+    border: 1px solid rgba(52, 211, 153, 0.75);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.97),
+                0 0 45px rgba(52, 211, 153, 0.22);
+    animation: scaleIn 0.6s ease-out;
+}
+
+#journey .yks-weekly-report-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 1.4rem;
+}
+
+@media (max-width: 900px) {
+    #journey .yks-weekly-report-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Sol taraf – sayısal istatistikler */
+#journey .report-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.85rem;
+}
+
+#journey .report-stat {
+    padding: 0.85rem 1rem;
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.98);
+    border: 1px solid rgba(55, 65, 81, 0.95);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.45s ease-out backwards;
+}
+
+#journey .report-stat:nth-child(1) { animation-delay: 0.05s; }
+#journey .report-stat:nth-child(2) { animation-delay: 0.1s; }
+#journey .report-stat:nth-child(3) { animation-delay: 0.15s; }
+#journey .report-stat:nth-child(4) { animation-delay: 0.2s; }
+
+#journey .report-stat:hover {
+    transform: translateY(-3px);
+    border-color: rgba(52, 211, 153, 0.85);
+    box-shadow: 0 12px 30px rgba(52, 211, 153, 0.3);
+}
+
+#journey .report-stat .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+}
+
+#journey .report-stat .value {
+    font-size: 1.25rem;
+    font-weight: 650;
+    color: #f9fafb;
+}
+
+#journey .report-stat .sub {
+    font-size: 0.82rem;
+    color: rgba(148, 163, 184, 0.95);
+}
+
+/* Sağ taraf – açıklama + öneriler */
+#journey .yks-weekly-report-side {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+#journey .report-message {
+    padding: 0.9rem 1rem;
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(55, 65, 81, 0.95);
+    animation: fadeInUp 0.5s ease-out backwards;
+}
+
+#journey .report-message p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(226, 232, 240, 0.9);
+}
+
+#journey .report-recommendations {
+    padding: 0.9rem 1rem 1rem;
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(55, 65, 81, 0.95);
+    animation: fadeInUp 0.55s ease-out backwards;
+}
+
+#journey .report-recommendations h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.96rem;
+    font-weight: 600;
+    color: #e5e7eb;
+}
+
+#journey .report-recommendations ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.3rem;
+}
+
+#journey .report-recommendations li {
+    font-size: 0.9rem;
+    color: rgba(209, 213, 219, 0.92);
+}
+
+html[data-theme="light"] #journey .yks-report-page .yks-detail-main {
+    background:
+        radial-gradient(circle at top left, rgba(52, 211, 153, 0.12), transparent 60%),
+        #f9fafb;
+    border-color: rgba(148, 163, 184, 0.7);
+    box-shadow: 0 16px 40px rgba(148, 163, 184, 0.4);
+}
+
+html[data-theme="light"] #journey .report-stat,
+html[data-theme="light"] #journey .report-message,
+html[data-theme="light"] #journey .report-recommendations {
+    background: #ffffff;
+    border-color: rgba(148, 163, 184, 0.9);
+}
+
+html[data-theme="light"] #journey .report-stat .label {
+    color: #6b7280;
+}
+
+html[data-theme="light"] #journey .report-message p,
+html[data-theme="light"] #journey .report-recommendations li {
+    color: #4b5563;
+}
+
+/* =========================================================
+   WEEKLY PLAN – INNER LIST ENHANCEMENTS
+   ========================================================= */
+
+#journey .yks-plan-day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    margin-bottom: 0.3rem;
+}
+
+#journey .yks-plan-day-header span {
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+#journey .yks-plan-day-list {
+    margin: 0.25rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+#journey .yks-plan-day-task {
+    padding: 0.32rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    color: rgba(226, 232, 240, 0.96);
+    white-space: nowrap;
+    width: fit-content;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.25s ease;
+}
+
+#journey .yks-plan-day-task i {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+#journey .yks-plan-day-task:hover {
+    transform: translateY(-1px);
+    border-color: rgba(56, 189, 248, 0.8);
+    box-shadow: 0 6px 18px rgba(56, 189, 248, 0.35);
+}
+
+html[data-theme="light"] #journey .yks-plan-day-task {
+    background: #eff6ff;
+    border-color: rgba(148, 163, 184, 0.9);
+    color: #1f2937;
+}
+
+/* =========================================================
+   DASHBOARD – RECOMMENDED STEPS & CUSTOM TESTS
+   ========================================================= */
+
+#journey .yks-recs-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 1.2rem;
+    align-items: flex-start;
+}
+
+@media (max-width: 1024px) {
+    #journey .yks-recs-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+#journey .yks-recs-card {
+    border-radius: 18px;
+    padding: 1rem 1.2rem 1.1rem;
+    background: rgba(15, 23, 42, 0.98);
+    border: 1px solid rgba(55, 65, 81, 0.95);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.85);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+html[data-theme="light"] #journey .yks-recs-card {
+    background: #ffffff;
+    border-color: rgba(148, 163, 184, 0.8);
+    box-shadow: 0 12px 30px rgba(148, 163, 184, 0.35);
+}
+
+#journey .yks-recs-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+
+#journey .yks-recs-card-header i {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(129, 140, 248, 0.18);
+    color: #c7d2fe;
+    font-size: 1rem;
+    box-shadow: 0 0 12px rgba(129, 140, 248, 0.45);
+}
+
+#journey .yks-recs-card-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Bugünkü önerilen adımlar – numaralı liste */
+#journey .steps-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+#journey .step-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.55rem 0.6rem;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    transition: all 0.25s ease;
+}
+
+#journey .step-index {
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(129, 140, 248, 0.25);
+    color: #e5e7eb;
+}
+
+#journey .step-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-size: 0.9rem;
+}
+
+#journey .step-title {
+    font-weight: 600;
+}
+
+#journey .step-desc {
+    font-size: 0.85rem;
+    color: rgba(148, 163, 184, 0.95);
+}
+
+/* Sana özel test önerileri – iç kartlar */
+#journey .custom-test-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+#journey .custom-test-card {
+    padding: 0.7rem 0.75rem 0.75rem;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    transition: all 0.25s ease;
+}
+
+#journey .custom-test-card:hover,
+#journey .step-item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(129, 140, 248, 0.9);
+    box-shadow: 0 10px 26px rgba(129, 140, 248, 0.3);
+}
+
+#journey .custom-test-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+}
+
+#journey .custom-test-header h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+#journey .custom-test-meta {
+    font-size: 0.8rem;
+    color: rgba(148, 163, 184, 0.95);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+#journey .custom-test-actions {
+    margin-top: 0.3rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+#journey .custom-test-actions .btn-primary {
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+}
+
+html[data-theme="light"] #journey .step-item,
+html[data-theme="light"] #journey .custom-test-card {
+    background: #f9fafb;
+    border-color: rgba(148, 163, 184, 0.9);
+}
+
+html[data-theme="light"] #journey .step-desc,
+html[data-theme="light"] #journey .custom-test-meta {
+    color: #6b7280;
+}
+
+
+
 
