@@ -1304,13 +1304,13 @@
 }
 
 /* LIGHT MODE COLOR FIXES */
-html[data-theme="light"] #journey .yks-section-card-meta,
-html[data-theme="light"] .yks-section-card .card-sub,
-html[data-theme="light"] .yks-section-card-desc {
+[data-theme="light"] #journey .yks-section-card-meta,
+[data-theme="light"] .yks-section-card .card-sub,
+[data-theme="light"] .yks-section-card-desc {
     color: #475569;
 }
 
-html[data-theme="light"] #journey .yks-section-card-meta-left span {
+[data-theme="light"] #journey .yks-section-card-meta-left span {
     color: #64748b;
 }
 
@@ -1691,19 +1691,19 @@ html[data-theme="light"] #journey .yks-section-card-meta-left span {
 }
 
 /* Light theme adjustments */
-html[data-theme="light"] #journey .question-option,
-html[data-theme="light"] #journey .answer-option,
-html[data-theme="light"] #journey .option-card,
-html[data-theme="light"] .level-exam-options .option-card {
+[data-theme="light"] #journey .question-option,
+[data-theme="light"] #journey .answer-option,
+[data-theme="light"] #journey .option-card,
+[data-theme="light"] .level-exam-options .option-card {
     background: #f9fafb;
     border-color: #e5e7eb;
     color: #111827;
 }
 
-html[data-theme="light"] #journey .question-option:hover,
-html[data-theme="light"] #journey .answer-option:hover,
-html[data-theme="light"] #journey .option-card:hover,
-html[data-theme="light"] .level-exam-options .option-card:hover {
+[data-theme="light"] #journey .question-option:hover,
+[data-theme="light"] #journey .answer-option:hover,
+[data-theme="light"] #journey .option-card:hover,
+[data-theme="light"] .level-exam-options .option-card:hover {
     background: #fef9c3;
     border-color: var(--accent-yellow);
     box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.3),
@@ -3059,7 +3059,7 @@ html {
 }
 
 /* 1) "Seni Tanıyalım" başlığını light modda siyah yap */
-html[data-theme="light"] .yks-onboarding .onboarding-header h1 {
+[data-theme="light"] .yks-onboarding .onboarding-header h1 {
     background: none;
     -webkit-background-clip: initial;
     background-clip: initial;
@@ -3073,7 +3073,7 @@ html[data-theme="light"] .yks-onboarding .onboarding-header h1 {
 }
 
 /* 2) Bugünkü İlerleme çubuğu - light modda daha koyu zemin */
-html[data-theme="light"] .yks-dashboard .progress-bar {
+[data-theme="light"] .yks-dashboard .progress-bar {
     background: #d1d5db; /* gri, light modda net görünecek */
 }
 
@@ -3096,7 +3096,7 @@ html[data-theme="light"] .yks-dashboard .progress-bar {
 /* === BUGÜNKÜ GÖREVLER - LIGHT MODE ÖZEL AYARLAR === */
 
 /* Light modda görevler konteynerini aç */
-html[data-theme="light"] #journey .yks-tasks-page .yks-detail-main {
+[data-theme="light"] #journey .yks-tasks-page .yks-detail-main {
     background:
         radial-gradient(circle at top left, rgba(129, 140, 248, 0.08), transparent 58%),
         #f9fafb;
@@ -3105,28 +3105,26 @@ html[data-theme="light"] #journey .yks-tasks-page .yks-detail-main {
 }
 
 /* Light modda tek tek görev kartlarını da aç */
-html[data-theme="light"] #journey .yks-task-item {
+[data-theme="light"] #journey .yks-task-item {
     background: linear-gradient(135deg, #ffffff, #e5e7eb);
     border-color: rgba(148, 163, 184, 0.9);
 }
 
 /* Başlık ve meta yazıları koyu yapsın */
-html[data-theme="light"] #journey .yks-task-title {
+[data-theme="light"] #journey .yks-task-title {
     color: #0f172a;
 }
 
-html[data-theme="light"] #journey .yks-task-meta {
+[data-theme="light"] #journey .yks-task-meta {
     color: #475569;
 }
 
 /* Progress bar zemini gri olsun, koyu değil */
-html[data-theme="light"] #journey .yks-task-progress-bar {
+[data-theme="light"] #journey .yks-task-progress-bar {
     background: #e5e7eb;
 }
 
 /* Yüzde metni de koyu olsun */
-html[data-theme="light"] #journey .yks-task-progress-text {
+[data-theme="light"] #journey .yks-task-progress-text {
     color: #111827;
 }
-
-
