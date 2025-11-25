@@ -2724,6 +2724,7 @@ html[data-theme="light"] .level-exam-options .option-card:hover {
     min-height: 120px;
     transition: all 0.3s ease;
     animation: scaleIn 0.5s ease-out backwards;
+    position: relative; /* BUG FIX: today border & overlay */
 }
 
 #journey .yks-plan-day-card:nth-child(1) { animation-delay: 0.05s; }
@@ -3066,6 +3067,11 @@ html[data-theme="light"] .yks-onboarding .onboarding-header h1 {
     color: #0f172a; /* koyu siyaha yakın */
 }
 
+/* ŞAPKAYI SIFIRLA - Başlıktaki olası ikon/şapka kaldırılsın */
+.yks-onboarding .onboarding-header h1::before {
+    content: none !important;
+}
+
 /* 2) Bugünkü İlerleme çubuğu - light modda daha koyu zemin */
 html[data-theme="light"] .yks-dashboard .progress-bar {
     background: #d1d5db; /* gri, light modda net görünecek */
@@ -3080,4 +3086,9 @@ html[data-theme="light"] .yks-dashboard .progress-bar {
     color: #f9fafb; /* alt satır açıklamalar da beyaza yakın */
 }
 
-
+/* 3b) Bugünkü Görevler – bar içindeki yazılar da beyaz olsun */
+[data-theme="dark"] #journey .yks-task-progress-text,
+[data-theme="dark"] #journey .yks-task-progress-fill,
+[data-theme="dark"] #journey .yks-task-progress-fill span {
+    color: #f9fafb !important;
+}
