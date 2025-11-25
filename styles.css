@@ -3578,3 +3578,49 @@ a:hover {
     }
 }
 
+/* ============================================
+   TESTIFY – YKS JOURNEY EK DÜZENLEMELERİ
+   (Bu bloğu ANA CSS'in en sonuna ekle)
+   ============================================ */
+
+/* 1) Accent değişkenleri – progress bar'lar için
+   (light + dark, kaybolma olmasın) */
+:root {
+    --accent-primary: #6366f1;   /* light mode mor-mavi */
+    --accent-secondary: #8b5cf6;
+}
+
+[data-theme="dark"] {
+    --accent-primary: #818cf8;   /* dark mode biraz daha parlak */
+    --accent-secondary: #a78bfa;
+}
+
+/* 2) "Bugün" kartındaki üst şerit için: before düzgün otursun */
+#journey .yks-plan-day-card {
+    position: relative;
+}
+
+/* 3) "Seni Tanıyalım" başlığı (ve Journey içi h2'ler)
+      LIGHT MODDA net siyah dursun */
+html[data-theme="light"] #journey h2 {
+    color: #111827; /* neredeyse siyah */
+}
+
+/* 4) Bugünkü ilerleme çubuğu – light modda daha koyu track */
+html[data-theme="light"] .widget-progress-bar,
+html[data-theme="light"] .yks-task-progress-bar,
+html[data-theme="light"] .quiz-progress-bar {
+    background: #d1d5db; /* gri-300, karttan belirgin koyu */
+}
+
+/* 5) Bugünkü Görevler – DARK MODDA görev yazıları beyaz olsun
+   (görev kartı class’ların farklıysa .yks-task-item / .yks-task-card
+    kısımlarını kendi class’ınla değiştirirsin) */
+[data-theme="dark"] #journey .yks-task-item,
+[data-theme="dark"] #journey .yks-task-item *,
+[data-theme="dark"] #journey .yks-task-card,
+[data-theme="dark"] #journey .yks-task-card * {
+    color: #f9fafb;
+}
+
+
