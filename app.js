@@ -1081,6 +1081,8 @@ window.navigateTo = function (tabName) {
    - #noteContentInput
    - #noteCancelBtn
    - #noteSaveBtn
+   - #noteModalTitle
+   - .confirm-dialog-message
    elementleri olmalı (sana verdiğim HTML ile uyumlu) */
 (function () {
     'use strict';
