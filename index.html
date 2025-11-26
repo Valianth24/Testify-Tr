@@ -454,6 +454,9 @@
             <section class="tab-content active" id="dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
                 <h1 data-i18n="dashboard.title">Dashboard</h1>
 
+                <!-- Bilimsel / açıklayıcı içerik -->
+                <section class="tab-intro" data-content-key="dashboardIntro"></section>
+
                 <div class="stats-grid" role="region" aria-label="İstatistikler">
                     <article class="stat-card">
                         <div class="stat-icon" aria-hidden="true">
@@ -501,6 +504,9 @@
 
             <!-- YKS Journey Tab - GELİŞTİRİLMİŞ TASARIM İLE -->
             <section class="tab-content" id="journey" role="tabpanel" aria-labelledby="tab-journey">
+                <!-- Bilimsel / açıklayıcı içerik -->
+                <div class="tab-intro yks-tab-intro" data-content-key="journeyIntro"></div>
+
                 <div id="journeyContent" data-journey-root="true">
                     <!-- YKS Yolculuğu buraya dinamik olarak yüklenecek -->
                     <!-- Örnek yapı - gerçek içerik yks-journey.js tarafından oluşturulacak -->
@@ -513,6 +519,10 @@
                 <div class="test-page active" id="testSelection">
                     <div class="test-selection">
                         <h1 data-i18n="test.title">Test Seç</h1>
+
+                        <!-- Bilimsel / açıklayıcı içerik -->
+                        <section class="tab-intro" data-content-key="testIntro"></section>
+
                         <div class="test-options" role="group" aria-label="Test modu seçenekleri">
                             <article class="test-option-card" tabindex="0" role="button" aria-label="Pratik modu">
                                 <div class="test-option-icon" aria-hidden="true">
@@ -639,6 +649,9 @@
             <section class="tab-content" id="create" role="tabpanel" aria-labelledby="tab-create">
                 <h1 data-i18n="create.title">Test Oluştur</h1>
 
+                <!-- Bilimsel / açıklayıcı içerik -->
+                <section class="tab-intro" data-content-key="createIntro"></section>
+
                 <form class="create-test-form" id="createTestForm" aria-label="Test oluşturma formu">
                     <div class="form-group">
                         <label for="testTitle"><span data-i18n="create.testTitle">Test Başlığı</span> <span class="required">*</span></label>
@@ -710,6 +723,10 @@
                         AI ile oluşturduğun testler burada saklanır (24 saat)
                     </p>
                 </div>
+
+                <!-- Bilimsel / açıklayıcı içerik -->
+                <section class="tab-intro" data-content-key="libraryIntro"></section>
+
                 <div id="libraryList" class="library-list">
                     <div class="empty-state">
                         <div class="empty-state-icon" aria-hidden="true">
@@ -737,6 +754,10 @@
                         <span data-i18n="notes.add">Yeni Not</span>
                     </button>
                 </div>
+
+                <!-- Bilimsel / açıklayıcı içerik -->
+                <section class="tab-intro" data-content-key="notesIntro"></section>
+
                 <div id="notesList" class="notes-list">
                     <div class="empty-state">
                         <div class="empty-state-icon" aria-hidden="true">
@@ -757,6 +778,9 @@
                         </h1>
                         <p data-i18n="leaderboard.period">Haftalık Sıralama</p>
                     </header>
+
+                    <!-- Bilimsel / açıklayıcı içerik -->
+                    <section class="tab-intro" data-content-key="leaderboardIntro"></section>
 
                     <div class="table-responsive">
                         <table class="leaderboard-table" role="table" aria-label="Liderlik tablosu">
@@ -787,6 +811,10 @@
                     <i class="ph ph-chart-line-up icon" aria-hidden="true"></i>
                     <span data-i18n="analysis.title">Performans Analizi</span>
                 </h1>
+
+                <!-- Bilimsel / açıklayıcı içerik -->
+                <section class="tab-intro" data-content-key="analysisIntro"></section>
+
                 <div id="analysisContent">
                     <div class="empty-state">
                         <div class="empty-state-icon" aria-hidden="true">
@@ -803,6 +831,9 @@
                     <i class="ph ph-gear-six icon" aria-hidden="true"></i>
                     <span data-i18n="settings.title">Ayarlar</span>
                 </h1>
+
+                <!-- Bilimsel / açıklayıcı içerik -->
+                <section class="tab-intro" data-content-key="settingsIntro"></section>
 
                 <form class="settings-form" id="settingsForm" aria-label="Ayarlar formu">
                     <div class="form-group">
@@ -921,6 +952,10 @@
     <script src="config.js"></script>
     <script src="storage.js"></script>
     <script src="language.js"></script>
+
+    <!-- 🔽 Bilimsel içerikler için ayrı JS -->
+    <script src="scientific-content.js"></script>
+
     <script src="library.js"></script>
     <!-- AdSense Manager JS (yeni sistem) -->
     <script src="adsense-manager.js"></script>
