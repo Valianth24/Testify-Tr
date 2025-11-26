@@ -1,3 +1,4 @@
+
 /* ============================================
    LIBRARY (KÜTÜPHANE) STYLES
    ============================================ */
@@ -357,6 +358,7 @@
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
     --spacing-2xl: 3rem;
+    --spacing-3xl: 3.5rem;
 
     /* Border Radius */
     --radius-sm: 0.25rem;
@@ -452,7 +454,11 @@
     color: var(--text-primary);
     text-decoration: none;
     background: transparent;
-    transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast);
 }
 
 .logo span[role="img"] {
@@ -878,7 +884,11 @@
 
 /* Smooth geçişler için */
 [data-theme="dark"] * {
-    transition: background var(--transition-base), border var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
+    transition:
+        background var(--transition-base),
+        border var(--transition-base),
+        color var(--transition-base),
+        box-shadow var(--transition-base);
 }
 
 /* ============================================
@@ -1018,6 +1028,7 @@ a:hover {
     border-bottom: 1px solid var(--border);
 }
 
+/* bu .logo bloğu üstteki ile birleşik çalışıyor, ekstra border-radius vs kalıyor */
 .logo {
     display: flex;
     align-items: center;
@@ -3628,16 +3639,13 @@ html[data-theme="light"] .quiz-progress-bar {
    ============================================ */
 
 .tab-intro {
-    margin-top: var(--spacing-3xl, 3rem);
-    margin-bottom: var(--spacing-3xl, 3rem);
+    margin-top: var(--spacing-3xl);
+    margin-bottom: var(--spacing-3xl);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xl, 1.75rem);
+    gap: var(--spacing-xl);
     color: #e5e7eb;
-}
 
-/* Büyük ana açıklama kartı */
-.tab-intro .intro-main {
     background:
         radial-gradient(circle at top left, rgba(148, 163, 184, 0.18), transparent 55%),
         radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.18), transparent 55%),
@@ -3662,7 +3670,7 @@ html[data-theme="light"] .quiz-progress-bar {
 }
 
 /* Üçlü küçük kartlar */
-.tab-intro .intro-grid {
+.tab-intro-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: var(--spacing-lg, 1.5rem);
@@ -3675,7 +3683,10 @@ html[data-theme="light"] .quiz-progress-bar {
     padding: 1.25rem 1.35rem;
     animation: fadeInUp 0.55s ease-out;
     animation-fill-mode: both;
-    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        border-color .18s ease;
 }
 
 .tab-intro .intro-card:nth-child(1) { animation-delay: 0.04s; }
