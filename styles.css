@@ -3623,4 +3623,191 @@ html[data-theme="light"] .quiz-progress-bar {
     color: #f9fafb;
 }
 
+/* ============================================================
+   BİLİMSEL İÇERİK BÖLÜMLERİ (tab-intro)
+   Siyah - Beyaz tema ile uyumlu, minimal animasyonlu kartlar
+   ============================================================ */
+
+.tab-intro {
+    position: relative;
+    margin: var(--spacing-2xl, 2.5rem) 0;
+    padding: clamp(1.25rem, 1.5vw + 0.5rem, 1.75rem);
+    border-radius: var(--radius-xl, 1.25rem);
+    background:
+        radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.04), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.03), transparent 50%),
+        linear-gradient(135deg,
+            rgba(7, 7, 7, 0.98),
+            rgba(12, 12, 12, 0.98));
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.85),
+        inset 0 0 0 1px rgba(15, 23, 42, 0.7);
+    color: var(--text-primary, #e5e7eb);
+    overflow: hidden;
+    animation: tabIntroFadeUp 0.45s ease-out both;
+}
+
+.tab-intro::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.03), transparent 55%);
+    opacity: 0;
+    pointer-events: none;
+    animation: tabIntroGlow 3.2s ease-in-out infinite alternate;
+}
+
+.tab-intro h2 {
+    font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: var(--spacing-md, 0.85rem);
+    color: var(--text-primary, #f9fafb);
+}
+
+.tab-intro p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-secondary, #9ca3af);
+    max-width: 48rem;
+    margin-bottom: 0.75rem;
+}
+
+.tab-intro p:last-of-type {
+    margin-bottom: 0;
+}
+
+/* Grid içi kartlar */
+.tab-intro-grid {
+    margin-top: var(--spacing-xl, 1.5rem);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-md, 1rem);
+}
+
+.intro-card {
+    position: relative;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-lg, 1rem);
+    background: linear-gradient(
+        145deg,
+        rgba(17, 17, 17, 0.9),
+        rgba(10, 10, 10, 0.95)
+    );
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    transform: translateY(0);
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        border-color 0.18s ease,
+        background-color 0.18s ease;
+}
+
+.intro-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.05),
+        transparent 40%
+    );
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.intro-card:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 16px 35px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(148, 163, 184, 0.4);
+    border-color: rgba(249, 250, 251, 0.18);
+}
+
+.intro-card:hover::before {
+    opacity: 1;
+}
+
+.intro-card h3 {
+    font-size: 0.98rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--text-primary, #f9fafb);
+}
+
+.intro-card p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-secondary, #9ca3af);
+    margin: 0;
+}
+
+/* Küçük ekran optimizasyonu */
+@media (max-width: 768px) {
+    .tab-intro {
+        margin: var(--spacing-xl, 1.5rem) 0;
+        padding: 1rem 0.9rem;
+    }
+
+    .tab-intro-grid {
+        margin-top: var(--spacing-md, 0.9rem);
+        gap: var(--spacing-sm, 0.75rem);
+    }
+}
+
+/* Açılış animasyonları (siyah-beyaz, minimal) */
+@keyframes tabIntroFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes tabIntroGlow {
+    from {
+        opacity: 0.05;
+    }
+    to {
+        opacity: 0.14;
+    }
+}
+
+/* YKS için hafif badge stili – globalde de kullanılabilir */
+.yks-pill-row {
+    align-items: stretch;
+}
+
+.yks-pill {
+    border-radius: 999px;
+    background: radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.04), transparent 55%),
+                linear-gradient(135deg, rgba(15, 15, 15, 0.98), rgba(0, 0, 0, 0.98));
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9);
+}
+
+.yks-pill h3 {
+    font-size: 0.95rem;
+    text-transform: none;
+}
+
+/* Koyu temada kod ve vurgular */
+.tab-intro strong {
+    color: var(--text-primary, #f9fafb);
+    font-weight: 600;
+}
+.tab-intro em {
+    font-style: normal;
+    color: var(--text-secondary, #d1d5db);
+}
+
+
+
 
