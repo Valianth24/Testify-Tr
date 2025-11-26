@@ -1,3 +1,6 @@
+bunu da güncel yapıya göre toparlayıp, olası yeni **AI sekmesi** için `aiIntro` içeriğini ekleyerek tam dosya hâlinde veriyorum. Eski metinlerin hiçbirini bozmadım, sadece üzerine koydum.
+
+```js
 // scientific-content.js
 // Tüm bilimsel / açıklayıcı metinler burada tutulur
 // data-content-key attribute'u ile ilgili sekmeye enjekte edilir.
@@ -205,6 +208,46 @@
             </p>
         `,
 
+        // Yeni: Testify AI sekmesi için intro (data-content-key="aiIntro")
+        aiIntro: `
+            <h2>Testify AI: Akıllı İçerik ve Geri Bildirim Asistanı</h2>
+            <p>
+                Testify AI, klasik soru bankası mantığını bir adım öteye taşıyarak;
+                <strong>soru üretimi</strong>, <strong>çözüm açıklamaları</strong> ve
+                <strong>kişiselleştirilmiş çalışma önerileri</strong> sunan yapay zekâ destekli bir asistandır.
+            </p>
+            <p>
+                Hazırlanmak istediğin konu başlığını, seviyeni ve sınav türünü seçtiğinde;
+                Testify AI senin için özgün sorular, detaylı açıklamalar ve ek pekiştirme soruları üretebilir.
+                Böylece yalnızca hazır soruları tüketen bir öğrenci değil, aktif olarak içerik üreten bir “çalışma tasarımcısı”
+                hâline gelirsin.
+            </p>
+            <div class="tab-intro-grid">
+                <article class="intro-card">
+                    <h3>Akıllı Soru Üretimi</h3>
+                    <p>
+                        Belirlediğin kazanımlara uygun, seviyene göre ayarlanmış özgün sorular üretir;
+                        böylece her oturumda taze ve hedefe yönelik içerikle karşılaşırsın.
+                    </p>
+                </article>
+                <article class="intro-card">
+                    <h3>Adım Adım Çözüm Açıklamaları</h3>
+                    <p>
+                        Yanlış yaptığın sorularda, sadece doğru cevabı göstermekle kalmaz;
+                        <strong>neden yanlış yaptığını</strong> anlamanı sağlayan adım adım yorumlar sunar.
+                    </p>
+                </article>
+                <article class="intro-card">
+                    <h3>Kişiselleştirilmiş Öneriler</h3>
+                    <p>
+                        Performans verilerini ve yaptığın hataları analiz ederek;
+                        hangi konuları tekrar etmen, hangi soru tiplerine ağırlık vermen gerektiğine dair
+                        kısa, net ve uygulanabilir tavsiyeler üretir.
+                    </p>
+                </article>
+            </div>
+        `,
+
         settingsIntro: `
             <h2>Ayarlar: Kişiselleştirilmiş Deneyim ve Şeffaf Veri Yönetimi</h2>
             <p>
@@ -238,3 +281,4 @@
         applyTestifyContent();
     }
 })();
+```
