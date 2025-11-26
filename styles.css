@@ -3720,3 +3720,230 @@ html[data-theme="light"] .quiz-progress-bar {
 .tab-intro a:hover {
     color: #0ea5e9;
 }
+
+/* ============================================
+   YKS JOURNEY – ANA KARTLAR & ALT REKLAM / AÇIKLAMA KARTLARI
+   (Bu bloğu style.css dosyanın EN SONUNA ekle)
+   ============================================ */
+
+/* 1) YKS Yolculuğum ana kartları – LIGHT modda beyaz kart + siyah kenar + siyah yazı */
+[data-theme="light"] #journey .yks-card,
+[data-theme="light"] #journey .yks-mini-card,
+[data-theme="light"] #journey .pomodoro-card {
+    background: #ffffff !important;
+    border-color: #000000 !important;
+    color: #000000 !important;
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.22) !important;
+}
+
+/* Başlık ve açıklamalar net siyah */
+[data-theme="light"] #journey .yks-card-title,
+[data-theme="light"] #journey .yks-card-subtitle,
+[data-theme="light"] #journey .yks-mini-title,
+[data-theme="light"] #journey .pomodoro-title,
+[data-theme="light"] #journey .pomodoro-desc,
+[data-theme="light"] #journey .yks-metric-label,
+[data-theme="light"] #journey .yks-metric-value {
+    color: #000000 !important;
+}
+
+/* Küçük metinler ve label'lar */
+[data-theme="light"] #journey .yks-chip,
+[data-theme="light"] #journey .yks-widget-tag {
+    color: #000000 !important;
+    border-color: #000000 !important;
+    background: #ffffff !important;
+}
+
+/* 2) YKS ALT BİLGİ / REKLAM YAZI BÖLÜMÜ
+   HTML'de:
+   <section id="journey">
+     ...
+     <section class="yks-info-section">
+        <article class="yks-info-card">...</article>
+        ...
+     </section>
+   </section>
+*/
+
+/* Bölüm sarmalayıcı */
+#journey .yks-info-section {
+    margin-top: var(--spacing-3xl);
+    display: grid;
+    gap: var(--spacing-lg);
+}
+
+/* Kart – hem dark hem light için temel stil */
+#journey .yks-info-card {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: 1.25rem;
+    padding: 1.35rem 1.6rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    animation: fadeInUp 0.4s ease-out backwards;
+    transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        border-color var(--transition-fast),
+        background var(--transition-fast),
+        color var(--transition-fast);
+}
+
+/* Hafif glow efekti */
+#journey .yks-info-card::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background:
+        radial-gradient(circle at 0% 0%, rgba(129, 140, 248, 0.18), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(34, 197, 94, 0.18), transparent 55%);
+    opacity: 0.45;
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+
+/* Kartlar sırayla gelsin */
+#journey .yks-info-card:nth-child(1) { animation-delay: 0.03s; }
+#journey .yks-info-card:nth-child(2) { animation-delay: 0.08s; }
+#journey .yks-info-card:nth-child(3) { animation-delay: 0.13s; }
+#journey .yks-info-card:nth-child(4) { animation-delay: 0.18s; }
+#journey .yks-info-card:nth-child(5) { animation-delay: 0.23s; }
+
+/* Hover – bol animasyonlu, YKS kartlarıyla aynı ruh */
+#journey .yks-info-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    border-color: var(--primary);
+    box-shadow:
+        0 24px 60px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(129, 140, 248, 0.35);
+}
+
+/* Başlık */
+#journey .yks-info-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 700;
+    font-size: 1rem;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+/* Başlık ikonu – istersen <i class="ph ph-info"></i> kullan */
+#journey .yks-info-card-title i {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    background: rgba(250, 204, 21, 0.14);
+    color: #facc15;
+    box-shadow: 0 8px 20px rgba(250, 204, 21, 0.35);
+    transition: transform 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+#journey .yks-info-card:hover .yks-info-card-title i {
+    transform: translateY(-2px) scale(1.12) rotate(6deg);
+}
+
+/* Gövde metni */
+#journey .yks-info-card-body {
+    font-size: 0.93rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+}
+
+#journey .yks-info-card-body p {
+    margin: 0.2rem 0;
+}
+
+#journey .yks-info-card-body b,
+#journey .yks-info-card-body strong {
+    font-weight: 700;
+}
+
+/* Light mod – OP ADSENSE MODU 😎
+   Kart tam beyaz, kenar full siyah, yazı full siyah */
+[data-theme="light"] #journey .yks-info-card {
+    background: #ffffff !important;
+    border-color: #000000 !important;
+    color: #000000 !important;
+    box-shadow:
+        0 20px 50px rgba(15, 23, 42, 0.22),
+        0 0 0 1px rgba(0, 0, 0, 0.8);
+}
+
+/* Light modda glow biraz kısık olsun */
+[data-theme="light"] #journey .yks-info-card::before {
+    opacity: 0.18;
+}
+
+/* Light modda metinler net siyah */
+[data-theme="light"] #journey .yks-info-card-title,
+[data-theme="light"] #journey .yks-info-card-body,
+[data-theme="light"] #journey .yks-info-card-body p {
+    color: #000000 !important;
+}
+
+/* Hover’da daha güçlü siyah kenar ve gölge */
+[data-theme="light"] #journey .yks-info-card:hover {
+    border-color: #000000 !important;
+    box-shadow:
+        0 26px 60px rgba(0, 0, 0, 0.28),
+        0 0 0 2px rgba(0, 0, 0, 0.95);
+}
+
+/* Light modda ikon arka planı daha soft */
+[data-theme="light"] #journey .yks-info-card-title i {
+    background: rgba(250, 204, 21, 0.12);
+    color: #ca8a04;
+}
+
+/* Dark mod – koyu şık görünüm */
+[data-theme="dark"] #journey .yks-info-card {
+    background:
+        radial-gradient(circle at top left, rgba(30, 64, 175, 0.38), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(17, 94, 89, 0.42), transparent 60%),
+        #020617;
+    border-color: rgba(148, 163, 184, 0.55);
+    color: #e5e7eb;
+    box-shadow:
+        0 24px 70px rgba(15, 23, 42, 0.95);
+}
+
+[data-theme="dark"] #journey .yks-info-card-title,
+[data-theme="dark"] #journey .yks-info-card-body,
+[data-theme="dark"] #journey .yks-info-card-body p {
+    color: rgba(248, 250, 252, 0.96);
+}
+
+/* Dark modda hover glow daha parlak */
+[data-theme="dark"] #journey .yks-info-card:hover {
+    border-color: rgba(129, 140, 248, 0.95);
+    box-shadow:
+        0 30px 80px rgba(15, 23, 42, 0.98),
+        0 0 0 1px rgba(129, 140, 248, 0.4);
+}
+
+/* Mobilde kart aralıklarını biraz sık */
+@media (max-width: 768px) {
+    #journey .yks-info-section {
+        margin-top: var(--spacing-2xl);
+        gap: var(--spacing-md);
+    }
+
+    #journey .yks-info-card {
+        padding: 1.1rem 1.2rem;
+        border-radius: 1rem;
+    }
+}
+
+
