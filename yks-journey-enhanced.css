@@ -3863,6 +3863,39 @@ html[data-theme="light"] #journey .custom-test-meta {
     color: #6b7280;
 }
 
+/* ============================================
+   YKS Yolculuğum – Bilimsel Intro Bölümü
+   (journey sekmesindeki üst açıklama için)
+   ============================================ */
+
+.yks-tab-intro {
+    margin-top: var(--spacing-xl, 1.5rem);
+    margin-bottom: var(--spacing-2xl, 2.5rem);
+    border-left: 3px solid rgba(249, 250, 251, 0.12);
+    padding-left: var(--spacing-md, 1rem);
+}
+
+.yks-tab-intro h2 {
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    opacity: 0.95;
+}
+
+.yks-tab-intro p:first-of-type {
+    margin-top: var(--spacing-sm, 0.65rem);
+}
+
+/* Eğer YKS widget bölgenle birlikte kullanılırsa çok kalabalık gözükmesin diye
+   mobilde biraz daraltıyoruz. */
+@media (max-width: 768px) {
+    .yks-tab-intro {
+        margin-top: var(--spacing-md, 1rem);
+        margin-bottom: var(--spacing-xl, 1.5rem);
+        padding-left: var(--spacing-sm, 0.75rem);
+    }
+}
+
 
 
 
