@@ -454,9 +454,6 @@
             <section class="tab-content active" id="dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
                 <h1 data-i18n="dashboard.title">Dashboard</h1>
 
-                <!-- Bilimsel / açıklayıcı içerik -->
-                <section class="tab-intro" data-content-key="dashboardIntro"></section>
-
                 <div class="stats-grid" role="region" aria-label="İstatistikler">
                     <article class="stat-card">
                         <div class="stat-icon" aria-hidden="true">
@@ -500,17 +497,107 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Bilimsel açıklama – Dashboard ALT KISIM -->
+                <section class="tab-intro tab-intro-dashboard">
+                    <article class="intro-main">
+                        <h2>Testify: Öğrenme Bilimi, Yapay Zekâ ve Ölçme-Değerlendirmenin Kesişim Noktası</h2>
+                        <p>
+                            Testify, sınav hazırlığını “ezber odaklı” tekrarlar olmaktan çıkarıp,
+                            <strong>öğrenme bilimi</strong>, <strong>bilişsel psikoloji</strong> ve
+                            <strong>modern ölçme-değerlendirme</strong> ilkeleriyle yeniden tasarlayan akıllı bir eğitim platformudur.
+                            Amaç yalnızca çok soru çözmek değil; hangi soruları, ne zaman, hangi zorluk seviyesinde çözmen gerektiğini
+                            veriye dayalı olarak belirleyebilmektir.
+                        </p>
+                        <p>
+                            Her çözdüğün test; başarı oranların, sürelerin ve hata desenlerinle birlikte bir veri noktası üretir.
+                            Testify bu verileri, zaman içinde senin için kişiselleştirilmiş öneriler, öğrenme yolları ve
+                            zorluk ayarlı testler üretmek için kullanmayı hedefler.
+                        </p>
+                    </article>
+
+                    <div class="intro-grid">
+                        <article class="intro-card">
+                            <h3>Bilişsel Psikoloji Temelli Tasarım</h3>
+                            <p>
+                                <strong>Geri getirme (retrieval practice)</strong> ve
+                                <strong>dağıtılmış tekrar (spaced repetition)</strong> prensiplerine göre,
+                                belirli aralıklarla benzer soru tipleri ve konularla tekrar karşılaşmanı sağlar.
+                            </p>
+                        </article>
+
+                        <article class="intro-card">
+                            <h3>Psikometri ve Ölçme-Değerlendirme</h3>
+                            <p>
+                                Yalnızca “doğru sayısına” değil; soruların <strong>zorluk düzeyine</strong>,
+                                <strong>ayırt ediciliğine</strong> ve hata desenlerine odaklanan bir yaklaşım benimsler.
+                                Böylece puanların, gerçekte neyi ne kadar bildiğini daha doğru yansıtır.
+                            </p>
+                        </article>
+
+                        <article class="intro-card">
+                            <h3>Veri Bilimi &amp; Yapay Zekâ</h3>
+                            <p>
+                                Her test, gelecekteki önerileri besleyen bir veri kaynağıdır.
+                                Amaç yalnızca “çok çalışıyor musun?” sorusunu değil;
+                                <strong>doğru yerde, doğru yoğunlukta çalışıyor musun?</strong> sorusunu da yanıtlayabilmektir.
+                            </p>
+                        </article>
+                    </div>
+                </section>
             </section>
 
             <!-- YKS Journey Tab - GELİŞTİRİLMİŞ TASARIM İLE -->
             <section class="tab-content" id="journey" role="tabpanel" aria-labelledby="tab-journey">
-                <!-- Bilimsel / açıklayıcı içerik -->
-                <div class="tab-intro yks-tab-intro" data-content-key="journeyIntro"></div>
-
                 <div id="journeyContent" data-journey-root="true">
-                    <!-- YKS Yolculuğu buraya dinamik olarak yüklenecek -->
-                    <!-- Örnek yapı - gerçek içerik yks-journey.js tarafından oluşturulacak -->
+                    <!-- YKS Yolculuğu dinamik olarak yüklenecek -->
                 </div>
+
+                <!-- Bilimsel açıklama – YKS Yolculuğum ALT KISIM -->
+                <section class="tab-intro tab-intro-journey">
+                    <article class="intro-main">
+                        <h2>YKS Yolculuğum: Bilimsel Çalışma Planı ve Akıllı Geri Bildirim</h2>
+                        <p>
+                            YKS Yolculuğum, TYT–AYT hazırlığını rastgele konu bitirme listelerinden çıkarıp;
+                            performans verilerine dayalı, sürekli güncellenen bir <strong>çalışma yol haritasına</strong> dönüştürür.
+                        </p>
+                        <p>
+                            Hangi derste hangi seviyede olduğunu, hangi konularda hataların yoğunlaştığını ve
+                            ne kadar sürede ilerlediğini takip ederek; soru önerilerini, deneme dağılımını ve
+                            günlük hedeflerini bu verilere göre uyarlamayı hedefler.
+                        </p>
+                    </article>
+
+                    <div class="intro-grid">
+                        <article class="intro-card">
+                            <h3>Alan Bazlı Seviye Haritası</h3>
+                            <p>
+                                Sayısal / Eşit Ağırlık / Sözel alanlarına göre TYT ve AYT performansın
+                                birleşik bir skora dönüştürülür. Bu skor, hangi ders ve konuların
+                                <strong>öncelikli</strong> çalışılması gerektiğini belirlemede kullanılır.
+                            </p>
+                        </article>
+
+                        <article class="intro-card">
+                            <h3>Uyarlanabilir Zorluk ve Test Setleri</h3>
+                            <p>
+                                Başarı oranına göre soru zorluk düzeyi dinamik olarak ayarlanır;
+                                böylece ne sürekli çok kolay sorularla oyalanırsın ne de motivasyonunu
+                                kıracak kadar zor setlere maruz kalırsın. Amaç, daima
+                                <strong>“gelişim bölgesi”</strong>nde çalışmaktır.
+                            </p>
+                        </article>
+
+                        <article class="intro-card">
+                            <h3>Zaman Yönetimi ve Dayanıklılık</h3>
+                            <p>
+                                Çözdüğün her testin süresi, soru başına harcadığın zaman ve denemelerdeki
+                                performans düşüşleri izlenir. Bu veriler üzerinden net hedeflerine uygun
+                                <strong>çalışma blokları</strong> ve mola aralıkları önerilir.
+                            </p>
+                        </article>
+                    </div>
+                </section>
             </section>
 
             <!-- Test Tab -->
@@ -519,10 +606,6 @@
                 <div class="test-page active" id="testSelection">
                     <div class="test-selection">
                         <h1 data-i18n="test.title">Test Seç</h1>
-
-                        <!-- Bilimsel / açıklayıcı içerik -->
-                        <section class="tab-intro" data-content-key="testIntro"></section>
-
                         <div class="test-options" role="group" aria-label="Test modu seçenekleri">
                             <article class="test-option-card" tabindex="0" role="button" aria-label="Pratik modu">
                                 <div class="test-option-icon" aria-hidden="true">
@@ -649,9 +732,6 @@
             <section class="tab-content" id="create" role="tabpanel" aria-labelledby="tab-create">
                 <h1 data-i18n="create.title">Test Oluştur</h1>
 
-                <!-- Bilimsel / açıklayıcı içerik -->
-                <section class="tab-intro" data-content-key="createIntro"></section>
-
                 <form class="create-test-form" id="createTestForm" aria-label="Test oluşturma formu">
                     <div class="form-group">
                         <label for="testTitle"><span data-i18n="create.testTitle">Test Başlığı</span> <span class="required">*</span></label>
@@ -723,10 +803,6 @@
                         AI ile oluşturduğun testler burada saklanır (24 saat)
                     </p>
                 </div>
-
-                <!-- Bilimsel / açıklayıcı içerik -->
-                <section class="tab-intro" data-content-key="libraryIntro"></section>
-
                 <div id="libraryList" class="library-list">
                     <div class="empty-state">
                         <div class="empty-state-icon" aria-hidden="true">
@@ -754,10 +830,6 @@
                         <span data-i18n="notes.add">Yeni Not</span>
                     </button>
                 </div>
-
-                <!-- Bilimsel / açıklayıcı içerik -->
-                <section class="tab-intro" data-content-key="notesIntro"></section>
-
                 <div id="notesList" class="notes-list">
                     <div class="empty-state">
                         <div class="empty-state-icon" aria-hidden="true">
@@ -778,9 +850,6 @@
                         </h1>
                         <p data-i18n="leaderboard.period">Haftalık Sıralama</p>
                     </header>
-
-                    <!-- Bilimsel / açıklayıcı içerik -->
-                    <section class="tab-intro" data-content-key="leaderboardIntro"></section>
 
                     <div class="table-responsive">
                         <table class="leaderboard-table" role="table" aria-label="Liderlik tablosu">
@@ -811,10 +880,6 @@
                     <i class="ph ph-chart-line-up icon" aria-hidden="true"></i>
                     <span data-i18n="analysis.title">Performans Analizi</span>
                 </h1>
-
-                <!-- Bilimsel / açıklayıcı içerik -->
-                <section class="tab-intro" data-content-key="analysisIntro"></section>
-
                 <div id="analysisContent">
                     <div class="empty-state">
                         <div class="empty-state-icon" aria-hidden="true">
@@ -831,9 +896,6 @@
                     <i class="ph ph-gear-six icon" aria-hidden="true"></i>
                     <span data-i18n="settings.title">Ayarlar</span>
                 </h1>
-
-                <!-- Bilimsel / açıklayıcı içerik -->
-                <section class="tab-intro" data-content-key="settingsIntro"></section>
 
                 <form class="settings-form" id="settingsForm" aria-label="Ayarlar formu">
                     <div class="form-group">
@@ -952,10 +1014,6 @@
     <script src="config.js"></script>
     <script src="storage.js"></script>
     <script src="language.js"></script>
-
-    <!-- 🔽 Bilimsel içerikler için ayrı JS -->
-    <script src="scientific-content.js"></script>
-
     <script src="library.js"></script>
     <!-- AdSense Manager JS (yeni sistem) -->
     <script src="adsense-manager.js"></script>
