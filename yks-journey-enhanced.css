@@ -3684,6 +3684,7 @@ html[data-theme="light"] #journey .yks-plan-day-task {
 
 /* =========================================================
    DASHBOARD – RECOMMENDED STEPS & CUSTOM TESTS
+   (YKS Journey alt kısmı için)
    ========================================================= */
 
 #journey .yks-recs-layout {
@@ -3865,7 +3866,7 @@ html[data-theme="light"] #journey .custom-test-meta {
 
 /* ============================================
    YKS Yolculuğum – Bilimsel Intro Bölümü
-   (journey sekmesindeki üst açıklama için)
+   (journey sekmesinin alt açıklaması için)
    ============================================ */
 
 .yks-tab-intro {
@@ -3886,8 +3887,7 @@ html[data-theme="light"] #journey .custom-test-meta {
     margin-top: var(--spacing-sm, 0.65rem);
 }
 
-/* Eğer YKS widget bölgenle birlikte kullanılırsa çok kalabalık gözükmesin diye
-   mobilde biraz daraltıyoruz. */
+/* Mobil daraltma */
 @media (max-width: 768px) {
     .yks-tab-intro {
         margin-top: var(--spacing-md, 1rem);
@@ -3895,7 +3895,3 @@ html[data-theme="light"] #journey .custom-test-meta {
         padding-left: var(--spacing-sm, 0.75rem);
     }
 }
-
-
-
-
