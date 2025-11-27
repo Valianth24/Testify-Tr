@@ -52,6 +52,10 @@
     <link rel="stylesheet" href="styles.css">
     <!-- YKS Yolculuğum CSS - GELİŞTİRİLMİŞ VERSİYON -->
     <link rel="stylesheet" href="yks-journey-enhanced.css">
+    <!-- YKS Test Flow CSS -->
+    <link rel="stylesheet" href="yks-test-flow.css">
+    <!-- Library CSS -->
+    <link rel="stylesheet" href="library.css">
 
     <!-- Phosphor Icons (ikonlar için) -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
@@ -623,51 +627,13 @@
                 </section>
             </section>
 
-            <!-- Test Tab -->
+            <!-- Test Tab (YENİ YAPI - YKS TEST FLOW ENTEGRASYONU) -->
             <section class="tab-content" id="test" role="tabpanel" aria-labelledby="tab-test">
                 <!-- Test Selection Page -->
                 <div class="test-page active" id="testSelection">
-                    <div class="test-selection">
-                        <h1 data-i18n="test.title">Test Seç</h1>
-                        <div class="test-options" role="group" aria-label="Test modu seçenekleri">
-                            <article class="test-option-card" tabindex="0" role="button" aria-label="Pratik modu">
-                                <div class="test-option-icon" aria-hidden="true">
-                                    <i class="ph ph-book icon"></i>
-                                </div>
-                                <h3 class="test-option-title" data-i18n="test.practice">Pratik Modu</h3>
-                                <p class="test-option-desc" data-i18n="test.practiceDesc">Zaman baskısı olmadan pratik yap</p>
-                            </article>
-                            <article class="test-option-card" tabindex="0" role="button" aria-label="Sınav modu">
-                                <div class="test-option-icon" aria-hidden="true">
-                                    <i class="ph ph-target icon"></i>
-                                </div>
-                                <h3 class="test-option-title" data-i18n="test.exam">Sınav Modu</h3>
-                                <p class="test-option-desc" data-i18n="test.examDesc">Gerçek sınav deneyimi</p>
-                            </article>
-                            <!-- AI Test kartı -->
-                            <article class="test-option-card ai-test-card" tabindex="0" role="button" aria-label="AI test">
-                                <div class="test-option-icon" aria-hidden="true">
-                                    <img src="al.png" alt="Testify AI" class="icon ai-icon-img ai-test-icon">
-                                </div>
-                                <h3 class="test-option-title" data-i18n="test.ai">AI Test</h3>
-                                <p class="test-option-desc" data-i18n="test.aiDesc">AI tarafından oluşturulan sorular</p>
-                            </article>
-                            <article class="test-option-card" tabindex="0" role="button" aria-label="Özel test">
-                                <div class="test-option-icon" aria-hidden="true">
-                                    <i class="ph ph-gear-six icon"></i>
-                                </div>
-                                <h3 class="test-option-title" data-i18n="test.custom">Özel Test</h3>
-                                <p class="test-option-desc" data-i18n="test.customDesc">Kendi kriterlerine göre</p>
-                            </article>
-                            <!-- 🔹 YENİ: YKS hızlı seviye testi kartı -->
-                            <article class="test-option-card" tabindex="0" role="button" id="yksQuickCard" aria-label="YKS seviye testi">
-                                <div class="test-option-icon" aria-hidden="true">
-                                    <i class="ph ph-rocket-launch icon"></i>
-                                </div>
-                                <h3 class="test-option-title">YKS Soru Çöz</h3>
-                                <p class="test-option-desc">Alanına göre hızlı seviye testi</p>
-                            </article>
-                        </div>
+                    <!-- YKS Test Flow Container -->
+                    <div id="yksTestFlowContainer">
+                        <!-- YKS Test Flow buraya render edilecek -->
                     </div>
                 </div>
 
@@ -698,7 +664,7 @@
 
                         <article class="question-card">
                             <h2 class="question-text" id="questionText">
-                                İşletim sisteminin temel görevlerinden biri nedir?
+                                Soru yükleniyor...
                             </h2>
 
                             <fieldset class="options-list" id="optionsList" aria-label="Cevap seçenekleri">
@@ -727,19 +693,19 @@
                             <i class="ph ph-trophy icon"></i>
                         </div>
                         <h1 class="results-title" data-i18n="results.title">Test Tamamlandı!</h1>
-                        <div class="results-score" id="finalScore" role="status" aria-live="polite">8/10</div>
+                        <div class="results-score" id="finalScore" role="status" aria-live="polite">0/0</div>
 
                         <div class="results-stats" role="region" aria-label="Test sonuçları">
                             <div class="result-stat">
-                                <div class="result-value success-color" id="correctAnswers">8</div>
+                                <div class="result-value success-color" id="correctAnswers">0</div>
                                 <div class="result-label" data-i18n="results.correct">Doğru</div>
                             </div>
                             <div class="result-stat">
-                                <div class="result-value danger-color" id="wrongAnswers">2</div>
+                                <div class="result-value danger-color" id="wrongAnswers">0</div>
                                 <div class="result-label" data-i18n="results.wrong">Yanlış</div>
                             </div>
                             <div class="result-stat">
-                                <div class="result-value primary-color" id="successPercent">80%</div>
+                                <div class="result-value primary-color" id="successPercent">0%</div>
                                 <div class="result-label" data-i18n="results.success">Başarı</div>
                             </div>
                             <div class="result-stat">
@@ -759,15 +725,14 @@
                     </article>
                 </div>
 
-                <!-- Bilimsel açıklama – Test sekmesi ALT KISIM -->
+                <!-- Bilimsel açıklama - Test sekmesi ALT KISIM -->
                 <section class="tab-intro tab-intro-test test-tab-intro">
                     <article class="intro-main">
-                        <h2>Test Çöz: Uyarlanabilir Soru Seçimi ve Gerçek Sınav Simülasyonu</h2>
+                        <h2>Test Çöz: YKS Soru Havuzu ile Kişiselleştirilmiş Çalışma</h2>
                         <p>
-                            “Test Çöz” alanı, yalnızca soru listesi sunan basit bir ekran değil;
-                            ölçme-değerlendirme ilkelerine dikkat eden bir çalışma ortamıdır.
-                            Farklı zorluk seviyelerindeki sorular, sınav süresi ve hata analizleri,
-                            <strong>gerçek sınav koşullarına yakın bir deneyim</strong> oluşturmak için birlikte çalışır.
+                            YKS soru havuzundan istediğin alanı, dersi ve konuyu seçerek
+                            kişiselleştirilmiş testler oluşturabilirsin. Pratik modunda
+                            anında geri bildirim al, sınav modunda gerçek sınav deneyimi yaşa.
                         </p>
                     </article>
                     <div class="intro-grid">
@@ -779,18 +744,17 @@
                             </p>
                         </article>
                         <article class="intro-card">
-                            <h3>Zaman Baskısını Yönetmek</h3>
+                            <h3>Alan ve Ders Seçimi</h3>
                             <p>
-                                Sınav modunda süre tutulması, sadece hız çalışması değil; aynı zamanda zaman baskısını ve
-                                sınav kaygısını kontrollü bir ortamda deneyimleme imkânıdır.
+                                TYT, AYT Sayısal, Eşit Ağırlık, Sözel veya Dil alanlarından birini seç,
+                                ardından çalışmak istediğin dersi ve konuları belirle.
                             </p>
                         </article>
                         <article class="intro-card">
-                            <h3>Hata Desenlerini Görmek</h3>
+                            <h3>Anında Geri Bildirim</h3>
                             <p>
-                                İşlem hatası mı yapıyorsun, yoksa soruyu yanlış mı yorumluyorsun?
-                                Performans verileri, hangi soru türlerinde zorlandığını göstererek çalışma planını
-                                yeniden şekillirmene yardımcı olur.
+                                Pratik modunda her sorudan sonra doğru cevabı ve açıklamasını görerek
+                                hatalarını anında düzelt ve öğrenmeyi pekiştir.
                             </p>
                         </article>
                     </div>
@@ -1201,23 +1165,34 @@
     <!-- Toast Notification -->
     <div class="toast-container" id="toastContainer" role="status" aria-live="polite" aria-atomic="true"></div>
 
-    <!-- External JavaScript -->
+    <!-- External JavaScript (SIRALAMA GÜNCELLENDİ) -->
     <script src="utils.js"></script>
     <script src="config.js"></script>
     <script src="storage.js"></script>
     <script src="language.js"></script>
-    <script src="library.js"></script>
-    <!-- AdSense Manager JS (yeni sistem) -->
-    <script src="adsense-manager.js"></script>
-    <!-- APP + QUIZ JS -->
-    <script src="app.js"></script>
-    <script src="quiz-manager.js"></script>
-    <script src="lazy-questions.js"></script>
-    <!-- Soru havuzu + YKS Flow + YKS Yolculuğu -->
+
+    <!-- YKS Soru Havuzu (önce yüklenmeli) -->
     <script src="yks-question-pool.js"></script>
-    <script src="yks-flow.js"></script> <!-- 🔹 YKS soru havuzu → Quiz köprüsü -->
+
+    <!-- Quiz ve Library Manager -->
+    <script src="quiz-manager.js"></script>
+    <script src="library.js"></script>
+
+    <!-- Diğer test yardımcıları -->
+    <script src="lazy-questions.js"></script>
+
+    <!-- YKS Test Flow (quiz-manager'dan sonra) -->
+    <script src="yks-test-flow.js"></script>
+
+    <!-- YKS Journey -->
     <script src="yks-journey.js"></script>
 
+    <!-- Ana uygulama -->
+    <script src="app.js"></script>
+
+    <!-- Diğer scriptler... -->
+    <!-- AdSense Manager JS (yeni sistem) -->
+    <script src="adsense-manager.js"></script>
     <!-- Chat drag (sürükleme + el işareti) -->
     <script src="chat-drag.js"></script>
     <!-- Performans helper (CLS + lazy load) -->
@@ -1408,42 +1383,12 @@
         })();
     </script>
 
-    <!-- 🔹 YKS hızlı seviye kartı + Kütüphane sekmesi için bağlayıcı script -->
+    <!-- Kütüphanem sekmesi için bağlayıcı script (yksQuickCard listener KALDIRILDI) -->
     <script>
         (function () {
             'use strict';
 
             document.addEventListener('DOMContentLoaded', function () {
-                // YKS hızlı seviye kartı
-                var card = document.getElementById('yksQuickCard');
-                if (card) {
-                    function triggerYKSQuickTest() {
-                        if (window.YKSFlow && typeof window.YKSFlow.startQuickLevelTest === 'function') {
-                            // Varsayılan: SAYISAL alan, karışık ders, 10 soru
-                            window.YKSFlow.startQuickLevelTest('sayisal');
-                        } else if (window.Utils && typeof window.Utils.showToast === 'function') {
-                            window.Utils.showToast('YKS soru havuzu henüz hazır değil. Lütfen sayfayı yenileyin.', 'warning');
-                        } else {
-                            alert('YKS soru havuzu henüz hazır değil.');
-                        }
-                    }
-
-                    card.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        // QuizManager'ın default click handler'ını engelle
-                        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-                        triggerYKSQuickTest();
-                    });
-
-                    card.addEventListener('keydown', function (e) {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-                            triggerYKSQuickTest();
-                        }
-                    });
-                }
-
                 // Kütüphanem sekmesine tıklanınca testleri yükle
                 var libTab = document.getElementById('tab-library');
                 if (libTab && window.LibraryManager && typeof window.LibraryManager.loadLibrary === 'function') {
