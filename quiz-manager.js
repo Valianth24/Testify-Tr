@@ -18,6 +18,7 @@ const QuizManager = {
         isReviewing: false,
         testTitle: null,
         testDescription: null,
+        meta: null,                 // ✅ Kaynak / ders / konu gibi ek bilgiler
         eventListenersAttached: false // ✅ Duplicate önleme
     },
 
@@ -105,6 +106,7 @@ const QuizManager = {
 
     /**
      * Quiz'i başlatır - TAM HATASIZ
+     * (Eski sistem: AI testi veya window.questionBank kullanır)
      */
     startQuiz(mode) {
         console.log('🎯 Quiz başlatılıyor, mod:', mode);
@@ -131,6 +133,10 @@ const QuizManager = {
                     isReviewing: false,
                     testTitle: aiTest.title,
                     testDescription: aiTest.description,
+                    meta: {
+                        source: 'ai',
+                        id: aiTest.id || null
+                    },
                     eventListenersAttached: this.state.eventListenersAttached
                 };
                 
@@ -167,6 +173,10 @@ const QuizManager = {
                     isReviewing: false,
                     testTitle: null,
                     testDescription: null,
+                    meta: {
+                        source: 'questionBank',
+                        mode
+                    },
                     eventListenersAttached: this.state.eventListenersAttached
                 };
                 
@@ -203,6 +213,72 @@ const QuizManager = {
             
         } catch (error) {
             console.error('❌ Quiz başlatma hatası:', error);
+            Utils.showToast('Test başlatılamadı: ' + error.message, 'error');
+        }
+    },
+
+    /**
+     * ✅ Yeni flow için generic başlatıcı
+     * TestFlow gibi yapılar buradan çağıracak:
+     * QuizManager.start({
+     *   questions: [...],        // ZORUNLU
+     *   mode: 'practice-library',
+     *   testTitle: '...',
+     *   testDescription: '...',
+     *   meta: { source: 'library', testId: '...' }
+     * })
+     */
+    start(config) {
+        console.log('🎯 QuizManager.start(config) çağrıldı:', config);
+
+        // Eski quiz’i temizle
+        this.cleanupPreviousQuiz();
+
+        try {
+            if (!config || !Array.isArray(config.questions) || config.questions.length === 0) {
+                Utils.showToast('Bu test için soru bulunamadı.', 'error');
+                console.error('QuizManager.start: geçersiz questions', config && config.questions);
+                return;
+            }
+
+            this.state = {
+                currentMode: config.mode || 'custom',
+                questions: config.questions,
+                currentIndex: 0,
+                answers: new Array(config.questions.length).fill(null),
+                startTime: Date.now(),
+                timerInterval: null,
+                elapsedSeconds: 0,
+                isReviewing: false,
+                testTitle: config.testTitle || null,
+                testDescription: config.testDescription || null,
+                meta: config.meta || null,
+                eventListenersAttached: this.state.eventListenersAttached
+            };
+
+            const testSelection = document.getElementById('testSelection');
+            const quizPage = document.getElementById('quizPage');
+
+            if (!quizPage) {
+                throw new Error('quizPage bulunamadı');
+            }
+
+            if (testSelection) {
+                testSelection.classList.remove('active');
+            }
+            quizPage.classList.add('active');
+
+            this.showExitButton();
+            this.startTimer();
+            this.displayQuestion();
+            this.saveState();
+
+            const questionCount = this.state.questions.length;
+            const titlePart = this.state.testTitle ? `: ${this.state.testTitle}` : '';
+            Utils.showToast(`Test başladı${titlePart} - ${questionCount} soru`, 'success');
+
+        } catch (error) {
+            console.error('❌ QuizManager.start hata:', error);
             Utils.showToast('Test başlatılamadı: ' + error.message, 'error');
         }
     },
@@ -248,6 +324,7 @@ const QuizManager = {
                     startTime: this.state.startTime,
                     elapsedSeconds: this.state.elapsedSeconds,
                     questionCount: this.state.questions.length
+                    // İstersen ileride testTitle/meta da ekleyebiliriz
                 });
             }
         } catch (error) {
@@ -649,7 +726,8 @@ const QuizManager = {
             successRate: successRate,
             time: this.state.elapsedSeconds,
             timestamp: Date.now(),
-            testTitle: this.state.testTitle
+            testTitle: this.state.testTitle,
+            meta: this.state.meta
         };
     },
 
@@ -765,6 +843,7 @@ const QuizManager = {
                 isReviewing: false,
                 testTitle: null,
                 testDescription: null,
+                meta: null,
                 eventListenersAttached: this.state.eventListenersAttached
             };
 
@@ -821,6 +900,7 @@ const QuizManager = {
                 isReviewing: false,
                 testTitle: null,
                 testDescription: null,
+                meta: null,
                 eventListenersAttached: this.state.eventListenersAttached
             };
 
@@ -861,19 +941,32 @@ const QuizManager = {
             
             cards.forEach((card, index) => {
                 const mode = modes[index];
-                
-                card.addEventListener('click', (e) => {
+
+                const handleClick = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    this.startQuiz(mode);
-                });
-                
-                card.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
+
+                    // ✅ Yeni flow: Pratik Modu → TestFlow varsa oraya yönlendir
+                    if (mode === 'practice' &&
+                        window.TestFlow &&
+                        typeof window.TestFlow.openPracticeSource === 'function') {
+                        console.log('🧭 TestFlow.openPracticeSource() çağrılıyor...');
+                        window.TestFlow.openPracticeSource();
+                    } else {
+                        // Eski davranış: direkt quiz başlat
                         this.startQuiz(mode);
                     }
-                });
+                };
+
+                const handleKey = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleClick(e);
+                    }
+                };
+                
+                card.addEventListener('click', handleClick);
+                card.addEventListener('keypress', handleKey);
             });
         }
 
