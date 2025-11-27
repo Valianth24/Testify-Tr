@@ -421,8 +421,8 @@
                             <i class="ph ph-target icon" aria-hidden="true"></i>
                             <span id="rank" aria-label="Sıralama">#--</span>
                         </div>
+                        <button class="user-avatar" id="userAvatar" aria-label="Kullanıcı menüsü" title="Profil">U</button>
                     </div>
-                    <button class="user-avatar" id="userAvatar" aria-label="Kullanıcı menüsü" title="Profil">U</button>
                 </div>
             </div>
 
@@ -1408,36 +1408,49 @@
         })();
     </script>
 
-    <!-- 🔹 YKS hızlı seviye kartı için bağlayıcı script -->
+    <!-- 🔹 YKS hızlı seviye kartı + Kütüphane sekmesi için bağlayıcı script -->
     <script>
         (function () {
             'use strict';
 
             document.addEventListener('DOMContentLoaded', function () {
+                // YKS hızlı seviye kartı
                 var card = document.getElementById('yksQuickCard');
-                if (!card) return;
-
-                function triggerYKSQuickTest() {
-                    if (window.YKSFlow && typeof window.YKSFlow.startQuickLevelTest === 'function') {
-                        // Varsayılan: SAYISAL alan, karışık ders, 10 soru
-                        window.YKSFlow.startQuickLevelTest('sayisal');
-                    } else if (window.Utils && typeof window.Utils.showToast === 'function') {
-                        window.Utils.showToast('YKS soru havuzu henüz hazır değil. Lütfen sayfayı yenileyin.', 'warning');
-                    } else {
-                        alert('YKS soru havuzu henüz hazır değil.');
+                if (card) {
+                    function triggerYKSQuickTest() {
+                        if (window.YKSFlow && typeof window.YKSFlow.startQuickLevelTest === 'function') {
+                            // Varsayılan: SAYISAL alan, karışık ders, 10 soru
+                            window.YKSFlow.startQuickLevelTest('sayisal');
+                        } else if (window.Utils && typeof window.Utils.showToast === 'function') {
+                            window.Utils.showToast('YKS soru havuzu henüz hazır değil. Lütfen sayfayı yenileyin.', 'warning');
+                        } else {
+                            alert('YKS soru havuzu henüz hazır değil.');
+                        }
                     }
+
+                    card.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        // QuizManager'ın default click handler'ını engelle
+                        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+                        triggerYKSQuickTest();
+                    });
+
+                    card.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+                            triggerYKSQuickTest();
+                        }
+                    });
                 }
 
-                card.addEventListener('click', function () {
-                    triggerYKSQuickTest();
-                });
-
-                card.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        triggerYKSQuickTest();
-                    }
-                });
+                // Kütüphanem sekmesine tıklanınca testleri yükle
+                var libTab = document.getElementById('tab-library');
+                if (libTab && window.LibraryManager && typeof window.LibraryManager.loadLibrary === 'function') {
+                    libTab.addEventListener('click', function () {
+                        window.LibraryManager.loadLibrary();
+                    });
+                }
             });
         })();
     </script>
