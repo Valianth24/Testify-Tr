@@ -4184,17 +4184,15 @@ html[data-theme="light"] .quiz-progress-bar {
     max-height: 40px;
     display: block;
     object-fit: contain;
-    transform: translateY(12px);   /* ikon hizası – istersen 10/8px'e çekebilirsin */
+    transform: translateY(12px);   /* ikon hizası */
 }
 
-/* AI ikonlu kartta yazıyı da aynı oranda aşağı kaydır */
-.mode-card:has(.ai-test-icon) .test-option-title,
-.mode-card:has(.ai-test-icon) .test-option-desc {
-    transform: translateY(12px);
+/* AI Test kartındaki yazıyı da aynı oranda aşağı kaydır
+   (3. kart AI Test ise) */
+.test-options .test-option-card:nth-child(3) .test-option-title,
+.test-options .test-option-card:nth-child(3) .test-option-desc {
+    margin-top: 12px;
 }
-
-
-
 
 
 
