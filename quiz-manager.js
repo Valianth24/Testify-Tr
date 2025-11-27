@@ -936,6 +936,7 @@ const QuizManager = {
         // Test kartları
         const testOptions = document.querySelector('.test-options');
         if (testOptions) {
+            // Kartların sırası: [0] practice, [1] exam, [2] ai, [3] custom
             const modes = ['practice', 'exam', 'ai', 'custom'];
             const cards = testOptions.querySelectorAll('.test-option-card');
             
@@ -946,16 +947,21 @@ const QuizManager = {
                     e.preventDefault();
                     e.stopPropagation();
 
-                    // ✅ Yeni flow: Pratik Modu → TestFlow varsa oraya yönlendir
-                    if (mode === 'practice' &&
-                        window.TestFlow &&
-                        typeof window.TestFlow.openPracticeSource === 'function') {
-                        console.log('🧭 TestFlow.openPracticeSource() çağrılıyor...');
-                        window.TestFlow.openPracticeSource();
-                    } else {
-                        // Eski davranış: direkt quiz başlat
-                        this.startQuiz(mode);
+                    // 🧭 PRATİK MODU → Kullanıcı Kütüphanesi
+                    if (mode === 'practice') {
+                        if (window.LibraryManager && typeof window.LibraryManager.openAndLoad === 'function') {
+                            console.log('📚 Pratik modu: kullanıcı kütüphanesi açılıyor...');
+                            window.LibraryManager.openAndLoad();
+                            return;
+                        }
+
+                        console.log('⚠️ LibraryManager bulunamadı, fallback: startQuiz("practice")');
+                        this.startQuiz('practice');
+                        return;
                     }
+
+                    // Diğer modlar eski davranışta kalsın
+                    this.startQuiz(mode);
                 };
 
                 const handleKey = (e) => {
