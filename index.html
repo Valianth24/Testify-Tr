@@ -644,7 +644,7 @@
                                 <h3 class="test-option-title" data-i18n="test.exam">Sınav Modu</h3>
                                 <p class="test-option-desc" data-i18n="test.examDesc">Gerçek sınav deneyimi</p>
                             </article>
-                            <!-- BURAYA SADECE ek class eklendi: ai-test-card -->
+                            <!-- AI Test kartı -->
                             <article class="test-option-card ai-test-card" tabindex="0" role="button" aria-label="AI test">
                                 <div class="test-option-icon" aria-hidden="true">
                                     <img src="al.png" alt="Testify AI" class="icon ai-icon-img ai-test-icon">
@@ -658,6 +658,14 @@
                                 </div>
                                 <h3 class="test-option-title" data-i18n="test.custom">Özel Test</h3>
                                 <p class="test-option-desc" data-i18n="test.customDesc">Kendi kriterlerine göre</p>
+                            </article>
+                            <!-- 🔹 YENİ: YKS hızlı seviye testi kartı -->
+                            <article class="test-option-card" tabindex="0" role="button" id="yksQuickCard" aria-label="YKS seviye testi">
+                                <div class="test-option-icon" aria-hidden="true">
+                                    <i class="ph ph-rocket-launch icon"></i>
+                                </div>
+                                <h3 class="test-option-title">YKS Soru Çöz</h3>
+                                <p class="test-option-desc">Alanına göre hızlı seviye testi</p>
                             </article>
                         </div>
                     </div>
@@ -1205,8 +1213,9 @@
     <script src="app.js"></script>
     <script src="quiz-manager.js"></script>
     <script src="lazy-questions.js"></script>
-    <!-- Soru havuzu + YKS Yolculuğu -->
+    <!-- Soru havuzu + YKS Flow + YKS Yolculuğu -->
     <script src="yks-question-pool.js"></script>
+    <script src="yks-flow.js"></script> <!-- 🔹 YKS soru havuzu → Quiz köprüsü -->
     <script src="yks-journey.js"></script>
 
     <!-- Chat drag (sürükleme + el işareti) -->
@@ -1396,6 +1405,40 @@
             } else {
                 initChatUI();
             }
+        })();
+    </script>
+
+    <!-- 🔹 YKS hızlı seviye kartı için bağlayıcı script -->
+    <script>
+        (function () {
+            'use strict';
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var card = document.getElementById('yksQuickCard');
+                if (!card) return;
+
+                function triggerYKSQuickTest() {
+                    if (window.YKSFlow && typeof window.YKSFlow.startQuickLevelTest === 'function') {
+                        // Varsayılan: SAYISAL alan, karışık ders, 10 soru
+                        window.YKSFlow.startQuickLevelTest('sayisal');
+                    } else if (window.Utils && typeof window.Utils.showToast === 'function') {
+                        window.Utils.showToast('YKS soru havuzu henüz hazır değil. Lütfen sayfayı yenileyin.', 'warning');
+                    } else {
+                        alert('YKS soru havuzu henüz hazır değil.');
+                    }
+                }
+
+                card.addEventListener('click', function () {
+                    triggerYKSQuickTest();
+                });
+
+                card.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        triggerYKSQuickTest();
+                    }
+                });
+            });
         })();
     </script>
 
