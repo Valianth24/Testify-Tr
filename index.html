@@ -370,6 +370,16 @@
         [data-theme="dark"] .ai-test-icon {
             content: url("al-white.png"); /* Dark mode için beyaz PNG yolu */
         }
+
+        /* === AI Test kartı hizalama (Test Seç bölümü) === */
+        .ai-test-card .test-option-icon .ai-test-icon {
+            transform: translateY(12px); /* ikon biraz aşağı */
+        }
+
+        .ai-test-card .test-option-title,
+        .ai-test-card .test-option-desc {
+            transform: translateY(12px); /* yazıları da aynı oranda aşağı kaydır */
+        }
     </style>
 </head>
 <body>
@@ -634,7 +644,8 @@
                                 <h3 class="test-option-title" data-i18n="test.exam">Sınav Modu</h3>
                                 <p class="test-option-desc" data-i18n="test.examDesc">Gerçek sınav deneyimi</p>
                             </article>
-                            <article class="test-option-card" tabindex="0" role="button" aria-label="AI test">
+                            <!-- BURAYA SADECE ek class eklendi: ai-test-card -->
+                            <article class="test-option-card ai-test-card" tabindex="0" role="button" aria-label="AI test">
                                 <div class="test-option-icon" aria-hidden="true">
                                     <img src="al.png" alt="Testify AI" class="icon ai-icon-img ai-test-icon">
                                 </div>
