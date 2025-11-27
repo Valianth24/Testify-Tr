@@ -4113,16 +4113,30 @@ html[data-theme="light"] .quiz-progress-bar {
     .theme-toggle {
         width: 44px;
         min-width: 44px;
-        padding: 2px;
+        height: 26px;
+        padding: 0;
         overflow: hidden;          /* yuvarlak dışarı taşmasın */
         border-radius: 999px;
     }
 
     .theme-toggle-slider {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
         padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
+
+        /* mobilde tam dikey ortala */
+        top: 50%;
+        left: 3px;
+        transform: translateY(-50%);
+    }
+
+    /* dark modda knob'u sağa, tam içine al */
+    [data-theme="dark"] .theme-toggle-slider {
+        left: calc(100% - 20px - 3px); /* genişlik - knob - margin */
     }
 
     .theme-toggle .icon {
@@ -4156,19 +4170,27 @@ html[data-theme="light"] .quiz-progress-bar {
     line-height: 1;
 }
 
-/* PNG ikon (al-white.png) – boşluklara rağmen ortala */
+/* PNG ikon (ör. al-white.png) – boşluklara rağmen ortala */
 .mode-card-icon img {
     max-width: 40px;
     max-height: 40px;
     display: block;
     object-fit: contain;
 }
+
+/* AI Test ikonunu da aynı kutuya oturt + aşağı kaydır */
 .ai-test-icon {
     max-width: 40px;
     max-height: 40px;
     display: block;
     object-fit: contain;
-    transform: translateY(2px);   /* gerekirse 3px yap, zevkine göre oynayabilirsin */
+    transform: translateY(12px);   /* ikon hizası – istersen 10/8px'e çekebilirsin */
+}
+
+/* AI ikonlu kartta yazıyı da aynı oranda aşağı kaydır */
+.mode-card:has(.ai-test-icon) .test-option-title,
+.mode-card:has(.ai-test-icon) .test-option-desc {
+    transform: translateY(12px);
 }
 
 
