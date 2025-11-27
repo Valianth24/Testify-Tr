@@ -3989,5 +3989,51 @@ html[data-theme="light"] [data-content-key] .yks-pill:hover {
 [data-theme="light"] .weekly-report-card * {
     color: #000000 !important;
 }
+/* === YKS JOURNEY - MOBİL LAYOUT DÜZELTMELERİ === */
+
+/* Çok küçük ekranlarda genel padding'i biraz daralt */
+@media (max-width: 480px) {
+    #journeyContent {
+        padding: 0.75rem 0.75rem 1rem;
+    }
+}
+
+/* "YKS Yolculuğum" ana kartı ve içeriği */
+@media (max-width: 768px) {
+    /* Büyük header kartı (YKS Yolculuğum + Ayarlar) alt alta gelsin */
+    .yks-dashboard .dashboard-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.9rem 1rem 1rem;
+        gap: 0.6rem;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    /* Kart içindeki her şey tam genişlik kullansın, sıkışmasın */
+    .yks-dashboard .dashboard-header-card > * {
+        width: 100%;
+    }
+
+    /* Ayarlar butonu (veya sağdaki kısım) alta insin ve sağa hizalansın */
+    .yks-dashboard .dashboard-header-card > *:last-child {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    /* Başlık biraz küçülsün ki satıra sığsın */
+    .yks-dashboard .countdown-section h1 {
+        font-size: 1.1rem;
+    }
+
+    /* "YKS'ye X gün kaldı" rozeti mobilde daha rahat dursun */
+    .yks-dashboard .countdown-timer {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+
 
 
