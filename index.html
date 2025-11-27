@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr" data-theme="light">
 <head>
@@ -43,33 +44,31 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6980942787991808"
             crossorigin="anonymous"></script>
     <!-- ✅ BİTİŞ -->
-    
+
     <!-- Font - Preload for Performance -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- External CSS -->
+    <!-- External CSS (ANA DİZİN) -->
     <link rel="stylesheet" href="styles.css">
     <!-- YKS Yolculuğum CSS - GELİŞTİRİLMİŞ VERSİYON -->
     <link rel="stylesheet" href="yks-journey-enhanced.css">
-    <!-- YKS Test Flow CSS (YENİ) -->
+    <!-- YKS Test Flow CSS -->
     <link rel="stylesheet" href="yks-test-flow.css">
+    <!-- Library CSS -->
+    <link rel="stylesheet" href="library.css">
 
     <!-- Phosphor Icons (ikonlar için) -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
-    
+
     <!-- Font Awesome for additional icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- AdSense Manager Styles -->
-    <!--  <link rel="stylesheet" href="testify-ads.css"> -->
-    <!--   <script src="testify-ads.js" defer></script> -->
 
     <!-- jsPDF for PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <!-- TestifyAI -->
-    <script src="testify-core.js"></script>   <!-- window.TestifyAI burada tanımlanmalı -->
+    <!-- TestifyAI (ANA DİZİN) -->
+    <script src="testify-core.js"></script>
     <script>
         // Gerçek TestifyAI nesnesi sonradan gelmezse en azından undefined olmasın
         window.TestifyAI = window.TestifyAI || { __placeholder: true };
@@ -90,37 +89,32 @@
 
     <!-- Floating Testify Assistant Styles -->
     <style>
-        /* Logo butonu container'ı */
         .logo {
             display: flex;
             align-items: center;
             padding-top: 0;
             padding-bottom: 0;
-            height: 36px; /* LOGO BOYUNU BURADAN AYARLA */
+            height: 36px;
             line-height: 1;
         }
 
-        /* Header içindeki elemanları dikey ortala (varsa override olur) */
         .header-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        /* Logo resmi: container kadar büyük olsun, header'ı büyütmesin */
         .logo-img {
             height: 300%;
             width: auto;
             display: block;
         }
 
-        /* Genel ikon stili (Phosphor) */
         .icon {
             font-size: 1.1em;
             vertical-align: middle;
         }
 
-        /* ChatGPT yerine kullanılan AI görseli */
         .ai-icon-img {
             width: 1.2em;
             height: 1.2em;
@@ -129,7 +123,6 @@
             vertical-align: middle;
         }
 
-        /* AI mesaj içi formatlama */
         .message-content strong {
             color: var(--primary);
             font-weight: 600;
@@ -148,7 +141,6 @@
             color: var(--primary-light);
         }
 
-        /* === Testify Floating Chat Widget === */
         .chat-widget-wrapper {
             position: fixed;
             right: 1.5rem;
@@ -177,15 +169,15 @@
             transition: transform .16s ease,box-shadow .16s ease,opacity .16s ease;
         }
 
-            .chat-toggle-btn:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 12px 30px rgba(15,23,42,0.4);
-            }
+        .chat-toggle-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(15,23,42,0.4);
+        }
 
-            .chat-toggle-btn:focus-visible {
-                outline: 2px solid var(--primary,#4f46e5);
-                outline-offset: 2px;
-            }
+        .chat-toggle-btn:focus-visible {
+            outline: 2px solid var(--primary,#4f46e5);
+            outline-offset: 2px;
+        }
 
         .chat-toggle-btn--hidden {
             display: none;
@@ -227,17 +219,17 @@
             transition: opacity .2s ease,transform .2s ease,visibility .2s ease;
         }
 
-            .chat-widget.chat-widget--open {
-                opacity: 1;
-                visibility: visible;
-                pointer-events: auto;
-                transform: translateY(0) scale(1);
-            }
+        .chat-widget.chat-widget--open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
 
-            .chat-widget.chat-widget--minimized .chat-body,
-            .chat-widget.chat-widget--minimized .chat-footer {
-                display: none;
-            }
+        .chat-widget.chat-widget--minimized .chat-body,
+        .chat-widget.chat-widget--minimized .chat-footer {
+            display: none;
+        }
 
         .chat-header {
             padding: 0.85rem 1rem;
@@ -251,9 +243,9 @@
             -webkit-user-select: none;
         }
 
-            .chat-header.dragging {
-                cursor: grabbing;
-            }
+        .chat-header.dragging {
+            cursor: grabbing;
+        }
 
         .chat-title {
             display: flex;
@@ -294,9 +286,9 @@
             cursor: pointer;
         }
 
-            .chat-header-btn:hover {
-                background: rgba(15,23,42,0.4);
-            }
+        .chat-header-btn:hover {
+            background: rgba(15,23,42,0.4);
+        }
 
         .chat-body {
             padding: 0.75rem 0.9rem;
@@ -309,9 +301,9 @@
             border-top: 1px solid rgba(15,23,42,0.7);
         }
 
-            .chat-footer .ai-input-group {
-                background: var(--bg-tertiary,rgba(15,23,42,0.9));
-            }
+        .chat-footer .ai-input-group {
+            background: var(--bg-tertiary,rgba(15,23,42,0.9));
+        }
 
         .ai-chat {
             flex: 1;
@@ -336,17 +328,16 @@
             }
         }
 
-        /* Liderlik tablosu & dil değiştirme alanı için lacivert tema */
         .leaderboard-header {
             background: linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,64,175,0.95));
             color: #f9fafb;
             border-radius: 1rem 1rem 0 0;
         }
 
-            .leaderboard-header h1,
-            .leaderboard-header p {
-                margin: 0;
-            }
+        .leaderboard-header h1,
+        .leaderboard-header p {
+            margin: 0;
+        }
 
         .language-switcher button,
         .language-switcher select {
@@ -355,12 +346,11 @@
             border-color: rgba(148,163,184,0.7);
         }
 
-            .language-switcher button.active {
-                background: linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,64,175,0.95));
-                color: #f9fafb;
-            }
+        .language-switcher button.active {
+            background: linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,64,175,0.95));
+            color: #f9fafb;
+        }
 
-        /* === AI Test kartı ikonu – dark mode uyumu === */
         .test-option-icon .ai-test-icon {
             display: block;
             max-width: 56px;
@@ -370,36 +360,31 @@
         }
 
         [data-theme="dark"] .ai-test-icon {
-            content: url("al-white.png"); /* Dark mode için beyaz PNG yolu */
+            content: url("al-white.png");
         }
 
-        /* === AI Test kartı hizalama (Test Seç bölümü) === */
         .ai-test-card .test-option-icon .ai-test-icon {
-            transform: translateY(12px); /* ikon biraz aşağı */
+            transform: translateY(12px);
         }
 
         .ai-test-card .test-option-title,
         .ai-test-card .test-option-desc {
-            transform: translateY(12px); /* yazıları da aynı oranda aşağı kaydır */
+            transform: translateY(12px);
         }
     </style>
 </head>
 <body>
-    <!-- Skip to Main Content (Accessibility) -->
     <a href="#main-content" class="skip-link">Ana içeriğe geç</a>
 
     <!-- Header -->
     <header class="header" role="banner">
         <div class="header-content">
             <div class="header-top">
-                <!-- LOGO: logo.png kullanıldı, 2.2 kat büyük -->
                 <a href="/" id="logoLink" class="logo" aria-label="Testify Ana Sayfa">
                     <img src="logo.png" alt="Testify" class="logo-img">
                 </a>
 
                 <div class="header-actions">
-                    <!-- Language Selector - Otomatik oluşturulacak -->
-                    <!-- Theme Toggle -->
                     <button class="theme-toggle"
                             onclick="themeManager.toggle()"
                             aria-label="Tema değiştir"
@@ -423,18 +408,16 @@
                             <i class="ph ph-target icon" aria-hidden="true"></i>
                             <span id="rank" aria-label="Sıralama">#--</span>
                         </div>
+                        <button class="user-avatar" id="userAvatar" aria-label="Kullanıcı menüsü" title="Profil">U</button>
                     </div>
-                    <button class="user-avatar" id="userAvatar" aria-label="Kullanıcı menüsü" title="Profil">U</button>
                 </div>
             </div>
 
-            <!-- Navigation Tabs -->
             <nav class="nav-tabs" role="tablist" aria-label="Ana navigasyon">
                 <button id="tab-dashboard" class="nav-tab active" data-tab="dashboard" role="tab" aria-selected="true" aria-controls="dashboard">
                     <i class="ph ph-chart-line-up icon" aria-hidden="true"></i>
                     <span data-i18n="nav.dashboard">Dashboard</span>
                 </button>
-                <!-- YKS Yolculuğum -->
                 <button id="tab-journey" class="nav-tab" data-tab="journey" role="tab" aria-selected="false" aria-controls="journey">
                     <i class="ph ph-rocket-launch icon" aria-hidden="true"></i>
                     <span data-i18n="nav.journey">YKS Yolculuğum</span>
@@ -471,11 +454,9 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <div class="main-container">
-        <!-- Main Content Area -->
         <main class="main-content" id="main-content" role="main">
-            <!-- Dashboard Tab -->
+            <!-- Dashboard -->
             <section class="tab-content active" id="dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
                 <h1 data-i18n="dashboard.title">Dashboard</h1>
 
@@ -510,7 +491,6 @@
                     </article>
                 </div>
 
-                <!-- Recent Activity -->
                 <section class="recent-activity" aria-labelledby="recent-activity-title">
                     <h2 id="recent-activity-title" data-i18n="dashboard.activity">Son Aktiviteler</h2>
                     <div id="activityList" class="activity-list">
@@ -523,21 +503,17 @@
                     </div>
                 </section>
 
-                <!-- Bilimsel açıklama – Dashboard ALT KISIM -->
                 <section class="tab-intro tab-intro-dashboard">
                     <article class="intro-main">
                         <h2>Testify: Öğrenme Bilimi, Yapay Zekâ ve Ölçme-Değerlendirmenin Kesişim Noktası</h2>
                         <p>
-                            Testify, sınav hazırlığını “ezber odaklı” tekrarlar olmaktan çıkarıp,
+                            Testify, sınav hazırlığını ezber odaklı tekrarlar olmaktan çıkarıp
                             <strong>öğrenme bilimi</strong>, <strong>bilişsel psikoloji</strong> ve
                             <strong>modern ölçme-değerlendirme</strong> ilkeleriyle yeniden tasarlayan akıllı bir eğitim platformudur.
-                            Amaç yalnızca çok soru çözmek değil; hangi soruları, ne zaman, hangi zorluk seviyesinde çözmen gerektiğini
-                            veriye dayalı olarak belirleyebilmektir.
                         </p>
                         <p>
-                            Her çözdüğün test; başarı oranların, sürelerin ve hata desenlerinle birlikte bir veri noktası üretir.
-                            Testify bu verileri, zaman içinde senin için kişiselleştirilmiş öneriler, öğrenme yolları ve
-                            zorluk ayarlı testler üretmek için kullanmayı hedefler.
+                            Amaç yalnızca çok soru çözmek değil; hangi soruları, ne zaman, hangi zorluk seviyesinde çözmen gerektiğini
+                            veriye dayalı olarak belirleyebilmektir.
                         </p>
                     </article>
 
@@ -554,9 +530,8 @@
                         <article class="intro-card">
                             <h3>Psikometri ve Ölçme-Değerlendirme</h3>
                             <p>
-                                Yalnızca “doğru sayısına” değil; soruların <strong>zorluk düzeyine</strong>,
-                                <strong>ayırt ediciliğine</strong> ve hata desenlerine odaklanan bir yaklaşım benimsler.
-                                Böylece puanların, gerçekte neyi ne kadar bildiğini daha doğru yansıtır.
+                                Yalnızca doğru sayısına değil; soruların zorluk düzeyine,
+                                ayırt ediciliğine ve hata desenlerine odaklanan bir yaklaşım benimsler.
                             </p>
                         </article>
 
@@ -564,7 +539,7 @@
                             <h3>Veri Bilimi &amp; Yapay Zekâ</h3>
                             <p>
                                 Her test, gelecekteki önerileri besleyen bir veri kaynağıdır.
-                                Amaç yalnızca “çok çalışıyor musun?” sorusunu değil;
+                                Amaç yalnızca “çok çalışıyor musun?” sorusunu değil,
                                 <strong>doğru yerde, doğru yoğunlukta çalışıyor musun?</strong> sorusunu da yanıtlayabilmektir.
                             </p>
                         </article>
@@ -572,13 +547,10 @@
                 </section>
             </section>
 
-            <!-- YKS Journey Tab - GELİŞTİRİLMİŞ TASARIM İLE -->
+            <!-- YKS Journey -->
             <section class="tab-content" id="journey" role="tabpanel" aria-labelledby="tab-journey">
-                <div id="journeyContent" data-journey-root="true">
-                    <!-- YKS Yolculuğu dinamik olarak yüklenecek -->
-                </div>
+                <div id="journeyContent" data-journey-root="true"></div>
 
-                <!-- Bilimsel açıklama – YKS Yolculuğum ALT KISIM -->
                 <section class="tab-intro tab-intro-journey">
                     <article class="intro-main">
                         <h2>YKS Yolculuğum: Bilimsel Çalışma Planı ve Akıllı Geri Bildirim</h2>
@@ -586,20 +558,14 @@
                             YKS Yolculuğum, TYT–AYT hazırlığını rastgele konu bitirme listelerinden çıkarıp;
                             performans verilerine dayalı, sürekli güncellenen bir <strong>çalışma yol haritasına</strong> dönüştürür.
                         </p>
-                        <p>
-                            Hangi derste hangi seviyede olduğunu, hangi konularda hataların yoğunlaştığını ve
-                            ne kadar sürede ilerlediğini takip ederek; soru önerilerini, deneme dağılımını ve
-                            günlük hedeflerini bu verilere göre uyarlamayı hedefler.
-                        </p>
                     </article>
 
                     <div class="intro-grid">
                         <article class="intro-card">
                             <h3>Alan Bazlı Seviye Haritası</h3>
                             <p>
-                                Sayısal / Eşit Ağırlık / Sözel alanlarına göre TYT ve AYT performansın
-                                birleşik bir skora dönüştürülür. Bu skor, hangi ders ve konuların
-                                <strong>öncelikli</strong> çalışılması gerektiğini belirlemede kullanılır.
+                                Sayısal / Eşit Ağırlık / Sözel alanlarına göre performansın birleşik bir skora dönüştürülür
+                                ve öncelikli ders/konular belirlenir.
                             </p>
                         </article>
 
@@ -607,18 +573,14 @@
                             <h3>Uyarlanabilir Zorluk ve Test Setleri</h3>
                             <p>
                                 Başarı oranına göre soru zorluk düzeyi dinamik olarak ayarlanır;
-                                böylece ne sürekli çok kolay sorularla oyalanırsın ne de motivasyonunu
-                                kıracak kadar zor setlere maruz kalırsın. Amaç, daima
-                                <strong>“gelişim bölgesi”</strong>nde çalışmaktır.
+                                her zaman gelişim bölgesinde çalışman hedeflenir.
                             </p>
                         </article>
 
                         <article class="intro-card">
                             <h3>Zaman Yönetimi ve Dayanıklılık</h3>
                             <p>
-                                Çözdüğün her testin süresi, soru başına harcadığın zaman ve denemelerdeki
-                                performans düşüşleri izlenir. Bu veriler üzerinden net hedeflerine uygun
-                                <strong>çalışma blokları</strong> ve mola aralıkları önerilir.
+                                Test sürelerin ve net hedeflerine göre çalışma blokları ve mola aralıkları önerilir.
                             </p>
                         </article>
                     </div>
@@ -627,7 +589,7 @@
 
             <!-- Test Tab -->
             <section class="tab-content" id="test" role="tabpanel" aria-labelledby="tab-test">
-                <!-- Test Selection Page -->
+                <!-- Test Selection Page (eski ekran + YKS kartı) -->
                 <div class="test-page active" id="testSelection">
                     <div class="test-selection">
                         <h1 data-i18n="test.title">Test Seç</h1>
@@ -639,6 +601,7 @@
                                 <h3 class="test-option-title" data-i18n="test.practice">Pratik Modu</h3>
                                 <p class="test-option-desc" data-i18n="test.practiceDesc">Zaman baskısı olmadan pratik yap</p>
                             </article>
+
                             <article class="test-option-card" tabindex="0" role="button" aria-label="Sınav modu">
                                 <div class="test-option-icon" aria-hidden="true">
                                     <i class="ph ph-target icon"></i>
@@ -646,22 +609,13 @@
                                 <h3 class="test-option-title" data-i18n="test.exam">Sınav Modu</h3>
                                 <p class="test-option-desc" data-i18n="test.examDesc">Gerçek sınav deneyimi</p>
                             </article>
-                            <!-- AI Test -->
+
                             <article class="test-option-card ai-test-card" tabindex="0" role="button" aria-label="AI test">
                                 <div class="test-option-icon" aria-hidden="true">
                                     <img src="al.png" alt="Testify AI" class="icon ai-icon-img ai-test-icon">
                                 </div>
                                 <h3 class="test-option-title" data-i18n="test.ai">AI Test</h3>
                                 <p class="test-option-desc" data-i18n="test.aiDesc">AI tarafından oluşturulan sorular</p>
-                            </article>
-
-                            <!-- YENİ: YKS Testleri kartı (FLOW buradan açılıyor) -->
-                            <article class="test-option-card" id="yksFlowCard" tabindex="0" role="button" aria-label="YKS Testleri">
-                                <div class="test-option-icon" aria-hidden="true">
-                                    <i class="ph ph-rocket-launch icon"></i>
-                                </div>
-                                <h3 class="test-option-title">YKS Testleri</h3>
-                                <p class="test-option-desc">TYT / AYT alan &amp; ders seç</p>
                             </article>
 
                             <article class="test-option-card" tabindex="0" role="button" aria-label="Özel test">
@@ -671,14 +625,23 @@
                                 <h3 class="test-option-title" data-i18n="test.custom">Özel Test</h3>
                                 <p class="test-option-desc" data-i18n="test.customDesc">Kendi kriterlerine göre</p>
                             </article>
+
+                            <!-- YENİ: YKS Soru Çöz kartı -->
+                            <article class="test-option-card" tabindex="0" role="button" aria-label="YKS Soru Çöz" id="yksFlowCard">
+                                <div class="test-option-icon" aria-hidden="true">
+                                    <i class="ph ph-graduation-cap icon"></i>
+                                </div>
+                                <h3 class="test-option-title">YKS Soru Çöz</h3>
+                                <p class="test-option-desc">TYT / AYT alan ve ders seç</p>
+                            </article>
                         </div>
                     </div>
                 </div>
 
-                <!-- YKS Test Flow Page (YKS kartına basılınca açılır) -->
+                <!-- YKS Test Flow Page -->
                 <div class="test-page" id="yksFlowPage">
                     <div id="yksTestFlowContainer">
-                        <div class="empty-state">
+                        <div class="yks-flow-loading empty-state">
                             <div class="empty-state-icon" aria-hidden="true">
                                 <i class="ph ph-warning-circle icon"></i>
                             </div>
@@ -690,7 +653,6 @@
                 <!-- Quiz Page -->
                 <div class="test-page" id="quizPage" aria-live="polite">
                     <div class="quiz-container">
-                        <!-- HEADER - EXIT BUTONU İLE -->
                         <div class="quiz-header">
                             <div class="quiz-info">
                                 <span><span data-i18n="quiz.question">Soru</span> <span id="currentQuestion">1</span> <span data-i18n="quiz.of">/</span> <span id="totalQuestionsQuiz">10</span></span>
@@ -699,7 +661,6 @@
                                 <i class="ph ph-timer icon" aria-hidden="true"></i>
                                 <time id="quizTimer">00:00</time>
                             </div>
-                            <!-- EXIT BUTTON -->
                             <button class="btn-exit-quiz"
                                     id="exitQuizBtn"
                                     aria-label="Testi bırak ve çık"
@@ -714,7 +675,7 @@
 
                         <article class="question-card">
                             <h2 class="question-text" id="questionText">
-                                İşletim sisteminin temel görevlerinden biri nedir?
+                                Soru yükleniyor...
                             </h2>
 
                             <fieldset class="options-list" id="optionsList" aria-label="Cevap seçenekleri">
@@ -743,19 +704,19 @@
                             <i class="ph ph-trophy icon"></i>
                         </div>
                         <h1 class="results-title" data-i18n="results.title">Test Tamamlandı!</h1>
-                        <div class="results-score" id="finalScore" role="status" aria-live="polite">8/10</div>
+                        <div class="results-score" id="finalScore" role="status" aria-live="polite">0/0</div>
 
                         <div class="results-stats" role="region" aria-label="Test sonuçları">
                             <div class="result-stat">
-                                <div class="result-value success-color" id="correctAnswers">8</div>
+                                <div class="result-value success-color" id="correctAnswers">0</div>
                                 <div class="result-label" data-i18n="results.correct">Doğru</div>
                             </div>
                             <div class="result-stat">
-                                <div class="result-value danger-color" id="wrongAnswers">2</div>
+                                <div class="result-value danger-color" id="wrongAnswers">0</div>
                                 <div class="result-label" data-i18n="results.wrong">Yanlış</div>
                             </div>
                             <div class="result-stat">
-                                <div class="result-value primary-color" id="successPercent">80%</div>
+                                <div class="result-value primary-color" id="successPercent">0%</div>
                                 <div class="result-label" data-i18n="results.success">Başarı</div>
                             </div>
                             <div class="result-stat">
@@ -775,15 +736,13 @@
                     </article>
                 </div>
 
-                <!-- Bilimsel açıklama – Test sekmesi ALT KISIM -->
                 <section class="tab-intro tab-intro-test test-tab-intro">
                     <article class="intro-main">
-                        <h2>Test Çöz: Uyarlanabilir Soru Seçimi ve Gerçek Sınav Simülasyonu</h2>
+                        <h2>Test Çöz: YKS Soru Havuzu ile Kişiselleştirilmiş Çalışma</h2>
                         <p>
-                            “Test Çöz” alanı, yalnızca soru listesi sunan basit bir ekran değil;
-                            ölçme-değerlendirme ilkelerine dikkat eden bir çalışma ortamıdır.
-                            Farklı zorluk seviyelerindeki sorular, sınav süresi ve hata analizleri,
-                            <strong>gerçek sınav koşullarına yakın bir deneyim</strong> oluşturmak için birlikte çalışır.
+                            YKS soru havuzundan istediğin alanı, dersi ve konuyu seçerek
+                            kişiselleştirilmiş testler oluşturabilirsin. Pratik modunda anında geri bildirim al,
+                            sınav modunda gerçek sınav deneyimi yaşa.
                         </p>
                     </article>
                     <div class="intro-grid">
@@ -795,25 +754,24 @@
                             </p>
                         </article>
                         <article class="intro-card">
-                            <h3>Zaman Baskısını Yönetmek</h3>
+                            <h3>Alan ve Ders Seçimi</h3>
                             <p>
-                                Sınav modunda süre tutulması, sadece hız çalışması değil; aynı zamanda zaman baskısını ve
-                                sınav kaygısını kontrollü bir ortamda deneyimleme imkânıdır.
+                                TYT, AYT Sayısal, Eşit Ağırlık, Sözel veya Dil alanlarından birini seç,
+                                ardından çalışmak istediğin dersi ve konuları belirle.
                             </p>
                         </article>
                         <article class="intro-card">
-                            <h3>Hata Desenlerini Görmek</h3>
+                            <h3>Anında Geri Bildirim</h3>
                             <p>
-                                İşlem hatası mı yapıyorsun, yoksa soruyu yanlış mı yorumluyorsun?
-                                Performans verileri, hangi soru türlerinde zorlandığını göstererek çalışma planını
-                                yeniden şekillirmene yardımcı olur.
+                                Pratik modunda her sorudan sonra doğru cevabı ve açıklamasını görerek
+                                hatalarını anında düzelt ve öğrenmeyi pekiştir.
                             </p>
                         </article>
                     </div>
                 </section>
             </section>
 
-            <!-- Create Test Tab -->
+            <!-- Create Test -->
             <section class="tab-content" id="create" role="tabpanel" aria-labelledby="tab-create">
                 <h1 data-i18n="create.title">Test Oluştur</h1>
 
@@ -875,7 +833,6 @@
                     </button>
                 </form>
 
-                <!-- Bilimsel açıklama – Test Oluştur ALT KISIM -->
                 <section class="tab-intro tab-intro-create">
                     <article class="intro-main">
                         <h2>Test Oluştur: Bilimsel Test Tasarımı İçin Akıllı Araçlar</h2>
@@ -883,7 +840,6 @@
                             Test oluşturmak, yalnızca soru yazmaktan ibaret değildir.
                             Hangi sorunun hangi öğrenme çıktısını ölçtüğünü bilmek,
                             <strong>sağlıklı bir ölçme-değerlendirme</strong> tasarımının temelidir.
-                            Testify, oluşturduğun testleri, soru köklerini ve seçenekleri bu bakış açısıyla düşünmeni teşvik eder.
                         </p>
                     </article>
                     <div class="intro-grid">
@@ -898,7 +854,7 @@
                             <h3>Dokümandan Soru Üretimi</h3>
                             <p>
                                 PDF, DOCX ve metin dosyalarını, pasif okuma materyali olmaktan çıkarıp
-                                <strong>etkileşimli soru kaynağına</strong> dönüştürmeyi hedefleyen AI desteği ile
+                                etkileşimli soru kaynağına dönüştürmeyi hedefleyen AI desteği ile
                                 içeriklerini daha verimli kullanabilirsin.
                             </p>
                         </article>
@@ -913,7 +869,7 @@
                 </section>
             </section>
 
-            <!-- Library Tab -->
+            <!-- Library -->
             <section class="tab-content" id="library" role="tabpanel" aria-labelledby="tab-library">
                 <div class="library-header">
                     <h1>
@@ -936,25 +892,19 @@
                     </div>
                 </div>
 
-                <!-- Bilimsel açıklama – Kütüphanem ALT KISIM -->
                 <section class="tab-intro tab-intro-library">
                     <article class="intro-main">
                         <h2>Kütüphanem: Kişisel Dijital Soru Bankan</h2>
                         <p>
-                            “Kütüphanem”, sınav hazırlığını bir arşiv mantığıyla yönetmeni sağlar.
+                            Kütüphanem, sınav hazırlığını bir arşiv mantığıyla yönetmeni sağlar.
                             Çözdüğün ve oluşturduğun testler tek bir yerde toplanır; böylece
-                            <strong>hangi gün hangi setleri çözdüğünü</strong>, hangi testlerde daha yüksek başarı
-                            elde ettiğini ve yeniden çözmek istediğin testleri kolayca takip edebilirsin.
-                        </p>
-                        <p>
-                            Bu yapı, ölçme-değerlendirme literatüründeki test formu yönetimi anlayışını bireysel seviyeye
-                            taşır ve uzun vadede ciddi bir zaman tasarrufu sunar.
+                            hangi gün hangi setleri çözdüğünü ve yeniden çözmek istediğin testleri takip edebilirsin.
                         </p>
                     </article>
                 </section>
             </section>
 
-            <!-- Notes Tab -->
+            <!-- Notes -->
             <section class="tab-content" id="notes" role="tabpanel" aria-labelledby="tab-notes">
                 <div class="notes-header">
                     <h1>
@@ -977,24 +927,18 @@
                     </div>
                 </div>
 
-                <!-- Bilimsel açıklama – Notlarım ALT KISIM -->
                 <section class="tab-intro tab-intro-notes">
                     <article class="intro-main">
                         <h2>Notlarım: Hatırlamayı Kolaylaştıran Kişisel Bilgi Alanı</h2>
                         <p>
-                            Bilgiyi sadece okumak yerine onu <strong>yazmak, özetlemek ve yeniden ifade etmek</strong>,
-                            kalıcılığı ciddi biçimde artırır. “Notlarım” bölümü; konu özetleri, formüller, sık yaptığın
-                            hatalar ve öğretmen notlarını sistemli biçimde saklaman için tasarlanmıştır.
-                        </p>
-                        <p>
-                            Bu notlara düzenli aralıklarla geri dönmek,
-                            <em>dağıtılmış tekrar (spaced repetition)</em> ilkesine uygun bir çalışma döngüsü kurmana yardımcı olur.
+                            Bilgiyi sadece okumak yerine onu yazmak, özetlemek ve yeniden ifade etmek
+                            kalıcılığı ciddi biçimde artırır.
                         </p>
                     </article>
                 </section>
             </section>
 
-            <!-- Leaderboard Tab -->
+            <!-- Leaderboard -->
             <section class="tab-content" id="leaderboard" role="tabpanel" aria-labelledby="tab-leaderboard">
                 <article class="leaderboard-container">
                     <header class="leaderboard-header">
@@ -1027,26 +971,18 @@
                     </div>
                 </article>
 
-                <!-- Bilimsel açıklama – Liderlik ALT KISIM -->
                 <section class="tab-intro tab-intro-leaderboard">
                     <article class="intro-main">
                         <h2>Liderlik Tablosu: Sağlıklı Rekabet ve İçsel Motivasyon Dengesi</h2>
                         <p>
-                            Motivasyon psikolojisi, sosyal karşılaştırmanın doğru kullanıldığında performansı
-                            artırabileceğini söyler. Testify’ın liderlik tablosu, kimseyi sadece “yarıştırmak”
-                            için değil; çözülen test sayısı, toplanan XP ve başarı oranlarını şeffaf biçimde
-                            göstererek <strong>hedef belirlemeyi</strong> kolaylaştırmak için tasarlanmıştır.
-                        </p>
-                        <p>
-                            Böylece çalışma süreci, yalnız ve tekdüze bir uğraş olmaktan çıkar; küçük gruplarla
-                            challenge’lar ve arkadaşlarla birlikte ilerleyebileceğin
-                            <strong>topluluk destekli</strong> bir öğrenme deneyimine dönüşür.
+                            Testify’ın liderlik tablosu, çözülen test sayısı, toplanan XP ve başarı oranlarını
+                            şeffaf biçimde göstererek hedef belirlemeyi kolaylaştırmak için tasarlanmıştır.
                         </p>
                     </article>
                 </section>
             </section>
 
-            <!-- Analysis Tab -->
+            <!-- Analysis -->
             <section class="tab-content" id="analysis" role="tabpanel" aria-labelledby="tab-analysis">
                 <h1>
                     <i class="ph ph-chart-line-up icon" aria-hidden="true"></i>
@@ -1061,26 +997,18 @@
                     </div>
                 </div>
 
-                <!-- Bilimsel açıklama – Analizler ALT KISIM -->
                 <section class="tab-intro tab-intro-analysis">
                     <article class="intro-main">
                         <h2>Performans Analizi: Öğrenme Sürecini Veriyle Yeniden Tasarlamak</h2>
                         <p>
-                            Performans analizi, seni notlarla yargılayan bir tablo değil;
-                            <strong>eyleme dönük geri bildirim</strong> üreten bir panel olarak tasarlanmıştır.
-                            Ders bazlı ve konu bazlı performans haritaları, hangi alanlarda istikrarlı olduğun,
-                            hangilerinde dalgalanma yaşadığını gösterir.
-                        </p>
-                        <p>
-                            Belirli aralıklarla yapılan ölçümler, gelişim eğrini ortaya çıkarır.
-                            İlk denemelerde düşük olan netlerin, doğru bir çalışmayla nasıl yükseldiğini görmek;
-                            hem motivasyon hem de öz yeterlik duygusu açısından kritiktir.
+                            Performans analizi, seni notlarla yargılayan bir tablo değil,
+                            eyleme dönük geri bildirim üreten bir panel olarak tasarlanmıştır.
                         </p>
                     </article>
                 </section>
             </section>
 
-            <!-- Settings Tab -->
+            <!-- Settings -->
             <section class="tab-content" id="settings" role="tabpanel" aria-labelledby="tab-settings">
                 <h1>
                     <i class="ph ph-gear-six icon" aria-hidden="true"></i>
@@ -1132,20 +1060,11 @@
                     </div>
                 </form>
 
-                <!-- Bilimsel açıklama – Ayarlar ALT KISIM -->
                 <section class="tab-intro tab-intro-settings">
                     <article class="intro-main">
                         <h2>Ayarlar: Kişiselleştirilmiş Deneyim ve Şeffaf Veri Yönetimi</h2>
                         <p>
                             Ayarlar alanı, Testify deneyimini kontrol ettiğin merkezdir.
-                            Tema tercihlerinden bildirimlere, kullanıcı bilgilerinden çalışma alışkanlıklarına kadar birçok
-                            detayı kendi ihtiyaçlarına göre düzenleyebilirsin.
-                        </p>
-                        <p>
-                            Aynı zamanda bu alan, veri gizliliği ve güvenliği konusundaki yaklaşımımızı da yansıtır.
-                            Sınav performansına ilişkin verilerin; yalnızca
-                            <strong>öğrenme sürecini iyileştirmek</strong> amacıyla ele alınır
-                            ve şeffaf politikalar çerçevesinde yönetilir.
                         </p>
                     </article>
                 </section>
@@ -1155,7 +1074,6 @@
 
     <!-- Floating Testify Assistant -->
     <div class="chat-widget-wrapper" aria-live="polite">
-        <!-- Başlangıçta chat açık olsun diye toggle butonu gizli -->
         <button id="chatToggleBtn" class="chat-toggle-btn chat-toggle-btn--hidden" type="button" aria-label="Testify asistanını aç">
             <span class="chat-toggle-initial">T</span>
             <span class="chat-toggle-text">Testify</span>
@@ -1177,9 +1095,7 @@
             </header>
 
             <div class="chat-body">
-                <div class="ai-chat" id="aiChat" role="log" aria-live="polite" aria-atomic="false">
-                    <!-- Mesajlar buraya eklenecek -->
-                </div>
+                <div class="ai-chat" id="aiChat" role="log" aria-live="polite" aria-atomic="false"></div>
             </div>
 
             <footer class="chat-footer">
@@ -1222,24 +1138,34 @@
     <script src="config.js"></script>
     <script src="storage.js"></script>
     <script src="language.js"></script>
-    <script src="library.js"></script>
-    <!-- AdSense Manager JS (yeni sistem) -->
-    <script src="adsense-manager.js"></script>
-    <!-- APP + QUIZ JS -->
-    <script src="app.js"></script>
-    <script src="quiz-manager.js"></script>
-    <script src="lazy-questions.js"></script>
-    <!-- Soru havuzu + YKS Test Flow + YKS Yolculuğu -->
+
+    <!-- YKS Soru Havuzu -->
     <script src="yks-question-pool.js"></script>
+
+    <!-- Quiz ve Library Manager -->
+    <script src="quiz-manager.js"></script>
+    <script src="library.js"></script>
+
+    <!-- Diğer test yardımcıları -->
+    <script src="lazy-questions.js"></script>
+
+    <!-- YKS Test Flow -->
     <script src="yks-test-flow.js"></script>
+
+    <!-- YKS Journey -->
     <script src="yks-journey.js"></script>
 
-    <!-- Chat drag (sürükleme + el işareti) -->
+    <!-- Ana uygulama -->
+    <script src="app.js"></script>
+
+    <!-- AdSense Manager -->
+    <script src="adsense-manager.js"></script>
+    <!-- Chat drag -->
     <script src="chat-drag.js"></script>
-    <!-- Performans helper (CLS + lazy load) -->
+    <!-- Performans helper -->
     <script src="testify-perf-helper.js"></script>
 
-    <!-- Chat UI: aç/kapa, küçült, mesaj gönder + TestifyAI entegrasyon denemesi -->
+    <!-- Chat UI -->
     <script>
         (function () {
             'use strict';
@@ -1404,7 +1330,6 @@
                     });
                 }
 
-                // İlk açıldığında karşılama mesajı
                 if (chatLog && chatLog.children.length === 0) {
                     appendMessage(
                         'assistant',
@@ -1412,7 +1337,6 @@
                     );
                 }
 
-                // Başlangıçtaki aria durumu
                 syncAria();
             }
 
@@ -1424,90 +1348,23 @@
         })();
     </script>
 
-    <!-- YKS TEST FLOW INIT + YKS kartı handler -->
+    <!-- Kütüphanem sekmesi için bağlayıcı script -->
     <script>
         (function () {
             'use strict';
 
-            function showTestPage(pageId) {
-                var pages = document.querySelectorAll('#test .test-page');
-                if (!pages || !pages.length) return;
-                pages.forEach(function (page) {
-                    if (page.id === pageId) {
-                        page.classList.add('active');
-                    } else {
-                        page.classList.remove('active');
-                    }
-                });
-            }
-
-            function initYKSTestFlowOnce() {
-                var container = document.getElementById('yksTestFlowContainer');
-                if (!container || container.__yksInited) return;
-
-                var flow = window.YKSTestFlow;
-                if (!flow || typeof flow.init !== 'function') {
-                    console.warn('YKSTestFlow.init bulunamadı. yks-test-flow.js ana dizinde mi ve global YKSTestFlow oluşturuyor mu kontrol et.');
-                    return;
-                }
-
-                try {
-                    flow.init({
-                        containerId: 'yksTestFlowContainer',
-                        container: container,
-                        onStartQuiz: function (quizConfig) {
-                            try {
-                                if (window.QuizManager) {
-                                    if (typeof window.QuizManager.start === 'function') {
-                                        window.QuizManager.start(quizConfig);
-                                    } else if (typeof window.QuizManager.startQuiz === 'function') {
-                                        var mode = (quizConfig && quizConfig.mode) || 'yks';
-                                        window.QuizManager.startQuiz(mode, quizConfig);
-                                    } else {
-                                        console.warn('QuizManager.start veya QuizManager.startQuiz fonksiyonu bulunamadı.');
-                                    }
-                                } else {
-                                    console.warn('QuizManager globali bulunamadı.');
-                                }
-                            } catch (quizErr) {
-                                console.error('Quiz başlatılırken hata oluştu:', quizErr);
-                            }
-                        }
-                    });
-
-                    container.__yksInited = true;
-                } catch (err) {
-                    console.error('YKSTestFlow.init(config) çağrısında hata:', err);
-                }
-            }
-
             document.addEventListener('DOMContentLoaded', function () {
-                var yksCard = document.getElementById('yksFlowCard');
-                if (!yksCard) return;
-
-                function handleClick(e) {
-                    if (e) {
-                        e.preventDefault();
-                        if (typeof e.stopImmediatePropagation === 'function') {
-                            e.stopImmediatePropagation();
-                        }
-                        e.stopPropagation();
-                    }
-                    showTestPage('yksFlowPage');
-                    initYKSTestFlowOnce();
+                var libTab = document.getElementById('tab-library');
+                if (libTab && window.LibraryManager && typeof window.LibraryManager.loadLibrary === 'function') {
+                    libTab.addEventListener('click', function () {
+                        window.LibraryManager.loadLibrary();
+                    });
                 }
-
-                yksCard.addEventListener('click', handleClick);
-                yksCard.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        handleClick(e);
-                    }
-                });
             });
         })();
     </script>
 
-    <!-- Not Ekle Modalı -->
+    <!-- Not Modalı -->
     <div id="noteModalOverlay" class="confirm-overlay note-modal-overlay" aria-hidden="true">
         <div id="noteModal" class="confirm-dialog note-modal" role="dialog" aria-modal="true" aria-labelledby="noteModalTitle">
             <h2 id="noteModalTitle" class="confirm-dialog-title">Yeni Not</h2>
@@ -1538,5 +1395,104 @@
             </div>
         </div>
     </div>
+
+    <!-- YKS TEST FLOW INIT -->
+    <script>
+        (function () {
+            'use strict';
+
+            function initYKSTestFlow() {
+                var container = document.getElementById('yksTestFlowContainer');
+                if (!container) {
+                    return;
+                }
+
+                var flow = window.YKSTestFlow;
+                if (!flow || typeof flow.init !== 'function') {
+                    console.warn('YKSTestFlow.init bulunamadı. yks-test-flow.js ana dizinde mi ve global YKSTestFlow oluşturuyor mu kontrol et.');
+                    return;
+                }
+
+                try {
+                    flow.init({
+                        containerId: 'yksTestFlowContainer',
+                        container: container,
+                        onStartQuiz: function (quizConfig) {
+                            try {
+                                if (window.QuizManager) {
+                                    if (typeof window.QuizManager.start === 'function') {
+                                        window.QuizManager.start(quizConfig);
+                                    } else if (typeof window.QuizManager.startQuiz === 'function') {
+                                        var mode = (quizConfig && quizConfig.mode) || 'yks';
+                                        window.QuizManager.startQuiz(mode, quizConfig);
+                                    } else {
+                                        console.warn('QuizManager.start veya QuizManager.startQuiz fonksiyonu bulunamadı.');
+                                    }
+                                } else {
+                                    console.warn('QuizManager globali bulunamadı.');
+                                }
+                            } catch (quizErr) {
+                                console.error('Quiz başlatılırken hata oluştu:', quizErr);
+                            }
+                        }
+                    });
+                } catch (err) {
+                    console.error('YKSTestFlow.init(config) çağrısında hata:', err);
+                    try {
+                        flow.init();
+                    } catch (err2) {
+                        console.error('YKSTestFlow.init() da hata verdi:', err2);
+                        container.innerHTML =
+                            '<div class="empty-state">' +
+                            '<div class="empty-state-icon" aria-hidden="true"><i class="ph ph-warning-circle icon"></i></div>' +
+                            '<p>YKS Test Flow başlatılırken bir hata oluştu. Lütfen sayfayı yenileyin.</p>' +
+                            '</div>';
+                    }
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initYKSTestFlow);
+            } else {
+                initYKSTestFlow();
+            }
+        })();
+    </script>
+
+    <!-- Test Seç <-> YKS Flow geçiş scripti -->
+    <script>
+        (function () {
+            'use strict';
+
+            function showTestPage(pageId) {
+                var pages = document.querySelectorAll('#test .test-page');
+                pages.forEach(function (page) {
+                    if (page.id === pageId) {
+                        page.classList.add('active');
+                    } else {
+                        page.classList.remove('active');
+                    }
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var yksCard = document.getElementById('yksFlowCard');
+                if (yksCard) {
+                    yksCard.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        showTestPage('yksFlowPage');
+                    });
+                }
+
+                var testTab = document.getElementById('tab-test');
+                if (testTab) {
+                    testTab.addEventListener('click', function () {
+                        showTestPage('testSelection');
+                    });
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
+
