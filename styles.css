@@ -4163,7 +4163,7 @@ html[data-theme="light"] .quiz-progress-bar {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 12px;
+    margin-bottom: 1px;
 }
 
 /* SVG / font ikonlar */
@@ -4191,6 +4191,7 @@ html[data-theme="light"] .quiz-progress-bar {
 .ai-test-card .test-option-desc {
     margin-top: 1px;
 }
+
 
 
 
