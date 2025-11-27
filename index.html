@@ -48,7 +48,7 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- External CSS -->
+    <!-- External CSS (ANA DİZİN) -->
     <link rel="stylesheet" href="styles.css">
     <!-- YKS Yolculuğum CSS - GELİŞTİRİLMİŞ VERSİYON -->
     <link rel="stylesheet" href="yks-journey-enhanced.css">
@@ -70,7 +70,7 @@
     <!-- jsPDF for PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <!-- TestifyAI -->
+    <!-- TestifyAI (ANA DİZİN) -->
     <script src="testify-core.js"></script>   <!-- window.TestifyAI burada tanımlanmalı -->
     <script>
         // Gerçek TestifyAI nesnesi sonradan gelmezse en azından undefined olmasın
@@ -372,7 +372,7 @@
         }
 
         [data-theme="dark"] .ai-test-icon {
-            content: url("al-white.png"); /* Dark mode için beyaz PNG yolu */
+            content: url("al-white.png"); /* Dark mode için beyaz PNG yolu (ANA DİZİN) */
         }
 
         /* === AI Test kartı hizalama (Test Seç bölümü) === */
@@ -633,7 +633,13 @@
                 <div class="test-page active" id="testSelection">
                     <!-- YKS Test Flow Container -->
                     <div id="yksTestFlowContainer">
-                        <!-- YKS Test Flow buraya render edilecek -->
+                        <!-- Basit fallback, JS yüklenene kadar gösterilir -->
+                        <div class="yks-flow-loading empty-state">
+                            <div class="empty-state-icon" aria-hidden="true">
+                                <i class="ph ph-warning-circle icon"></i>
+                            </div>
+                            <p>YKS Test Flow yükleniyor...</p>
+                        </div>
                     </div>
                 </div>
 
@@ -1165,7 +1171,7 @@
     <!-- Toast Notification -->
     <div class="toast-container" id="toastContainer" role="status" aria-live="polite" aria-atomic="true"></div>
 
-    <!-- External JavaScript (SIRALAMA GÜNCELLENDİ) -->
+    <!-- External JavaScript (TAMAMI ANA DİZİNDE) -->
     <script src="utils.js"></script>
     <script src="config.js"></script>
     <script src="storage.js"></script>
@@ -1431,5 +1437,70 @@
             </div>
         </div>
     </div>
+
+    <!-- YKS TEST FLOW INIT (ANA DİZİNDEKİ yks-test-flow.js ve QuizManager için güvenli başlatma) -->
+    <script>
+        (function () {
+            'use strict';
+
+            function initYKSTestFlow() {
+                var container = document.getElementById('yksTestFlowContainer');
+                if (!container) {
+                    return;
+                }
+
+                var flow = window.YKSTestFlow;
+                if (!flow || typeof flow.init !== 'function') {
+                    console.warn('YKSTestFlow.init bulunamadı. yks-test-flow.js ana dizinde mi ve global YKSTestFlow oluşturuyor mu kontrol et.');
+                    return;
+                }
+
+                try {
+                    // Tercih edilen imza: config nesnesi ile init
+                    flow.init({
+                        containerId: 'yksTestFlowContainer',
+                        container: container,
+                        onStartQuiz: function (quizConfig) {
+                            try {
+                                if (window.QuizManager) {
+                                    if (typeof window.QuizManager.start === 'function') {
+                                        window.QuizManager.start(quizConfig);
+                                    } else if (typeof window.QuizManager.startQuiz === 'function') {
+                                        var mode = (quizConfig && quizConfig.mode) || 'yks';
+                                        window.QuizManager.startQuiz(mode, quizConfig);
+                                    } else {
+                                        console.warn('QuizManager.start veya QuizManager.startQuiz fonksiyonu bulunamadı.');
+                                    }
+                                } else {
+                                    console.warn('QuizManager globali bulunamadı.');
+                                }
+                            } catch (quizErr) {
+                                console.error('Quiz başlatılırken hata oluştu:', quizErr);
+                            }
+                        }
+                    });
+                } catch (err) {
+                    console.error('YKSTestFlow.init(config) çağrısında hata:', err);
+                    // Alternatif: parametresiz init denemesi
+                    try {
+                        flow.init();
+                    } catch (err2) {
+                        console.error('YKSTestFlow.init() da hata verdi:', err2);
+                        container.innerHTML =
+                            '<div class="empty-state">' +
+                            '<div class="empty-state-icon" aria-hidden="true"><i class="ph ph-warning-circle icon"></i></div>' +
+                            '<p>YKS Test Flow başlatılırken bir hata oluştu. Lütfen sayfayı yenileyin.</p>' +
+                            '</div>';
+                    }
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initYKSTestFlow);
+            } else {
+                initYKSTestFlow();
+            }
+        })();
+    </script>
 </body>
 </html>
