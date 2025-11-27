@@ -4142,55 +4142,8 @@ html[data-theme="light"] .quiz-progress-bar {
     .theme-toggle .icon {
         font-size: 0.9rem;
     }
-}
 
-/* === TEST SEÇ – KART HİZALAMA (YENİ CLASS İSİMLERİYLE) === */
 
-/* Tüm kartları aynı şekilde hizala */
-.test-option-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;   /* dikey ortalama */
-    text-align: center;
-    padding: 40px 24px;        /* hepsi için aynı padding */
-}
-
-/* İkon alanı: hepsi aynı kutuya otursun */
-.test-option-icon {
-    width: 56px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1px;
-}
-
-/* SVG / font ikonlar */
-.test-option-icon i {
-    font-size: 40px;
-    line-height: 1;
-}
-
-/* PNG ikon (ör. al.png / al-white.png) – boşluklara rağmen ortala */
-.test-option-icon img,
-.ai-test-icon {
-    max-width: 40px;
-    max-height: 40px;
-    display: block;
-    object-fit: contain;
-}
-
-/* AI Test ikonunu da aynı kutuya oturt + biraz aşağı kaydır */
-.ai-test-card .test-option-icon .ai-test-icon {
-    transform: translateY(12px);
-}
-
-/* AI Test kartındaki yazıyı da aynı oranda aşağı kaydır */
-.ai-test-card .test-option-title,
-.ai-test-card .test-option-desc {
-    margin-top: 1px;
-}
 
 
 
