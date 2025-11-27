@@ -41,6 +41,18 @@
         },
 
         /**
+         * Pratik modu / başka yerden çağırmak için:
+         * sekmeyi aç + listeyi doldur
+         */
+        openAndLoad() {
+            const libraryTab = document.querySelector('[data-tab="library"]');
+            if (libraryTab) {
+                libraryTab.click();
+            }
+            this.loadLibrary();
+        },
+
+        /**
          * Test kartı HTML'i oluşturur
          */
         createTestCard(test) {
@@ -218,6 +230,8 @@
 
         /**
          * Teste başla
+         *  - Yeni sistem: QuizManager.start(config) (varsa)
+         *  - Geriye dönük: testify_generated_test + QuizManager.startQuiz('ai')
          */
         startTest(testId) {
             try {
@@ -231,20 +245,45 @@
 
                 const testData = JSON.parse(raw);
 
-                localStorage.setItem('testify_generated_test', JSON.stringify(testData));
-
+                // Önce test sekmesine geç (senin tab sistemin için)
                 const testTab = document.querySelector('[data-tab="test"]');
                 if (testTab) {
                     testTab.click();
                 }
 
-                setTimeout(() => {
-                    if (window.QuizManager && typeof QuizManager.startQuiz === 'function') {
+                // ✅ Yeni API varsa: doğrudan soruları QuizManager'a ver
+                if (window.QuizManager && typeof QuizManager.start === 'function') {
+                    setTimeout(() => {
+                        QuizManager.start({
+                            questions: testData.questions || [],
+                            mode: 'library',
+                            testTitle: testData.title,
+                            testDescription: testData.description,
+                            meta: {
+                                source: 'library',
+                                testId: testData.id,
+                                createdAt: testData.createdAt,
+                                expiresAt: testData.expiresAt
+                            }
+                        });
+                    }, 300);
+
+                // ↩️ Eski davranış: localStorage + startQuiz('ai')
+                } else if (window.QuizManager && typeof QuizManager.startQuiz === 'function') {
+                    localStorage.setItem('testify_generated_test', JSON.stringify(testData));
+
+                    setTimeout(() => {
                         QuizManager.startQuiz('ai');
-                    }
-                }, 500);
+                    }, 500);
+
+                } else {
+                    console.error('❌ QuizManager bulunamadı');
+                    Utils.showToast(t('msg.error', 'Quiz modülü bulunamadı!'), 'error');
+                    return;
+                }
 
                 Utils.showToast(t('msg.testStarted', 'Test başlatılıyor...'), 'info');
+
             } catch (error) {
                 console.error('❌ Test başlatma hatası:', error);
                 Utils.showToast(t('msg.error', 'Test başlatılamadı!'), 'error');
