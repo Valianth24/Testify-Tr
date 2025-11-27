@@ -4130,6 +4130,41 @@ html[data-theme="light"] .quiz-progress-bar {
     }
 }
 
+/* Tüm kartları aynı şekilde hizala */
+.mode-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* dikey ortalama */
+    text-align: center;
+    padding: 40px 24px;      /* hepsi için aynı padding */
+}
+
+/* İkon alanı: hepsi aynı kutuya otursun */
+.mode-card-icon {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+/* SVG / font ikonlar */
+.mode-card-icon i {
+    font-size: 40px;
+    line-height: 1;
+}
+
+/* PNG ikon (al-white.png) – boşluklara rağmen ortala */
+.mode-card-icon img {
+    max-width: 40px;
+    max-height: 40px;
+    display: block;
+    object-fit: contain;
+}
+
+
 
 
 
