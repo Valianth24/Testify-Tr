@@ -627,18 +627,139 @@
                 </section>
             </section>
 
-            <!-- Test Tab (YENİ YAPI - YKS TEST FLOW ENTEGRASYONU) -->
+            <!-- Test Tab (GENEL TEST MODLARI + YKS TEST FLOW) -->
             <section class="tab-content" id="test" role="tabpanel" aria-labelledby="tab-test">
                 <!-- Test Selection Page -->
                 <div class="test-page active" id="testSelection">
-                    <!-- YKS Test Flow Container -->
-                    <div id="yksTestFlowContainer">
-                        <!-- Basit fallback, JS yüklenene kadar gösterilir -->
-                        <div class="yks-flow-loading empty-state">
-                            <div class="empty-state-icon" aria-hidden="true">
-                                <i class="ph ph-warning-circle icon"></i>
+
+                    <!-- 1) GENEL TEST MODLARI (Pratik / Sınav / vs...) -->
+                    <div id="defaultTestMenu" class="test-select-wrapper">
+                        <header class="test-select-header">
+                            <h1 data-i18n="test.selectTitle">Nasıl çalışmak istiyorsun?</h1>
+                            <p data-i18n="test.selectSubtitle">
+                                Aşağıdan bir çalışma modu veya YKS soru çözme ekranını seç.
+                            </p>
+                        </header>
+
+                        <div class="test-options-grid" id="testModeOptions">
+                            <!-- Pratik Modu -->
+                            <button class="test-option-card"
+                                    type="button"
+                                    data-quiz-mode="practice"
+                                    data-quiz-questions="10">
+                                <div class="test-option-icon" aria-hidden="true">
+                                    <i class="ph ph-book-open icon"></i>
+                                </div>
+                                <div class="test-option-content">
+                                    <h3 class="test-option-title">Pratik Yap</h3>
+                                    <p class="test-option-desc">
+                                        Süre baskısı olmadan, anında doğru/yanlış ve açıklama gör.
+                                    </p>
+                                </div>
+                            </button>
+
+                            <!-- Sınav Modu -->
+                            <button class="test-option-card"
+                                    type="button"
+                                    data-quiz-mode="exam"
+                                    data-quiz-questions="40">
+                                <div class="test-option-icon" aria-hidden="true">
+                                    <i class="ph ph-timer icon"></i>
+                                </div>
+                                <div class="test-option-content">
+                                    <h3 class="test-option-title">Sınav Modu</h3>
+                                    <p class="test-option-desc">
+                                        Süre sınırlı, sonuçlar en sonda. Gerçek sınav provası.
+                                    </p>
+                                </div>
+                            </button>
+
+                            <!-- Hızlı Test -->
+                            <button class="test-option-card"
+                                    type="button"
+                                    data-quiz-mode="quick"
+                                    data-quiz-questions="5">
+                                <div class="test-option-icon" aria-hidden="true">
+                                    <i class="ph ph-lightning icon"></i>
+                                </div>
+                                <div class="test-option-content">
+                                    <h3 class="test-option-title">Hızlı Test</h3>
+                                    <p class="test-option-desc">
+                                        5 soruluk mini test. Kısa aralarda çözmek için ideal.
+                                    </p>
+                                </div>
+                            </button>
+
+                            <!-- Maraton -->
+                            <button class="test-option-card"
+                                    type="button"
+                                    data-quiz-mode="marathon"
+                                    data-quiz-questions="30">
+                                <div class="test-option-icon" aria-hidden="true">
+                                    <i class="ph ph-flag-checkered icon"></i>
+                                </div>
+                                <div class="test-option-content">
+                                    <h3 class="test-option-title">Maraton</h3>
+                                    <p class="test-option-desc">
+                                        Karışık konulardan uzun test. Dayanıklılık için.
+                                    </p>
+                                </div>
+                            </button>
+
+                            <!-- AI ile Test Çöz -->
+                            <button class="test-option-card ai-test-card"
+                                    type="button"
+                                    data-quiz-mode="ai"
+                                    data-quiz-questions="15"
+                                    id="aiTestCard">
+                                <div class="test-option-icon" aria-hidden="true">
+                                    <img src="al-color.png"
+                                         alt="Testify AI"
+                                         class="ai-test-icon" />
+                                </div>
+                                <div class="test-option-content">
+                                    <h3 class="test-option-title">AI ile Test Çöz</h3>
+                                    <p class="test-option-desc">
+                                        Testify AI seviyene göre anında soru üretsin.
+                                    </p>
+                                </div>
+                            </button>
+
+                            <!-- YKS Soru Çöz KARTI (sadece bu karta basınca YKS FLOW açılır) -->
+                            <button class="test-option-card"
+                                    type="button"
+                                    id="yksQuickCard">
+                                <div class="test-option-icon" aria-hidden="true">
+                                    <i class="ph ph-graduation-cap icon"></i>
+                                </div>
+                                <div class="test-option-content">
+                                    <h3 class="test-option-title">YKS Soru Çöz</h3>
+                                    <p class="test-option-desc">
+                                        TYT–AYT alan, ders ve konu seçerek kişiselleştirilmiş YKS testleri oluştur.
+                                    </p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2) YKS TEST FLOW WRAPPER (başlangıçta gizli) -->
+                    <div id="yksFlowWrapper" style="display:none; margin-top: 1.75rem;">
+                        <button type="button"
+                                class="btn btn-secondary"
+                                id="yksBackToModes"
+                                style="margin-bottom: 1rem;">
+                            ← Test modlarına geri dön
+                        </button>
+
+                        <!-- YKS Test Flow Container -->
+                        <div id="yksTestFlowContainer">
+                            <!-- Basit fallback, JS yüklenene kadar gösterilir -->
+                            <div class="yks-flow-loading empty-state">
+                                <div class="empty-state-icon" aria-hidden="true">
+                                    <i class="ph ph-warning-circle icon"></i>
+                                </div>
+                                <p>YKS Test Flow yükleniyor...</p>
                             </div>
-                            <p>YKS Test Flow yükleniyor...</p>
                         </div>
                     </div>
                 </div>
@@ -1389,7 +1510,7 @@
         })();
     </script>
 
-    <!-- Kütüphanem sekmesi için bağlayıcı script (yksQuickCard listener KALDIRILDI) -->
+    <!-- Kütüphanem sekmesi için bağlayıcı script -->
     <script>
         (function () {
             'use strict';
@@ -1402,6 +1523,76 @@
                         window.LibraryManager.loadLibrary();
                     });
                 }
+            });
+        })();
+    </script>
+
+    <!-- Test Çöz sekmesi: genel mod kartları + YKS kartı davranışı -->
+    <script>
+        (function () {
+            'use strict';
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var defaultMenu = document.getElementById('defaultTestMenu');
+                var yksWrapper = document.getElementById('yksFlowWrapper');
+                var yksBackBtn = document.getElementById('yksBackToModes');
+                var yksCard = document.getElementById('yksQuickCard');
+
+                // YKS kartına tıklayınca: genel menüyü gizle, YKS Flow'u göster + init et
+                if (yksCard && defaultMenu && yksWrapper) {
+                    yksCard.addEventListener('click', function () {
+                        defaultMenu.style.display = 'none';
+                        yksWrapper.style.display = 'block';
+
+                        if (window.initYKSTestFlow) {
+                            window.initYKSTestFlow();
+                        }
+                    });
+                }
+
+                // "Test modlarına geri dön" butonu
+                if (yksBackBtn && defaultMenu && yksWrapper) {
+                    yksBackBtn.addEventListener('click', function () {
+                        yksWrapper.style.display = 'none';
+                        defaultMenu.style.display = 'block';
+                    });
+                }
+
+                // Pratik / Sınav / Hızlı / Maraton / AI kartları
+                var modeCards = document.querySelectorAll('[data-quiz-mode]');
+                modeCards.forEach(function (card) {
+                    var mode = card.getAttribute('data-quiz-mode');
+                    if (!mode || mode === 'yks') return; // YKS kartını burada kullanmıyoruz
+
+                    card.addEventListener('click', function () {
+                        var questionCount = parseInt(card.getAttribute('data-quiz-questions') || '10', 10);
+                        var config = {
+                            mode: mode,
+                            questionCount: questionCount,
+                            source: 'quick-menu'
+                        };
+
+                        if (mode === 'ai') {
+                            config.useAI = true;
+                        }
+
+                        if (window.QuizManager) {
+                            try {
+                                if (typeof window.QuizManager.start === 'function') {
+                                    window.QuizManager.start(config);
+                                } else if (typeof window.QuizManager.startQuiz === 'function') {
+                                    window.QuizManager.startQuiz(mode, config);
+                                } else {
+                                    console.warn('QuizManager.start veya QuizManager.startQuiz fonksiyonu bulunamadı.');
+                                }
+                            } catch (err) {
+                                console.error('Quiz başlatılırken hata oluştu:', err);
+                            }
+                        } else {
+                            console.warn('QuizManager globali bulunamadı.');
+                        }
+                    });
+                });
             });
         })();
     </script>
@@ -1438,14 +1629,20 @@
         </div>
     </div>
 
-    <!-- YKS TEST FLOW INIT (ANA DİZİNDEKİ yks-test-flow.js ve QuizManager için güvenli başlatma) -->
+    <!-- YKS TEST FLOW INIT
+         Artık otomatik değil; sadece YKS kartına basınca initYKSTestFlow() çağrılıyor -->
     <script>
         (function () {
             'use strict';
 
-            function initYKSTestFlow() {
+            function initYKSTestFlowInternal() {
                 var container = document.getElementById('yksTestFlowContainer');
                 if (!container) {
+                    return;
+                }
+
+                // Aynı container'a ikinci kez init etme
+                if (container.__yksFlowInitialized) {
                     return;
                 }
 
@@ -1454,6 +1651,8 @@
                     console.warn('YKSTestFlow.init bulunamadı. yks-test-flow.js ana dizinde mi ve global YKSTestFlow oluşturuyor mu kontrol et.');
                     return;
                 }
+
+                container.__yksFlowInitialized = true;
 
                 try {
                     // Tercih edilen imza: config nesnesi ile init
@@ -1495,11 +1694,8 @@
                 }
             }
 
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initYKSTestFlow);
-            } else {
-                initYKSTestFlow();
-            }
+            // Global fonksiyon: YKS kartına basılınca çağrılacak
+            window.initYKSTestFlow = initYKSTestFlowInternal;
         })();
     </script>
 </body>
