@@ -1,204 +1,286 @@
 // yks-flow.js
-(function (window, document) {
+(function () {
     'use strict';
 
-    const YKSFlow = {
-        /**
-         * Belirli alan için (sayisal, ea, sozel, dil, genel)
-         * mevcut derslerin listesini döndürür (matematik, fizik, ...).
-         * -> Ders seçimi sayfasında kullanacaksın.
-         */
-        getSubjectsForField(field) {
-            const api = window.YKSQuestionPoolAPI;
-            if (!api || !api.allLevelQuestions) {
-                console.warn('YKSQuestionPoolAPI bulunamadı');
-                return [];
-            }
+    /**
+     * Küçük yardımcı: güvenli shuffle
+     */
+    function shuffle(array) {
+        const arr = array.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
 
-            const all = api.allLevelQuestions;
-            const key = all[field] ? field : 'genel';
-            const list = all[key] || [];
+    /**
+     * Testify config / helper referansları
+     */
+    const hasUtils = typeof window.Utils !== 'undefined';
+    const hasStorageManager = typeof window.StorageManager !== 'undefined';
+    const hasQuizManager = typeof window.QuizManager !== 'undefined';
 
-            const set = new Set();
-            list.forEach(q => {
-                if (q.subject) set.add(q.subject);
-            });
+    // AI current test key (library ile aynı yolu kullanmak için)
+    const CURRENT_TEST_KEY =
+        (hasStorageManager &&
+            StorageManager.INTERNAL_KEYS &&
+            StorageManager.INTERNAL_KEYS.AI_CURRENT_TEST) ||
+        'testify_current_test';
 
-            return Array.from(set).sort();
-        },
+    /**
+     * YKS soru havuzu referansı
+     */
+    const hasYKSAPI = typeof window.YKSQuestionPoolAPI !== 'undefined';
 
-        /**
-         * Havuzdaki formatı QuizManager formatına çevirir:
-         *  - text -> q
-         *  - choices -> o
-         *  - correctIndex -> answerIndex
-         * QuizManager.getCorrectIndex zaten answerIndex'i destekliyor.
-         */
-        mapToQuizQuestions(poolQuestions) {
-            if (!Array.isArray(poolQuestions)) return [];
+    if (!hasYKSAPI) {
+        console.warn('[YKSFlow] YKSQuestionPoolAPI bulunamadı. yks-question-pool.js yüklü mü?');
+    }
 
-            return poolQuestions.map(q => ({
-                id: q.id,
-                field: q.field,
-                subject: q.subject,
-                q: q.text,
-                o: q.choices,
-                answerIndex: q.correctIndex,     // ✅ direkt index
-                explanation: q.explanation || '',
-                difficulty: q.difficulty || 'medium',
-                source: 'yks_level'
-            }));
-        },
+    /**
+     * YKS havuzundan soruları seçer
+     * @param {Object} config
+     *  - field: "sayisal" | "ea" | "sozel" | "dil" | "genel"
+     *  - subject: "matematik" | "fizik" | ... | "mixed"
+     *  - questionCount: toplam soru
+     *  - perSubject: mixed ise ders başına soru sayısı
+     */
+    function pickQuestionsFromPool(config) {
+        if (!hasYKSAPI) return [];
 
-        /**
-         * Havuzdan soru listesi oluştur:
-         * - subject seçiliyse: sadece o ders
-         * - subject yoksa:
-         *    - perSubject verilmişse: her dersten perSubject kadar
-         *    - aksi halde: alanın genelinden count kadar
-         */
-        buildQuestionPool(config) {
-            const api = window.YKSQuestionPoolAPI;
-            if (!api || !api.allLevelQuestions) {
-                console.error('YKSQuestionPoolAPI bulunamadı');
-                return [];
-            }
+        const field = config.field || 'genel';
+        const subject = config.subject || 'mixed';
+        const total = config.questionCount || 10;
+        const perSubject = config.perSubject || 3;
 
-            const field = config.field || 'genel';
-            const subject = config.subject || null;
-            const count = config.questionCount || 15;
-            const perSubject = config.perSubject || null;
+        const api = window.YKSQuestionPoolAPI;
+        const allByField = api.allLevelQuestions && api.allLevelQuestions[field];
 
-            const all = api.allLevelQuestions;
-            const key = all[field] ? field : 'genel';
-            const list = all[key] || [];
+        // Eğer belirli bir ders istendiyse: sadece o subject'ten sor
+        if (subject && subject !== 'mixed' && allByField) {
+            const filtered = allByField.filter(q => q.subject === subject);
+            const shuffled = shuffle(filtered);
+            return shuffled.slice(0, Math.min(total, shuffled.length));
+        }
 
-            // 1) Belirli bir ders seçilmişse
-            if (subject) {
-                const filtered = list.filter(q => q.subject === subject);
-                if (!filtered.length) return [];
-
-                // basit shuffle
-                const shuffled = filtered
-                    .slice()
-                    .sort(() => Math.random() - 0.5);
-
-                return shuffled.slice(0, Math.min(count, shuffled.length));
-            }
-
-            // 2) Ders seçilmemiş ama "her dersten x soru" isteniyorsa
-            if (perSubject) {
-                return api.getLevelTestQuestionsPerSubject(field, perSubject) || [];
-            }
-
-            // 3) Alanın genelinden karışık
-            return api.getLevelTestQuestions(field, count) || [];
-        },
-
-        /**
-         * YKS testini başlat:
-         * config:
-         *  - field: 'sayisal' | 'ea' | 'sozel' | 'dil' | 'genel'
-         *  - subject: 'matematik' | 'fizik' ... (opsiyonel, null = karışık)
-         *  - questionCount: sayı (subject mode)
-         *  - perSubject: sayı (alan geneli mode)
-         *  - mode: 'practice' | 'exam' (şimdilik sadece başlık/desc için)
-         *  - saveToLibrary: true/false (istersen sonra kullanırız)
-         */
-        startTest(config) {
-            try {
-                const field = config.field || 'genel';
-                const subject = config.subject || null;
-
-                const poolQuestions = this.buildQuestionPool(config);
-
-                if (!poolQuestions.length) {
-                    if (window.Utils) {
-                        window.Utils.showToast('Bu alan/ders için soru bulunamadı!', 'error');
-                    }
-                    console.warn('YKS havuzunda soru bulunamadı', config);
-                    return;
-                }
-
-                const quizQuestions = this.mapToQuizQuestions(poolQuestions);
-
-                // Başlık / açıklama üret
-                const fieldNames = {
-                    sayisal: 'Sayısal',
-                    ea: 'Eşit Ağırlık',
-                    sozel: 'Sözel',
-                    dil: 'Dil',
-                    genel: 'Genel Tarama'
-                };
-
-                const modeText = config.mode === 'exam' ? 'Deneme Modu' : 'Pratik Modu';
-
-                const fieldLabel = fieldNames[field] || fieldNames.genel;
-                const subjectLabel = subject ? ` - ${subject.toUpperCase()}` : '';
-                const title = `YKS ${fieldLabel}${subjectLabel} ${modeText}`;
-                const descParts = [];
-
-                descParts.push(`${fieldLabel} alanı için hazırlanmış seviye testi.`);
-                if (subject) {
-                    descParts.push(`${subject.toUpperCase()} dersine odaklanır.`);
-                } else if (config.perSubject) {
-                    descParts.push(`Her dersten yaklaşık ${config.perSubject} soru içerir.`);
-                }
-                descParts.push(`${quizQuestions.length} sorudan oluşur.`);
-
-                const description = descParts.join(' ');
-
-                const testData = {
-                    id: 'yks_' + Date.now(),
-                    title: title,
-                    description: description,
-                    questions: quizQuestions,
-                    createdAt: Date.now(),
-                    // AI testleri gibi 24 saat saklayalım
-                    expiresAt: Date.now() + 24 * 60 * 60 * 1000
-                };
-
-                // ✅ QuizManager, AI testlerini buradan okuyor
-                localStorage.setItem('testify_generated_test', JSON.stringify(testData));
-
-                // İstersek kütüphaneye de kaydedebiliriz (şimdilik opsiyonel)
-                if (config.saveToLibrary && window.LibraryManager && typeof window.LibraryManager.saveTestToLibrary === 'function') {
-                    window.LibraryManager.saveTestToLibrary(testData);
-                }
-
-                // Test sekmesine geç
-                const testTab = document.querySelector('[data-tab="test"]');
-                if (testTab) {
-                    testTab.click();
-                }
-
-                // Quiz'i başlat (AI mod pipeline'ını kullanıyoruz)
-                setTimeout(() => {
-                    if (window.QuizManager && typeof window.QuizManager.startQuiz === 'function') {
-                        window.QuizManager.startQuiz('ai'); // AI testi gibi davranır ama soru kaynağımız YKS havuzu
-                    } else {
-                        console.error('QuizManager.startQuiz bulunamadı');
-                    }
-                }, 400);
-
-                if (window.Utils) {
-                    window.Utils.showToast('YKS testi başlatılıyor...', 'info');
-                }
-
-                console.log('🎯 YKS testi hazır:', {
-                    field,
-                    subject,
-                    questionCount: quizQuestions.length
-                });
-
-            } catch (err) {
-                console.error('❌ YKS testi başlatma hatası:', err);
-                if (window.Utils) {
-                    window.Utils.showToast('YKS testi başlatılamadı!', 'error');
-                }
+        // Ders karışık ise: her dersten perSubject kadar al
+        if (typeof api.getLevelTestQuestionsPerSubject === 'function') {
+            const list = api.getLevelTestQuestionsPerSubject(field, perSubject);
+            if (list && list.length) {
+                const shuffled = shuffle(list);
+                return shuffled.slice(0, Math.min(total, shuffled.length));
             }
         }
+
+        // Yedek: alanın genelinden karışık soru
+        if (typeof api.getLevelTestQuestions === 'function') {
+            return api.getLevelTestQuestions(field, total) || [];
+        }
+
+        return [];
+    }
+
+    /**
+     * YKS sorularını QuizManager'ın tüketebileceği testData formatına çevirir
+     * @param {Array} questionsFromPool
+     * @param {Object} meta
+     */
+    function buildTestData(questionsFromPool, meta) {
+        const now = Date.now();
+
+        const fieldLabelMap = {
+            sayisal: 'Sayısal',
+            ea: 'Eşit Ağırlık',
+            sozel: 'Sözel',
+            dil: 'Dil',
+            genel: 'Genel'
+        };
+
+        const fieldLabel = fieldLabelMap[meta.field] || 'Genel';
+
+        const titleBase = meta.subject && meta.subject !== 'mixed'
+            ? `YKS ${fieldLabel} – ${meta.subject} Seviye Testi`
+            : `YKS ${fieldLabel} Karışık Seviye Testi`;
+
+        const modeLabel = meta.mode === 'exam' ? 'Sınav Modu' : 'Pratik';
+
+        const testData = {
+            id: meta.id || (hasUtils && Utils.generateId ? Utils.generateId() : `yks_${now}`),
+            source: 'yks-level',
+            field: meta.field || 'genel',
+            subject: meta.subject || 'mixed',
+            title: `${titleBase} (${modeLabel})`,
+            description: meta.description || 'YKS seviye belirleme testi',
+            mode: meta.mode || 'practice',
+            createdAt: now,
+            // İstersen burada timeLimit de koyabilirsin (saniye cinsinden)
+            // timeLimit: meta.mode === 'exam' ? 1200 : null,
+            questions: []
+        };
+
+        testData.questions = questionsFromPool.map((q, index) => {
+            const id = q.id || `yks_q_${index + 1}`;
+            const choices = q.choices || q.options || [];
+
+            return {
+                // Genel alanlar
+                id,
+                text: q.text || '',
+                // Hem "choices" hem "options" dolduruluyor;
+                // QuizManager hangisini kullanıyorsa oradan okuyacak.
+                choices: choices,
+                options: choices,
+                correctIndex: typeof q.correctIndex === 'number' ? q.correctIndex : 0,
+                explanation: q.explanation || '',
+                // Ek metadata
+                field: q.field || meta.field || 'genel',
+                subject: q.subject || meta.subject || 'genel',
+                tags: ['yks', fieldLabel.toLowerCase(), q.subject || 'genel'],
+                difficulty: q.difficulty || 'medium',
+                // QuizManager için faydalı olabilecek ekstra alan
+                order: index + 1
+            };
+        });
+
+        return testData;
+    }
+
+    /**
+     * Testi localStorage'a yazar ve QuizManager üzerinden başlatır
+     * @param {Object} testData
+     * @param {string} quizMode  - QuizManager.startQuiz için mod (örn: 'ai')
+     */
+    function launchQuiz(testData, quizMode) {
+        try {
+            const json = JSON.stringify(testData);
+
+            // AI current test key üzerinden
+            try {
+                localStorage.setItem(CURRENT_TEST_KEY, json);
+            } catch (e) {
+                console.warn('[YKSFlow] CURRENT_TEST_KEY yazılamadı:', e);
+            }
+
+            // Eski olabilecek "testify_generated_test" desteği
+            try {
+                localStorage.setItem('testify_generated_test', json);
+            } catch (e) {
+                console.warn('[YKSFlow] testify_generated_test yazılamadı:', e);
+            }
+
+            if (!hasQuizManager || typeof QuizManager.startQuiz !== 'function') {
+                console.error('[YKSFlow] QuizManager.startQuiz bulunamadı.');
+                if (hasUtils && Utils.showToast) {
+                    Utils.showToast('Quiz sistemi henüz hazır değil. Lütfen sayfayı yenileyin.', 'error');
+                }
+                return;
+            }
+
+            // AI test pipeline'ını kullanıyoruz (AI tarzı custom test)
+            QuizManager.startQuiz(quizMode || 'ai');
+        } catch (err) {
+            console.error('[YKSFlow] launchQuiz hatası:', err);
+            if (hasUtils && Utils.showToast) {
+                Utils.showToast('YKS testi başlatılırken bir hata oluştu.', 'error');
+            }
+        }
+    }
+
+    /**
+     * Ana API:
+     * YKS havuzundan test üret + quiz başlat
+     * @param {Object} config
+     *  - field: sayisal / ea / sozel / dil / genel
+     *  - subject: belirli ders veya "mixed"
+     *  - mode: "practice" | "exam"
+     *  - questionCount: toplam soru
+     *  - perSubject: mixed için ders başına soru
+     *  - saveToLibrary: true/false (ileride kullanmak istersen)
+     */
+    function startTest(config) {
+        const cfg = Object.assign(
+            {
+                field: 'genel',
+                subject: 'mixed',
+                mode: 'practice',
+                questionCount: 10,
+                perSubject: 3,
+                saveToLibrary: false
+            },
+            config || {}
+        );
+
+        const questions = pickQuestionsFromPool(cfg);
+
+        if (!questions.length) {
+            if (hasUtils && Utils.showToast) {
+                Utils.showToast('Bu alan/derste henüz soru havuzu bulunmuyor.', 'warning');
+            } else {
+                alert('Bu alan/derste henüz soru havuzu bulunmuyor.');
+            }
+            return;
+        }
+
+        const testData = buildTestData(questions, cfg);
+
+        // İsteğe bağlı: kütüphaneye kaydet (AI library / senin library.js’teki sistemine göre)
+        if (cfg.saveToLibrary) {
+            try {
+                if (hasStorageManager && typeof StorageManager.saveTestToLibrary === 'function') {
+                    StorageManager.saveTestToLibrary(testData);
+                } else if (window.LibraryManager && typeof window.LibraryManager.saveTestToLibrary === 'function') {
+                    window.LibraryManager.saveTestToLibrary(testData);
+                }
+            } catch (e) {
+                console.warn('[YKSFlow] saveToLibrary sırasında hata:', e);
+            }
+        }
+
+        // Quiz’i başlat
+        launchQuiz(testData, 'ai');
+
+        // Aktivite log (güzel dursun diye)
+        try {
+            if (hasStorageManager && typeof StorageManager.saveActivity === 'function') {
+                StorageManager.saveActivity({
+                    type: 'yks_test_started',
+                    data: {
+                        field: cfg.field,
+                        subject: cfg.subject,
+                        questionCount: testData.questions.length,
+                        mode: cfg.mode
+                    },
+                    timestamp: Date.now()
+                });
+            }
+        } catch (e) {
+            console.warn('[YKSFlow] aktivite kaydı başarısız:', e);
+        }
+    }
+
+    /**
+     * Hızlı seviye testi (UI’den rahat çağırmak için)
+     * Örnek kullanım:
+     *   YKSFlow.startQuickLevelTest('sayisal');
+     */
+    function startQuickLevelTest(field, subject) {
+        startTest({
+            field: field || 'genel',
+            subject: subject || 'mixed',
+            mode: 'practice',
+            questionCount: 10,
+            perSubject: 3,
+            saveToLibrary: false
+        });
+    }
+
+    // Global API
+    window.YKSFlow = {
+        startTest,
+        startQuickLevelTest,
+        _buildTestData: buildTestData,         // istersen debug için
+        _pickQuestionsFromPool: pickQuestionsFromPool
     };
 
-    window.YKSFlow = YKSFlow;
-})(window, document);
+    console.log('[YKSFlow] Yüklendi ve hazır.');
+})();
