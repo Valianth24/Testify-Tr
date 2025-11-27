@@ -4142,11 +4142,13 @@ html[data-theme="light"] .quiz-progress-bar {
     .theme-toggle .icon {
         font-size: 0.9rem;
     }
-   
+}
+
 /* Sadece AI ikonlu kartta, ikon ile yazı arasındaki boşluğu artır */
 .test-option-icon:has(.ai-test-icon) {
     margin-bottom: 20px;  /* 16–20 arası zevkine göre oynatabilirsin */
 }
+
 
 
 
