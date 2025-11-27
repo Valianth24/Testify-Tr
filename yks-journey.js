@@ -1,13 +1,12 @@
-// yks-journey.js - BİRLEŞİK VE GELİŞMİŞ SÜRÜM
-// Eski YKS Journey + Yeni YKS Journey Manager tek dosyada
+// yks-journey.js - Gelişmiş tek sürüm
+// YKS Journey Manager (onboarding + dashboard + seviye testi)
 
 (function () {
     'use strict';
 
     const YKSJourneyManager = {
-        // Storage anahtarları
+        // Storage anahtarı (sadece v2)
         STORAGE_KEY: 'testify.yksJourney.v2',
-        LEGACY_STORAGE_KEY: 'testify.yksJourney.v1',
 
         // YKS TYT tarihi
         EXAM_DATE: new Date('2025-06-14'),
@@ -85,7 +84,7 @@
             // Diğer dersler istenirse eklenebilir
         },
 
-        // Eski sürüm alan label'ları
+        // Alan label'ları
         FIELD_LABELS: {
             sayisal: 'Sayısal',
             ea: 'Eşit Ağırlık',
@@ -94,7 +93,7 @@
             genel: 'Genel'
         },
 
-        // Eski sürümde onboarding 2. adımda kullanılan ders listeleri
+        // Eski sürümde onboarding 2. adımda kullanılan ders listeleri (dışarıdan ihtiyaç olursa diye tutuluyor)
         FIELD_SUBJECTS: {
             sayisal: [
                 { id: 'matematik', label: 'TYT Matematik', icon: 'ph ph-calculator' },
@@ -124,7 +123,7 @@
             ]
         },
 
-        // Rozet sistemi (arkada kalsın, UI göstermiyoruz)
+        // Rozet sistemi (UI şu an göstermiyor ama istatistik için hazır)
         BADGES: {
             beginner: { name: 'Yeni Başlayan', icon: '🌱', requirement: 100, xp: 50 },
             consistent: { name: 'Düzenli Çalışkan', icon: '📚', requirement: 7, xp: 100 }, // 7 gün streak
@@ -183,7 +182,6 @@
                     history: []
                 },
                 reports: [],
-                // Eski seviye testi state'i
                 levelTest: {
                     status: 'not_started', // 'not_started' | 'in_progress' | 'completed'
                     lastResult: null
@@ -192,53 +190,15 @@
         },
 
         /**
-         * Eski v1 -> yeni v2 migrate ve state yükleme
+         * State yükleme (sadece v2, legacy migration yok)
          */
         loadState() {
             let state = null;
+
             try {
                 const saved = window.localStorage.getItem(this.STORAGE_KEY);
                 if (saved) {
                     state = JSON.parse(saved);
-                } else {
-                    // Eski v1 verisini migrate et
-                    const legacy = window.localStorage.getItem(this.LEGACY_STORAGE_KEY);
-                    if (legacy) {
-                        const v1 = JSON.parse(legacy);
-                        const base = this.createDefaultState();
-
-                        if (v1.profile) {
-                            const legacySubjects = v1.profile.subjects || [];
-                            const weakSubjects = legacySubjects.map(id =>
-                                this.mapSubjectIdToName(id)
-                            );
-
-                            base.profile = {
-                                field: v1.profile.field || null,
-                                grade: null,
-                                targetDepartment: '',
-                                targetRank: null,
-                                dailyTime: 2,
-                                weakSubjects,
-                                subjects: legacySubjects,
-                                levelTestPreference: v1.profile.levelTestPreference || 'never',
-                                createdAt: v1.profile.createdAt || new Date().toISOString()
-                            };
-                        }
-
-                        if (v1.stats) {
-                            base.stats.solvedQuestions = v1.stats.solvedQuestions || 0;
-                            base.stats.completedTests = v1.stats.completedTests || 0;
-                            base.stats.streakDays = v1.stats.streakDays || 0;
-                            base.stats.totalQuestions = base.stats.solvedQuestions;
-                        }
-
-                        if (v1.levelTest) {
-                            base.levelTest = Object.assign({}, base.levelTest, v1.levelTest);
-                        }
-
-                        state = base;
-                    }
                 }
             } catch (e) {
                 console.error('YKS state yükleme hatası:', e);
@@ -250,6 +210,7 @@
 
             // Eksik alanları tamamla (geriye dönük uyumluluk)
             const defaults = this.createDefaultState();
+
             state.stats = Object.assign({}, defaults.stats, state.stats || {});
             state.spacedRepetition = Object.assign(
                 {},
@@ -257,7 +218,10 @@
                 state.spacedRepetition || {}
             );
             state.levelTest = Object.assign({}, defaults.levelTest, state.levelTest || {});
+
             if (!Array.isArray(state.reports)) state.reports = [];
+            if (!Array.isArray(state.dailyTasks)) state.dailyTasks = [];
+            if (!Array.isArray(state.weakPoints)) state.weakPoints = [];
 
             return state;
         },
@@ -273,7 +237,7 @@
         },
 
         /**
-         * Eski subject ID -> Yeni görünen isim
+         * Eski subject ID -> Yeni görünen isim (dışarıdan kullanılırsa diye bırakıldı)
          */
         mapSubjectIdToName(id) {
             const map = {
@@ -298,6 +262,8 @@
          * ONBOARDING - Çok adımlı, tek kart tek seçim
          */
         renderOnboarding(container, state) {
+            void state;
+
             this.currentOnboardingStep = 1;
 
             container.innerHTML = `
@@ -496,7 +462,7 @@
 
             steps.forEach(stepEl => {
                 const s = Number(stepEl.getAttribute('data-step') || '1');
-                stepEl.hidden = s !== this.currentOnboardingStep;
+                stepEl.hidden = (s !== this.currentOnboardingStep);
             });
         },
 
@@ -724,7 +690,7 @@
             const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
             const todayName = dayNames[today.getDay()];
 
-            const todayPlan = weeklyPlan[todayName] || [];
+            const todayPlan = (weeklyPlan && weeklyPlan[todayName]) || [];
 
             const tasks = todayPlan.map(session => ({
                 id: this.generateId(),
@@ -956,6 +922,7 @@
             `;
 
             const weeklyReportCard = this.renderWeeklyReport(state);
+
             const coachingCard = `
                 <div class="coaching-card">
                     <h3><i class="ph ph-book-open"></i> YKS Koçluk İçerikleri</h3>
@@ -1291,7 +1258,7 @@
         },
 
         /**
-         * Eski dashboard’taki ek alanlar (özet, seviye testi hatırlatıcısı, adımlar vb.)
+         * Özet + seviye testi hatırlatıcısı + adımlar
          */
         renderLegacyDashboardExtras(state) {
             const profile = state.profile || {};
@@ -1326,9 +1293,9 @@
                         <p><strong>Alan:</strong> ${fieldLabel}</p>
                         <p><strong>Öncelikli dersler:</strong> ${subjectsText}</p>
                         ${hasCompletedLevelTest
-                    ? '<p class="summary-subtitle">Seviye testine göre seni bekleyen özel hedefler hazır. Aşağıdaki adımlardan başlayabilirsin.</p>'
-                    : '<p class="summary-subtitle">Henüz seviye testini tamamlamadın. İstersen önce kısa bir seviye testi ile başlangıç seviyeni netleştirebilirsin.</p>'
-                }
+                ? '<p class="summary-subtitle">Seviye testine göre seni bekleyen özel hedefler hazır. Aşağıdaki adımlardan başlayabilirsin.</p>'
+                : '<p class="summary-subtitle">Henüz seviye testini tamamlamadın. İstersen önce kısa bir seviye testi ile başlangıç seviyeni netleştirebilirsin.</p>'
+            }
                     </div>
                 </section>
 
@@ -1733,7 +1700,7 @@
         },
 
         editProfile() {
-            // Eski "Profili Düzenle" davranışına uygun: yolculuğu sıfırla
+            // Profili sıfırla ve onboarding'e dön
             const fresh = this.createDefaultState();
             this.saveState(fresh);
             this.init();
@@ -1803,7 +1770,7 @@
         },
 
         /**
-         * Eski seviye testi kartları (dashboard içinde kullanılan)
+         * Seviye testi kartları (dashboard içinde kullanılan)
          */
         renderLevelTestReminderHTML(state) {
             const profile = state.profile;
@@ -1881,7 +1848,7 @@
         },
 
         /**
-         * Dashboard event’leri (eski butonlar + seviye testi başlat/tekrar)
+         * Dashboard event’leri (seviye testi başlat/tekrar + sekme yönlendirmeleri)
          */
         attachDashboardEvents(container, state) {
             const self = this;
@@ -1901,7 +1868,7 @@
                 });
             }
 
-            // Eski dashboard'taki yönlendirme butonları
+            // Yönlendirme butonları
             container.querySelectorAll('[data-yks-action="go-tests"]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     if (window.App && typeof window.App.switchTab === 'function') {
@@ -1959,7 +1926,7 @@
         },
 
         /**
-         * Seviye testi giriş noktası (dashboard + onboarding kullanır)
+         * Seviye testi giriş noktası
          */
         startLevelTest() {
             const container = document.getElementById('journeyContent');
@@ -1974,7 +1941,7 @@
         },
 
         /**
-         * Eski seviye testi ekranı (tam sürüm)
+         * Seviye testi ekranı
          */
         renderLevelTest(container, state) {
             const self = this;
@@ -2236,7 +2203,6 @@
                     </div>
                 </div>
             `;
-
             const toDashboardBtn = container.querySelector('#yksResultToDashboardBtn');
             const retakeBtn = container.querySelector('#yksResultRetakeBtn');
             const self = this;
@@ -2260,7 +2226,6 @@
          * Eski beginTest için geriye dönük uyumluluk
          */
         beginTest() {
-            // Eski HTML'de YKSJourneyManager.beginTest() çağrısı varsa boşa gitmesin
             this.startLevelTest();
         },
 
