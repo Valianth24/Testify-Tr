@@ -3978,4 +3978,16 @@ html[data-theme="light"] [data-content-key] .yks-pill:hover {
 }
 
 
+/* Light modda Haftalık Rapor kartı: zemin beyaz, yazılar siyah */
+[data-theme="light"] .weekly-report-card {
+    background: #ffffff !important;
+    border-color: #000000 !important;
+    color: #000000 !important;
+}
+
+/* Kart içindeki bütün yazılar da siyah olsun */
+[data-theme="light"] .weekly-report-card * {
+    color: #000000 !important;
+}
+
 
