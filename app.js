@@ -135,7 +135,7 @@ const App = {
                 themeBtn.setAttribute('aria-pressed', newTheme === 'dark');
             }
 
-            if (window.Utils && window.Config && Config.STORAGE_KEYS) {
+            if (window.Utils && window.Config && Config.STORAGE_KEYS && typeof Utils.setToStorage === 'function') {
                 Utils.setToStorage(Config.STORAGE_KEYS.THEME, newTheme);
             } else if (window.localStorage) {
                 localStorage.setItem('theme', newTheme);
@@ -149,7 +149,7 @@ const App = {
     loadTheme() {
         let savedTheme = 'light';
 
-        if (window.Utils && window.Config && Config.STORAGE_KEYS) {
+        if (window.Utils && window.Config && Config.STORAGE_KEYS && typeof Utils.getFromStorage === 'function') {
             savedTheme = Utils.getFromStorage(Config.STORAGE_KEYS.THEME, 'light');
         } else if (window.localStorage) {
             savedTheme = localStorage.getItem('theme') || 'light';
@@ -710,8 +710,12 @@ const App = {
                 return;
             }
 
-            const successRate = Math.round((stats.correctAnswers / stats.totalQuestions) * 100);
-            const avgTime = Math.round(stats.totalTime / stats.totalTests);
+            // 🔹 Güvenli oran & süre hesaplama
+            const totalQuestionsSafe = Math.max(stats.totalQuestions, 1);
+            const successRate = Math.round((stats.correctAnswers / totalQuestionsSafe) * 100);
+            const avgTime = stats.totalTests > 0
+                ? Math.round(stats.totalTime / stats.totalTests)
+                : 0;
 
             const avgSuccessText = t('analysis.avgSuccess', 'Ortalama Başarı');
             const avgTimeText = t('analysis.avgTime', 'Ortalama Süre');
