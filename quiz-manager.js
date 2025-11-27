@@ -1,12 +1,25 @@
 /**
- * TESTIFY QUIZ MANAGER - HATASIZ FINAL
- * Tüm memory leak, event listener ve bug'lar düzeltildi
+ * TESTIFY QUIZ MANAGER v2.1
+ * =========================
+ * Test motoru - Tüm test akışlarını yönetir
+ * 
+ * Desteklenen modlar:
+ * - practice: Pratik modu (süre yok, anında geri bildirim)
+ * - exam: Sınav modu (süre var, sonuçlar sonda)
+ * - quick: Hızlı test (5 soru)
+ * - marathon: Maraton (30+ soru)
+ * - ai: AI tarafından oluşturulan test
+ * - library: Kütüphaneden yüklenen test
+ * - yks: YKS soru havuzundan test
  */
 
 'use strict';
 
 const QuizManager = {
-    // Quiz durumu
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════════════════════════
+    
     state: {
         currentMode: null,
         questions: [],
@@ -15,15 +28,25 @@ const QuizManager = {
         startTime: null,
         timerInterval: null,
         elapsedSeconds: 0,
+        timeLimit: null,           // Sınav modu için süre limiti (saniye)
         isReviewing: false,
         testTitle: null,
         testDescription: null,
-        meta: null,                 // ✅ Kaynak / ders / konu gibi ek bilgiler
-        eventListenersAttached: false // ✅ Duplicate önleme
+        meta: null,
+        eventListenersAttached: false,
+        showInstantFeedback: true  // Pratik modda anında geri bildirim
     },
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // YARDIMCI METOTLAR
+    // ═══════════════════════════════════════════════════════════════════════════
+
     /**
-     * Doğru cevabın index'ini bulur (A/B/C veya tam metin destekli)
+     * Doğru cevabın index'ini bulur
+     * Desteklenen formatlar:
+     * - question.answerIndex (number)
+     * - question.a (string - tam metin veya harf)
+     * - question.correctIndex (number)
      */
     getCorrectIndex(question) {
         if (!question || !Array.isArray(question.o)) return -1;
@@ -31,23 +54,27 @@ const QuizManager = {
         const letters = ['A', 'B', 'C', 'D', 'E'];
         const a = question.a;
 
-        // Eğer doğrudan index saklandıysa
+        // Doğrudan index
         if (typeof question.answerIndex === 'number') {
             return question.answerIndex;
+        }
+        if (typeof question.correctIndex === 'number') {
+            return question.correctIndex;
         }
         if (typeof a === 'number') {
             return a;
         }
 
+        // String olarak cevap
         if (typeof a === 'string') {
             const trimmed = a.trim();
 
-            // Case 1: sadece harf (A, B, C...)
+            // Sadece harf (A, B, C...)
             if (/^[A-E]$/i.test(trimmed)) {
                 return letters.indexOf(trimmed.toUpperCase());
             }
 
-            // Case 2: "C) ..." veya tam metin
+            // "C) ..." formatı veya tam metin
             const normalizedAnswer = trimmed.replace(/^\s*[A-E]\)\s*/i, '').trim();
 
             return question.o.findIndex(opt => {
@@ -65,11 +92,54 @@ const QuizManager = {
     },
 
     /**
-     * AI TARAFINDAN OLUŞTURULAN TESTİ YÜKLE
+     * Soru formatını normalize et
+     * Farklı kaynaklardan gelen soruları standart formata çevir
+     */
+    normalizeQuestion(q, index) {
+        // Zaten doğru formatta
+        if (q.q && Array.isArray(q.o)) {
+            return {
+                ...q,
+                id: q.id || `q_${index + 1}`
+            };
+        }
+
+        // Alternatif formatlar
+        const question = {
+            id: q.id || `q_${index + 1}`,
+            q: q.q || q.text || q.question || '',
+            o: q.o || q.options || q.choices || [],
+            a: null,
+            explanation: q.explanation || q.hint || '',
+            difficulty: q.difficulty || 'medium',
+            subject: q.subject || null,
+            topic: q.topic || null
+        };
+
+        // Doğru cevabı belirle
+        if (typeof q.correctIndex === 'number') {
+            question.a = question.o[q.correctIndex] || '';
+            question.answerIndex = q.correctIndex;
+        } else if (typeof q.answerIndex === 'number') {
+            question.a = question.o[q.answerIndex] || '';
+        } else if (q.a) {
+            question.a = q.a;
+        } else if (q.answer) {
+            question.a = q.answer;
+        }
+
+        return question;
+    },
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // TEST YÜKLEME
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * AI tarafından oluşturulan testi yükle
      */
     loadAIGeneratedTest() {
         try {
-            // Önce yeni key, yoksa eski key'ten dene
             let raw = localStorage.getItem('testify_generated_test') 
                    || localStorage.getItem('testify_current_test');
 
@@ -80,13 +150,12 @@ const QuizManager = {
             
             const testData = JSON.parse(raw);
             
-            // Expiry yoksa şimdi ekle (24 saat)
+            // Expiry kontrolü
             if (!testData.expiresAt) {
                 testData.expiresAt = Date.now() + 24 * 60 * 60 * 1000;
                 localStorage.setItem('testify_generated_test', JSON.stringify(testData));
             }
             
-            // Süresi dolmuş mu kontrol et
             if (testData.expiresAt && Date.now() > testData.expiresAt) {
                 console.log('⏰ AI testi süresi dolmuş');
                 localStorage.removeItem('testify_generated_test');
@@ -95,7 +164,6 @@ const QuizManager = {
             }
             
             console.log('✅ AI testi yüklendi:', testData.title);
-            console.log('📊 Soru sayısı:', testData.questions.length);
             return testData;
             
         } catch (error) {
@@ -104,158 +172,61 @@ const QuizManager = {
         }
     },
 
-    /**
-     * Quiz'i başlatır - TAM HATASIZ
-     * (Eski sistem: AI testi veya window.questionBank kullanır)
-     */
-    startQuiz(mode) {
-        console.log('🎯 Quiz başlatılıyor, mod:', mode);
-        
-        // ✅ Önceki timer'ı temizle
-        this.cleanupPreviousQuiz();
-        
-        try {
-            // Önce AI testi var mı kontrol et
-            const aiTest = this.loadAIGeneratedTest();
-            
-            if (aiTest && aiTest.questions && aiTest.questions.length > 0) {
-                console.log('🤖 AI testi kullanılıyor');
-                
-                // AI testini kullan
-                this.state = {
-                    currentMode: 'ai',
-                    questions: aiTest.questions,
-                    currentIndex: 0,
-                    answers: [],
-                    startTime: Date.now(),
-                    timerInterval: null,
-                    elapsedSeconds: 0,
-                    isReviewing: false,
-                    testTitle: aiTest.title,
-                    testDescription: aiTest.description,
-                    meta: {
-                        source: 'ai',
-                        id: aiTest.id || null
-                    },
-                    eventListenersAttached: this.state.eventListenersAttached
-                };
-                
-                this.state.answers = new Array(aiTest.questions.length).fill(null);
-                
-                Utils.showToast(`🤖 AI Testi: ${aiTest.title} - ${aiTest.questions.length} soru`, 'info', 4000);
-                
-            } else {
-                console.log('📚 Varsayılan sorular kullanılıyor');
-                
-                // Soru bankası kontrolü
-                if (!window.questionBank || !Array.isArray(window.questionBank)) {
-                    Utils.showToast('Soru bankası yüklenemedi!', 'error');
-                    console.error('questionBank bulunamadı!');
-                    return;
-                }
-
-                if (window.questionBank.length === 0) {
-                    Utils.showToast('Soru bankası boş!', 'error');
-                    return;
-                }
-
-                // Tüm soruları karıştır ve al
-                const allQuestions = [...window.questionBank];
-                
-                this.state = {
-                    currentMode: mode,
-                    questions: Utils.shuffleArray(allQuestions),
-                    currentIndex: 0,
-                    answers: [],
-                    startTime: Date.now(),
-                    timerInterval: null,
-                    elapsedSeconds: 0,
-                    isReviewing: false,
-                    testTitle: null,
-                    testDescription: null,
-                    meta: {
-                        source: 'questionBank',
-                        mode
-                    },
-                    eventListenersAttached: this.state.eventListenersAttached
-                };
-                
-                this.state.answers = new Array(this.state.questions.length).fill(null);
-            }
-
-            console.log(`✅ ${this.state.questions.length} soru yüklendi`);
-
-            // Sayfaları değiştir
-            const testSelection = document.getElementById('testSelection');
-            const quizPage = document.getElementById('quizPage');
-            
-            if (!testSelection || !quizPage) {
-                throw new Error('Quiz sayfaları bulunamadı');
-            }
-
-            testSelection.classList.remove('active');
-            quizPage.classList.add('active');
-
-            // Exit butonunu göster
-            this.showExitButton();
-
-            // Timer'ı başlat
-            this.startTimer();
-
-            // İlk soruyu göster
-            this.displayQuestion();
-
-            // Quiz durumunu kaydet
-            this.saveState();
-
-            const questionCount = this.state.questions.length;
-            Utils.showToast(`Test başladı! ${questionCount} soru - Bol şans!`, 'success');
-            
-        } catch (error) {
-            console.error('❌ Quiz başlatma hatası:', error);
-            Utils.showToast('Test başlatılamadı: ' + error.message, 'error');
-        }
-    },
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ANA API - start()
+    // ═══════════════════════════════════════════════════════════════════════════
 
     /**
-     * ✅ Yeni flow için generic başlatıcı
-     * TestFlow gibi yapılar buradan çağıracak:
-     * QuizManager.start({
-     *   questions: [...],        // ZORUNLU
-     *   mode: 'practice-library',
-     *   testTitle: '...',
-     *   testDescription: '...',
-     *   meta: { source: 'library', testId: '...' }
-     * })
+     * Yeni test başlat - Ana giriş noktası
+     * 
+     * @param {Object} config
+     * @param {Array} config.questions - Soru listesi (ZORUNLU)
+     * @param {string} config.mode - Test modu ('practice', 'exam', 'quick', 'marathon')
+     * @param {string} config.testTitle - Test başlığı
+     * @param {string} config.testDescription - Test açıklaması
+     * @param {number} config.timeLimit - Süre limiti (saniye, exam modu için)
+     * @param {Object} config.meta - Ek metadata
      */
     start(config) {
-        console.log('🎯 QuizManager.start(config) çağrıldı:', config);
+        console.log('🎯 QuizManager.start() çağrıldı:', config);
 
-        // Eski quiz’i temizle
+        // Önceki testi temizle
         this.cleanupPreviousQuiz();
 
         try {
+            // Validasyon
             if (!config || !Array.isArray(config.questions) || config.questions.length === 0) {
                 Utils.showToast('Bu test için soru bulunamadı.', 'error');
-                console.error('QuizManager.start: geçersiz questions', config && config.questions);
-                return;
+                console.error('QuizManager.start: geçersiz questions');
+                return false;
             }
 
+            // Mod belirleme
+            const mode = config.mode || 'practice';
+            const showInstantFeedback = mode === 'practice' || mode === 'quick';
+
+            // Soruları normalize et
+            const normalizedQuestions = config.questions.map((q, i) => this.normalizeQuestion(q, i));
+
+            // State'i ayarla
             this.state = {
-                currentMode: config.mode || 'custom',
-                questions: config.questions,
+                currentMode: mode,
+                questions: normalizedQuestions,
                 currentIndex: 0,
-                answers: new Array(config.questions.length).fill(null),
+                answers: new Array(normalizedQuestions.length).fill(null),
                 startTime: Date.now(),
                 timerInterval: null,
                 elapsedSeconds: 0,
+                timeLimit: config.timeLimit || null,
                 isReviewing: false,
                 testTitle: config.testTitle || null,
                 testDescription: config.testDescription || null,
                 meta: config.meta || null,
-                eventListenersAttached: this.state.eventListenersAttached
+                eventListenersAttached: this.state.eventListenersAttached,
+                showInstantFeedback: showInstantFeedback
             };
 
+            // Sayfa geçişi
             const testSelection = document.getElementById('testSelection');
             const quizPage = document.getElementById('quizPage');
 
@@ -268,75 +239,85 @@ const QuizManager = {
             }
             quizPage.classList.add('active');
 
+            // UI'ı hazırla
             this.showExitButton();
             this.startTimer();
             this.displayQuestion();
             this.saveState();
 
+            // Bildirim
             const questionCount = this.state.questions.length;
             const titlePart = this.state.testTitle ? `: ${this.state.testTitle}` : '';
             Utils.showToast(`Test başladı${titlePart} - ${questionCount} soru`, 'success');
 
+            console.log(`✅ ${questionCount} soru yüklendi, mod: ${mode}`);
+            return true;
+
         } catch (error) {
             console.error('❌ QuizManager.start hata:', error);
             Utils.showToast('Test başlatılamadı: ' + error.message, 'error');
+            return false;
         }
     },
 
     /**
-     * ✅ Önceki quiz'i temizle
+     * Eski API - Geriye dönük uyumluluk
      */
-    cleanupPreviousQuiz() {
-        // Timer'ı durdur
-        if (this.state.timerInterval) {
-            clearInterval(this.state.timerInterval);
-            this.state.timerInterval = null;
-            console.log('🧹 Önceki timer temizlendi');
-        }
+    startQuiz(mode) {
+        console.log('🎯 QuizManager.startQuiz() çağrıldı, mod:', mode);
         
-        // Eski seçenekleri temizle
-        const optionsList = document.getElementById('optionsList');
-        if (optionsList) {
-            optionsList.innerHTML = '';
-        }
-    },
-
-    /**
-     * Exit butonunu göster/gizle
-     */
-    showExitButton() {
-        const exitBtn = document.getElementById('exitQuizBtn');
-        if (exitBtn) {
-            exitBtn.style.display = this.state.isReviewing ? 'none' : 'inline-flex';
-        }
-    },
-
-    /**
-     * Quiz durumunu kaydeder
-     */
-    saveState() {
+        this.cleanupPreviousQuiz();
+        
         try {
-            if (window.StorageManager) {
-                StorageManager.saveQuizState({
-                    currentMode: this.state.currentMode,
-                    currentIndex: this.state.currentIndex,
-                    answers: this.state.answers,
-                    startTime: this.state.startTime,
-                    elapsedSeconds: this.state.elapsedSeconds,
-                    questionCount: this.state.questions.length
-                    // İstersen ileride testTitle/meta da ekleyebiliriz
+            // AI testini kontrol et
+            const aiTest = this.loadAIGeneratedTest();
+            
+            if (aiTest && aiTest.questions && aiTest.questions.length > 0) {
+                return this.start({
+                    questions: aiTest.questions,
+                    mode: mode === 'exam' ? 'exam' : 'practice',
+                    testTitle: aiTest.title,
+                    testDescription: aiTest.description,
+                    meta: {
+                        source: 'ai',
+                        id: aiTest.id || null
+                    }
                 });
             }
+
+            // Varsayılan soru bankası
+            if (!window.questionBank || !Array.isArray(window.questionBank) || window.questionBank.length === 0) {
+                Utils.showToast('Soru bankası yüklenemedi!', 'error');
+                console.error('questionBank bulunamadı veya boş!');
+                return false;
+            }
+
+            return this.start({
+                questions: Utils.shuffleArray([...window.questionBank]),
+                mode: mode,
+                testTitle: null,
+                testDescription: null,
+                meta: {
+                    source: 'questionBank',
+                    mode: mode
+                }
+            });
+            
         } catch (error) {
-            console.warn('Quiz durumu kaydedilemedi:', error);
+            console.error('❌ Quiz başlatma hatası:', error);
+            Utils.showToast('Test başlatılamadı: ' + error.message, 'error');
+            return false;
         }
     },
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // TIMER YÖNETİMİ
+    // ═══════════════════════════════════════════════════════════════════════════
+
     /**
-     * Timer'ı başlatır
+     * Timer'ı başlat
      */
     startTimer() {
-        // ✅ Önceki timer'ı temizle
         if (this.state.timerInterval) {
             clearInterval(this.state.timerInterval);
         }
@@ -345,7 +326,12 @@ const QuizManager = {
             this.state.elapsedSeconds++;
             this.updateTimerDisplay();
             
-            // Her 10 saniyede bir state'i kaydet
+            // Süre limiti kontrolü (sınav modu)
+            if (this.state.timeLimit && this.state.elapsedSeconds >= this.state.timeLimit) {
+                this.handleTimeUp();
+            }
+            
+            // State'i periyodik kaydet
             if (this.state.elapsedSeconds % 10 === 0) {
                 this.saveState();
             }
@@ -353,28 +339,52 @@ const QuizManager = {
     },
 
     /**
-     * Timer'ı durdurur
+     * Timer'ı durdur
      */
     stopTimer() {
         if (this.state.timerInterval) {
             clearInterval(this.state.timerInterval);
             this.state.timerInterval = null;
-            console.log('⏹️ Timer durduruldu');
         }
     },
 
     /**
-     * Timer'ı günceller
+     * Timer gösterimini güncelle
      */
     updateTimerDisplay() {
         const timerEl = document.getElementById('quizTimer');
-        if (timerEl) {
+        if (!timerEl) return;
+
+        if (this.state.timeLimit) {
+            // Geri sayım (sınav modu)
+            const remaining = Math.max(0, this.state.timeLimit - this.state.elapsedSeconds);
+            timerEl.textContent = Utils.formatTime(remaining);
+            
+            // Son 1 dakika uyarısı
+            if (remaining <= 60 && remaining > 0) {
+                timerEl.style.color = 'var(--danger)';
+                timerEl.style.fontWeight = '700';
+            }
+        } else {
+            // Normal sayım
             timerEl.textContent = Utils.formatTime(this.state.elapsedSeconds);
         }
     },
 
     /**
-     * Soruyu gösterir
+     * Süre dolduğunda
+     */
+    handleTimeUp() {
+        Utils.showToast('⏰ Süre doldu! Test otomatik olarak bitiriliyor...', 'warning');
+        this.finishQuiz(true); // Force finish
+    },
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SORU GÖSTERİMİ
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Mevcut soruyu göster
      */
     displayQuestion() {
         try {
@@ -383,7 +393,7 @@ const QuizManager = {
                 throw new Error('Soru bulunamadı');
             }
 
-            // Soru numarası ve toplam
+            // Soru numarası
             const currentQuestionEl = document.getElementById('currentQuestion');
             const totalQuestionsEl = document.getElementById('totalQuestionsQuiz');
             
@@ -416,6 +426,7 @@ const QuizManager = {
 
             // Butonları güncelle
             this.updateButtons();
+
         } catch (error) {
             console.error('Soru gösterme hatası:', error);
             Utils.showToast('Soru gösterilemedi', 'error');
@@ -423,17 +434,18 @@ const QuizManager = {
     },
 
     /**
-     * Seçenekleri gösterir
+     * Seçenekleri göster
      */
     displayOptions(question) {
         const optionsList = document.getElementById('optionsList');
         if (!optionsList) return;
 
-        // Eski seçenekleri temizle
         optionsList.innerHTML = '';
 
         const letters = ['A', 'B', 'C', 'D', 'E'];
         const correctIndex = this.getCorrectIndex(question);
+        const userAnswer = this.state.answers[this.state.currentIndex];
+        const hasAnswered = userAnswer !== null;
 
         question.o.forEach((option, index) => {
             const optionDiv = document.createElement('div');
@@ -442,14 +454,16 @@ const QuizManager = {
             optionDiv.setAttribute('aria-checked', 'false');
             optionDiv.setAttribute('tabindex', '0');
             
-            const isSelected = this.state.answers[this.state.currentIndex] === index;
+            const isSelected = userAnswer === index;
             if (isSelected) {
                 optionDiv.classList.add('selected');
                 optionDiv.setAttribute('aria-checked', 'true');
             }
 
-            // Review modundaysa doğru/yanlış göster
-            if (this.state.isReviewing) {
+            // Review modunda veya anında geri bildirim aktifse ve cevap verildiyse
+            const showFeedback = this.state.isReviewing || (this.state.showInstantFeedback && hasAnswered);
+
+            if (showFeedback) {
                 optionDiv.classList.add('disabled');
                 const isCorrect = index === correctIndex;
                 const isUserAnswer = isSelected;
@@ -463,7 +477,7 @@ const QuizManager = {
                 }
             }
 
-            // "A) " prefixini kaldır, biz zaten solda harfi gösteriyoruz
+            // "A) " prefix'ini kaldır
             const cleanText = String(option).replace(/^\s*[A-E]\)\s*/i, '');
 
             optionDiv.innerHTML = `
@@ -471,8 +485,8 @@ const QuizManager = {
                 <span>${Utils.sanitizeHTML(cleanText)}</span>
             `;
 
-            // Event listener'lar sadece normal çözüm modunda
-            if (!this.state.isReviewing) {
+            // Event listener (henüz cevaplanmamışsa veya review değilse)
+            if (!showFeedback) {
                 const clickHandler = () => this.selectOption(index);
                 const keyHandler = (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -488,26 +502,19 @@ const QuizManager = {
             optionsList.appendChild(optionDiv);
         });
 
-        // Review modunda açıklama göster
-        if (this.state.isReviewing && question.explanation) {
-            const explanationDiv = document.createElement('div');
-            explanationDiv.className = 'question-explanation';
-            explanationDiv.innerHTML = `
-                <div class="explanation-header">
-                    <span class="explanation-icon">💡</span>
-                    <strong>${window.t ? t('quiz.explanation', 'Açıklama') : 'Açıklama'}:</strong>
-                </div>
-                <p>${Utils.sanitizeHTML(question.explanation)}</p>
-            `;
-            optionsList.appendChild(explanationDiv);
+        // Açıklama göster (review veya anında geri bildirim)
+        if (showFeedback && question.explanation) {
+            const isCorrect = userAnswer === correctIndex;
+            this.showExplanation(question, isCorrect);
         }
     },
 
     /**
-     * Seçenek seçer
+     * Seçenek seç
      */
     selectOption(index) {
         if (this.state.isReviewing) return;
+        if (this.state.answers[this.state.currentIndex] !== null) return; // Zaten cevaplandı
 
         try {
             const question = this.state.questions[this.state.currentIndex];
@@ -517,42 +524,52 @@ const QuizManager = {
             // Cevabı kaydet
             this.state.answers[this.state.currentIndex] = index;
 
-            // Tüm seçenekleri disable et
-            document.querySelectorAll('.option-item').forEach((item, idx) => {
-                item.classList.add('disabled');
-                item.style.pointerEvents = 'none';
-                
-                // Doğru cevabı yeşil yap
-                if (idx === correctIndex) {
-                    item.classList.add('correct');
-                }
-                
-                // Yanlış seçimi kırmızı yap
-                if (idx === index && !isCorrect) {
-                    item.classList.add('incorrect');
-                }
-                
-                if (idx === index) {
-                    item.classList.add('selected');
-                    item.setAttribute('aria-checked', 'true');
-                } else {
-                    item.classList.remove('selected');
-                    item.setAttribute('aria-checked', 'false');
-                }
-            });
+            // Anında geri bildirim göster
+            if (this.state.showInstantFeedback) {
+                // Tüm seçenekleri disable et
+                document.querySelectorAll('.option-item').forEach((item, idx) => {
+                    item.classList.add('disabled');
+                    item.style.pointerEvents = 'none';
+                    
+                    if (idx === correctIndex) {
+                        item.classList.add('correct');
+                    }
+                    
+                    if (idx === index && !isCorrect) {
+                        item.classList.add('incorrect');
+                    }
+                    
+                    if (idx === index) {
+                        item.classList.add('selected');
+                        item.setAttribute('aria-checked', 'true');
+                    }
+                });
 
-            // Açıklamayı göster
-            this.showExplanation(question, isCorrect);
+                // Açıklama göster
+                this.showExplanation(question, isCorrect);
+            } else {
+                // Sadece seçimi işaretle (sınav modu)
+                document.querySelectorAll('.option-item').forEach((item, idx) => {
+                    if (idx === index) {
+                        item.classList.add('selected');
+                        item.setAttribute('aria-checked', 'true');
+                    } else {
+                        item.classList.remove('selected');
+                        item.setAttribute('aria-checked', 'false');
+                    }
+                });
+            }
 
             // State'i kaydet
             this.saveState();
+
         } catch (error) {
             console.error('Seçenek seçme hatası:', error);
         }
     },
 
     /**
-     * Açıklamayı gösterir
+     * Açıklama göster
      */
     showExplanation(question, isCorrect) {
         // Eski açıklamayı kaldır
@@ -561,7 +578,6 @@ const QuizManager = {
             oldExplanation.remove();
         }
 
-        // Açıklama yoksa çık
         if (!question.explanation) return;
 
         const optionsList = document.getElementById('optionsList');
@@ -569,22 +585,23 @@ const QuizManager = {
 
         const explanationDiv = document.createElement('div');
         explanationDiv.className = 'question-explanation';
-        explanationDiv.style.cssText = 'margin-top: 20px; padding: 15px; background: var(--bg-tertiary); border-left: 4px solid var(--info); border-radius: 8px; animation: slideIn 0.3s ease-out;';
         
         const statusIcon = isCorrect ? '✅' : '❌';
-        const statusText = isCorrect ? (window.t ? t('quiz.correct', 'Doğru!') : 'Doğru!') : (window.t ? t('quiz.wrong', 'Yanlış!') : 'Yanlış!');
+        const statusText = isCorrect 
+            ? (window.t ? t('quiz.correct', 'Doğru!') : 'Doğru!')
+            : (window.t ? t('quiz.wrong', 'Yanlış!') : 'Yanlış!');
         const statusColor = isCorrect ? 'var(--success)' : 'var(--danger)';
         
         explanationDiv.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <div class="explanation-status" style="color: ${statusColor}">
                 <span style="font-size: 1.2rem;">${statusIcon}</span>
-                <strong style="color: ${statusColor}; font-size: 1.1rem;">${statusText}</strong>
+                <strong>${statusText}</strong>
             </div>
-            <div style="display: flex; align-items: flex-start; gap: 8px; margin-top: 10px;">
-                <span style="font-size: 1.2rem;">💡</span>
+            <div class="explanation-content">
+                <span class="explanation-icon">💡</span>
                 <div>
                     <strong style="color: var(--info);">${window.t ? t('quiz.explanation', 'Açıklama') : 'Açıklama'}:</strong>
-                    <p style="color: var(--text-secondary); line-height: 1.6; margin: 5px 0 0;">${Utils.sanitizeHTML(question.explanation)}</p>
+                    <p>${Utils.sanitizeHTML(question.explanation)}</p>
                 </div>
             </div>
         `;
@@ -592,8 +609,12 @@ const QuizManager = {
         optionsList.appendChild(explanationDiv);
     },
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // NAVİGASYON
+    // ═══════════════════════════════════════════════════════════════════════════
+
     /**
-     * Butonları günceller
+     * Butonları güncelle
      */
     updateButtons() {
         const prevBtn = document.getElementById('prevBtn');
@@ -603,40 +624,29 @@ const QuizManager = {
         const isFirstQuestion = this.state.currentIndex === 0;
         const isLastQuestion = this.state.currentIndex === this.state.questions.length - 1;
 
-        // ÖNCEKİ BUTONU
+        // Önceki butonu
         if (prevBtn) {
             prevBtn.disabled = isFirstQuestion;
-            
-            if (!isFirstQuestion || this.state.isReviewing) {
-                prevBtn.style.display = 'inline-flex';
-                prevBtn.style.opacity = isFirstQuestion ? '0.5' : '1';
-            } else {
-                prevBtn.style.display = 'none';
-            }
+            prevBtn.style.display = (!isFirstQuestion || this.state.isReviewing) ? 'inline-flex' : 'none';
+            prevBtn.style.opacity = isFirstQuestion ? '0.5' : '1';
         }
 
-        // SONRAKİ BUTONU
+        // Sonraki butonu
         if (nextBtn) {
-            if (this.state.isReviewing) {
-                nextBtn.style.display = isLastQuestion ? 'none' : 'inline-flex';
-                const nextText = window.t ? t('quiz.next', 'Sonraki') : 'Sonraki';
-                nextBtn.innerHTML = `${nextText} →`;
-            } else {
-                nextBtn.style.display = isLastQuestion ? 'none' : 'inline-flex';
-            }
+            nextBtn.style.display = isLastQuestion ? 'none' : 'inline-flex';
         }
         
-        // BİTİR BUTONU
+        // Bitir butonu
         if (submitBtn) {
             submitBtn.style.display = isLastQuestion && !this.state.isReviewing ? 'inline-flex' : 'none';
         }
 
-        // Exit butonunu güncelle
+        // Çıkış butonu
         this.showExitButton();
     },
 
     /**
-     * Sonraki soruya geçer
+     * Sonraki soru
      */
     nextQuestion() {
         if (this.state.currentIndex < this.state.questions.length - 1) {
@@ -648,7 +658,7 @@ const QuizManager = {
     },
 
     /**
-     * Önceki soruya gider
+     * Önceki soru
      */
     previousQuestion() {
         if (this.state.currentIndex > 0) {
@@ -659,14 +669,18 @@ const QuizManager = {
         }
     },
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // TEST BİTİŞİ
+    // ═══════════════════════════════════════════════════════════════════════════
+
     /**
-     * Testi bitirir
+     * Testi bitir
      */
-    async finishQuiz() {
+    async finishQuiz(forceFinish = false) {
         try {
             const unanswered = this.state.answers.filter(a => a === null).length;
             
-            if (unanswered > 0) {
+            if (unanswered > 0 && !forceFinish) {
                 const confirmMsg = window.t 
                     ? t('quiz.unansweredConfirm', `${unanswered} soru cevaplanmadı. Testi bitirmek istediğinizden emin misiniz?`)
                     : `${unanswered} soru cevaplanmadı. Testi bitirmek istediğinizden emin misiniz?`;
@@ -678,12 +692,22 @@ const QuizManager = {
             this.stopTimer();
             const results = this.calculateResults();
 
+            // Sonuçları kaydet
             if (window.StorageManager) {
                 StorageManager.saveTestResult(results);
                 StorageManager.clearQuizState();
             }
 
+            // YKS Journey'e bildir
+            if (window.TestifyYKS && typeof TestifyYKS.addSolvedQuestions === 'function') {
+                TestifyYKS.addSolvedQuestions(results.totalQuestions);
+            }
+
+            // Temizlik
             localStorage.removeItem('testify_generated_test');
+            localStorage.removeItem('testify_current_test');
+
+            // Sonuçları göster
             this.showResults(results);
             
         } catch (error) {
@@ -693,7 +717,7 @@ const QuizManager = {
     },
 
     /**
-     * Sonuçları hesaplar
+     * Sonuçları hesapla
      */
     calculateResults() {
         let correct = 0;
@@ -717,6 +741,9 @@ const QuizManager = {
             ? Math.round((correct / this.state.questions.length) * 100) 
             : 0;
 
+        // Net hesaplama (YKS formülü: Doğru - Yanlış/4)
+        const net = correct - (wrong / 4);
+
         return {
             mode: this.state.currentMode,
             totalQuestions: this.state.questions.length,
@@ -724,6 +751,7 @@ const QuizManager = {
             wrongAnswers: wrong,
             unanswered: unanswered,
             successRate: successRate,
+            net: Math.max(0, net.toFixed(2)),
             time: this.state.elapsedSeconds,
             timestamp: Date.now(),
             testTitle: this.state.testTitle,
@@ -732,7 +760,7 @@ const QuizManager = {
     },
 
     /**
-     * Sonuçları gösterir
+     * Sonuçları göster
      */
     showResults(results) {
         try {
@@ -746,28 +774,41 @@ const QuizManager = {
             quizPage.classList.remove('active');
             resultsPage.classList.add('active');
 
-            const finalScore = document.getElementById('finalScore');
-            const correctAnswers = document.getElementById('correctAnswers');
-            const wrongAnswers = document.getElementById('wrongAnswers');
-            const successPercent = document.getElementById('successPercent');
-            const totalTimeResult = document.getElementById('totalTimeResult');
+            // Sonuç elemanlarını güncelle
+            const elements = {
+                finalScore: `${results.correctAnswers}/${results.totalQuestions}`,
+                correctAnswers: results.correctAnswers,
+                wrongAnswers: results.wrongAnswers,
+                successPercent: results.successRate + '%',
+                totalTimeResult: Utils.formatTime(results.time)
+            };
 
-            if (finalScore) finalScore.textContent = `${results.correctAnswers}/${results.totalQuestions}`;
-            if (correctAnswers) correctAnswers.textContent = results.correctAnswers;
-            if (wrongAnswers) wrongAnswers.textContent = results.wrongAnswers;
-            if (successPercent) successPercent.textContent = results.successRate + '%';
-            if (totalTimeResult) totalTimeResult.textContent = Utils.formatTime(results.time);
+            Object.entries(elements).forEach(([id, value]) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            });
 
+            // Başarı ikonu
             const resultsIcon = document.querySelector('.results-icon');
             if (resultsIcon) {
-                if (results.successRate >= 90) resultsIcon.textContent = '🏆';
-                else if (results.successRate >= 75) resultsIcon.textContent = '🎉';
-                else if (results.successRate >= 60) resultsIcon.textContent = '👏';
-                else if (results.successRate >= 40) resultsIcon.textContent = '💪';
-                else resultsIcon.textContent = '📚';
+                const icons = {
+                    90: '🏆',
+                    75: '🎉',
+                    60: '👏',
+                    40: '💪',
+                    0: '📚'
+                };
+                
+                for (const [threshold, icon] of Object.entries(icons)) {
+                    if (results.successRate >= parseInt(threshold)) {
+                        resultsIcon.innerHTML = `<i class="ph ph-trophy icon" style="font-size: 3rem;"></i>`;
+                        break;
+                    }
+                }
             }
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
         } catch (error) {
             console.error('Sonuç gösterme hatası:', error);
             Utils.showToast('Sonuçlar gösterilemedi', 'error');
@@ -775,12 +816,13 @@ const QuizManager = {
     },
 
     /**
-     * Cevapları inceler
+     * Cevapları incele
      */
     reviewAnswers() {
         try {
             this.state.isReviewing = true;
             this.state.currentIndex = 0;
+            this.state.showInstantFeedback = true; // Review'da her zaman göster
 
             const resultsPage = document.getElementById('resultsPage');
             const quizPage = document.getElementById('quizPage');
@@ -793,31 +835,27 @@ const QuizManager = {
             quizPage.classList.add('active');
 
             this.displayQuestion();
-
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const submitBtn = document.getElementById('submitBtn');
-
-            if (prevBtn) prevBtn.style.display = 'inline-flex';
-            if (nextBtn) nextBtn.style.display = 'inline-flex';
-            if (submitBtn) submitBtn.style.display = 'none';
-
             this.showExitButton();
 
-            const reviewMsg = window.t 
-                ? t('quiz.reviewMode', 'İnceleme modu - Açıklamaları okuyabilirsiniz')
-                : 'İnceleme modu - Açıklamaları okuyabilirsiniz';
-            Utils.showToast(reviewMsg, 'info');
+            Utils.showToast(
+                window.t ? t('quiz.reviewMode', 'İnceleme modu - Açıklamaları okuyabilirsiniz') : 'İnceleme modu',
+                'info'
+            );
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
         } catch (error) {
             console.error('İnceleme modu hatası:', error);
             Utils.showToast('İnceleme modu başlatılamadı', 'error');
         }
     },
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // YENİ TEST & ÇIKIŞ
+    // ═══════════════════════════════════════════════════════════════════════════
+
     /**
-     * Yeni quiz başlatır
+     * Yeni test
      */
     newQuiz() {
         try {
@@ -831,24 +869,13 @@ const QuizManager = {
             if (quizPage) quizPage.classList.remove('active');
             if (testSelection) testSelection.classList.add('active');
 
-            // State'i sıfırla
-            this.state = {
-                currentMode: null,
-                questions: [],
-                currentIndex: 0,
-                answers: [],
-                startTime: null,
-                timerInterval: null,
-                elapsedSeconds: 0,
-                isReviewing: false,
-                testTitle: null,
-                testDescription: null,
-                meta: null,
-                eventListenersAttached: this.state.eventListenersAttached
-            };
+            this.resetState();
 
             localStorage.removeItem('testify_generated_test');
+            localStorage.removeItem('testify_current_test');
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
         } catch (error) {
             console.error('Yeni quiz başlatma hatası:', error);
             Utils.showToast('Yeni test başlatılamadı', 'error');
@@ -856,7 +883,7 @@ const QuizManager = {
     },
 
     /**
-     * Quiz'den çıkar
+     * Testten çık
      */
     async exitQuiz() {
         if (this.state.isReviewing) {
@@ -889,20 +916,7 @@ const QuizManager = {
             if (resultsPage) resultsPage.classList.remove('active');
             if (testSelection) testSelection.classList.add('active');
 
-            this.state = {
-                currentMode: null,
-                questions: [],
-                currentIndex: 0,
-                answers: [],
-                startTime: null,
-                timerInterval: null,
-                elapsedSeconds: 0,
-                isReviewing: false,
-                testTitle: null,
-                testDescription: null,
-                meta: null,
-                eventListenersAttached: this.state.eventListenersAttached
-            };
+            this.resetState();
 
             if (answeredCount > 0) {
                 Utils.showToast(
@@ -922,8 +936,83 @@ const QuizManager = {
         }
     },
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // YARDIMCI
+    // ═══════════════════════════════════════════════════════════════════════════
+
     /**
-     * Event listener'ları kur (sadece bir kez)
+     * Önceki testi temizle
+     */
+    cleanupPreviousQuiz() {
+        if (this.state.timerInterval) {
+            clearInterval(this.state.timerInterval);
+            this.state.timerInterval = null;
+        }
+        
+        const optionsList = document.getElementById('optionsList');
+        if (optionsList) {
+            optionsList.innerHTML = '';
+        }
+    },
+
+    /**
+     * State'i sıfırla
+     */
+    resetState() {
+        this.state = {
+            currentMode: null,
+            questions: [],
+            currentIndex: 0,
+            answers: [],
+            startTime: null,
+            timerInterval: null,
+            elapsedSeconds: 0,
+            timeLimit: null,
+            isReviewing: false,
+            testTitle: null,
+            testDescription: null,
+            meta: null,
+            eventListenersAttached: this.state.eventListenersAttached,
+            showInstantFeedback: true
+        };
+    },
+
+    /**
+     * Çıkış butonunu göster
+     */
+    showExitButton() {
+        const exitBtn = document.getElementById('exitQuizBtn');
+        if (exitBtn) {
+            exitBtn.style.display = this.state.isReviewing ? 'none' : 'inline-flex';
+        }
+    },
+
+    /**
+     * State'i kaydet
+     */
+    saveState() {
+        try {
+            if (window.StorageManager) {
+                StorageManager.saveQuizState({
+                    currentMode: this.state.currentMode,
+                    currentIndex: this.state.currentIndex,
+                    answers: this.state.answers,
+                    startTime: this.state.startTime,
+                    elapsedSeconds: this.state.elapsedSeconds,
+                    questionCount: this.state.questions.length
+                });
+            }
+        } catch (error) {
+            console.warn('Quiz durumu kaydedilemedi:', error);
+        }
+    },
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // EVENT LISTENERS
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Event listener'ları kur
      */
     setupEventListeners() {
         if (this.state.eventListenersAttached) {
@@ -936,47 +1025,53 @@ const QuizManager = {
         // Test kartları
         const testOptions = document.querySelector('.test-options');
         if (testOptions) {
-            // Kartların sırası: [0] practice, [1] exam, [2] ai, [3] custom
-            const modes = ['practice', 'exam', 'ai', 'custom'];
+            // Kartları tanımla: practice, exam, ai, custom, yks-quick
             const cards = testOptions.querySelectorAll('.test-option-card');
             
-            cards.forEach((card, index) => {
-                const mode = modes[index];
+            cards.forEach((card) => {
+                // YKS Quick kartı ayrı ele alınıyor (ID ile)
+                if (card.id === 'yksQuickCard') return;
 
                 const handleClick = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
 
-                    // 🧭 PRATİK MODU → Kullanıcı Kütüphanesi
-                    if (mode === 'practice') {
-                        if (window.LibraryManager && typeof window.LibraryManager.openAndLoad === 'function') {
-                            console.log('📚 Pratik modu: kullanıcı kütüphanesi açılıyor...');
-                            window.LibraryManager.openAndLoad();
-                            return;
+                    // Kart türünü belirle (aria-label veya içerik)
+                    const label = card.getAttribute('aria-label') || '';
+                    
+                    if (label.includes('Pratik') || label.includes('practice')) {
+                        // PRATİK MODU → Kütüphaneye yönlendir
+                        if (window.LibraryManager && typeof LibraryManager.openAndLoad === 'function') {
+                            LibraryManager.openAndLoad();
+                        } else {
+                            this.startQuiz('practice');
                         }
-
-                        console.log('⚠️ LibraryManager bulunamadı, fallback: startQuiz("practice")');
-                        this.startQuiz('practice');
-                        return;
+                    } else if (label.includes('Sınav') || label.includes('exam')) {
+                        this.startQuiz('exam');
+                    } else if (label.includes('AI') || label.includes('ai')) {
+                        this.startQuiz('ai');
+                    } else if (label.includes('Özel') || label.includes('custom')) {
+                        // Özel test → Test oluştur sekmesine git
+                        if (window.App && typeof App.switchTab === 'function') {
+                            App.switchTab('create');
+                        } else {
+                            const createTab = document.querySelector('[data-tab="create"]');
+                            if (createTab) createTab.click();
+                        }
                     }
-
-                    // Diğer modlar eski davranışta kalsın
-                    this.startQuiz(mode);
                 };
 
-                const handleKey = (e) => {
+                card.addEventListener('click', handleClick);
+                card.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         handleClick(e);
                     }
-                };
-                
-                card.addEventListener('click', handleClick);
-                card.addEventListener('keypress', handleKey);
+                });
             });
         }
 
-        // Navigation buttons
+        // Navigation butonları
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
         const submitBtn = document.getElementById('submitBtn');
@@ -1031,7 +1126,10 @@ const QuizManager = {
     }
 };
 
-// Sadece bir kez event listener kur
+// ═══════════════════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════════════════════════════════
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         QuizManager.setupEventListeners();
@@ -1040,7 +1138,7 @@ if (document.readyState === 'loading') {
     QuizManager.setupEventListeners();
 }
 
-// Sayfa kapanırken temizlik yap
+// Sayfa kapanırken temizlik
 window.addEventListener('beforeunload', () => {
     QuizManager.stopTimer();
 });
