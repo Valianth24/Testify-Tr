@@ -4163,6 +4163,14 @@ html[data-theme="light"] .quiz-progress-bar {
     display: block;
     object-fit: contain;
 }
+.ai-test-icon {
+    max-width: 40px;
+    max-height: 40px;
+    display: block;
+    object-fit: contain;
+    transform: translateY(2px);   /* gerekirse 3px yap, zevkine göre oynayabilirsin */
+}
+
 
 
 
