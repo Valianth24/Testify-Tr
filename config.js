@@ -26,7 +26,9 @@ const Config = {
         SETTINGS: 'testify_settings',
         NOTES: 'testify_notes',
         LEADERBOARD: 'testify_leaderboard',
-        ACTIVITY: 'testify_activity'
+        ACTIVITY: 'testify_activity',
+        // 🔹 Kütüphane (AI ile oluşturulan testler)
+        LIBRARY: 'testify_library'
     },
     
     // Quiz Ayarları
@@ -132,10 +134,10 @@ const Config = {
         TRACKING_ID: 'UA-XXXXXXXXX-X'
     },
     
-    // AdSense (Gerçek ID'niz ile değiştirilmeli)
+    // AdSense (head içindeki script ile aynı ID olmalı)
     ADSENSE: {
         ENABLED: true,
-        CLIENT_ID: 'ca-pub-1234567890123456',
+        CLIENT_ID: 'ca-pub-6980942787991808',
         AD_SLOTS: {
             TOP_BANNER: '1234567890',
             BOTTOM_BANNER: '0987654321',
@@ -188,6 +190,27 @@ const Config = {
         EASY: { value: 'easy', label: 'Kolay', color: '#10b981' },
         MEDIUM: { value: 'medium', label: 'Orta', color: '#f59e0b' },
         HARD: { value: 'hard', label: 'Zor', color: '#ef4444' }
+    },
+    
+    // YKS ile ilgili genel ayarlar (ileride YKS Journey için kullanabilirsin)
+    YKS: {
+        TRACKS: ['sayisal', 'esitagirlik', 'sozel', 'dil'],
+        EXAMS: {
+            TYT: 'tyt',
+            AYT_SAY: 'ayt_sayisal',
+            AYT_EA: 'ayt_esitagirlik',
+            AYT_SOZ: 'ayt_sozel',
+            YDT: 'yabanci_dil'
+        },
+        DEFAULT_TARGET_YEAR: 2026
+    },
+    
+    // AI ile ilgili genel ayarlar (TestifyAI tarafına referans olsun diye)
+    AI: {
+        PROVIDER: 'openai',
+        DEFAULT_MODEL: 'gpt-4.1-mini',
+        MAX_QUESTIONS_PER_TEST: 50,
+        MAX_EXPLANATION_LENGTH: 800 // karakter
     },
     
     // Accessibility
