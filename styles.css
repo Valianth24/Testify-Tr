@@ -4189,8 +4189,9 @@ html[data-theme="light"] .quiz-progress-bar {
 /* AI Test kartındaki yazıyı da aynı oranda aşağı kaydır */
 .ai-test-card .test-option-title,
 .ai-test-card .test-option-desc {
-    margin-top: 12px;
+    margin-top: 4px;
 }
+
 
 
 
