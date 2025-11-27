@@ -4089,6 +4089,18 @@ html[data-theme="light"] .quiz-progress-bar {
 [data-theme="light"] .tab-intro p {
     color: #000000 !important;
 }
+/* === AI Test ikonu tema desteği === */
+.ai-test-icon {
+    width: 1.6em;
+    height: 1.6em;
+}
+
+/* Karanlık modda beyaz PNG kullan */
+[data-theme="dark"] .ai-test-icon {
+    content: url("al-white.png");
+}
+
+
 
 
 
