@@ -4145,8 +4145,9 @@ html[data-theme="light"] .quiz-progress-bar {
    
 /* Sadece AI ikonlu kartta, ikon ile yazı arasındaki boşluğu artır */
 .test-option-icon:has(.ai-test-icon) {
-    margin-bottom: 12px;  /* 16–20 arası zevkine göre oynatabilirsin */
+    margin-bottom: 20px;  /* 16–20 arası zevkine göre oynatabilirsin */
 }
+
 
 
 
