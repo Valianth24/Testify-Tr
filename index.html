@@ -357,6 +357,19 @@
                 background: linear-gradient(135deg,rgba(15,23,42,0.98),rgba(30,64,175,0.95));
                 color: #f9fafb;
             }
+
+        /* === AI Test kartı ikonu – dark mode uyumu === */
+        .test-option-icon .ai-test-icon {
+            display: block;
+            max-width: 56px;
+            max-height: 56px;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+
+        [data-theme="dark"] .ai-test-icon {
+            content: url("al-white.png"); /* Dark mode için beyaz PNG yolu */
+        }
     </style>
 </head>
 <body>
@@ -623,7 +636,7 @@
                             </article>
                             <article class="test-option-card" tabindex="0" role="button" aria-label="AI test">
                                 <div class="test-option-icon" aria-hidden="true">
-                                    <img src="al.png" alt="Testify AI" class="icon ai-icon-img">
+                                    <img src="al.png" alt="Testify AI" class="icon ai-icon-img ai-test-icon">
                                 </div>
                                 <h3 class="test-option-title" data-i18n="test.ai">AI Test</h3>
                                 <p class="test-option-desc" data-i18n="test.aiDesc">AI tarafından oluşturulan sorular</p>
@@ -823,7 +836,6 @@
                     <input type="hidden" id="language" value="tr">
 
                     <button type="submit" class="btn btn-primary btn-large">
-                        <img src="al.png" alt="Testify AI" class="icon ai-icon-img" aria-hidden="true">
                         <span data-i18n="create.submit">Testify ile Oluştur</span>
                     </button>
                 </form>
