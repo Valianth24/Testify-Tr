@@ -43,12 +43,18 @@
         /**
          * Pratik modu / başka yerden çağırmak için:
          * sekmeyi aç + listeyi doldur
+         * (QuizManager → practice kartı burayı çağıracak)
          */
         openAndLoad() {
+            console.log('📚 LibraryManager.openAndLoad()');
+
+            // Eğer tab sistemi varsa önce Library sekmesini aç
             const libraryTab = document.querySelector('[data-tab="library"]');
             if (libraryTab) {
                 libraryTab.click();
             }
+
+            // Sonra listeyi doldur
             this.loadLibrary();
         },
 
