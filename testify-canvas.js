@@ -278,6 +278,8 @@ class TestifyCanvas {
         this.size = CONFIG.DEFAULT_SIZE;
         this.opacity = CONFIG.DEFAULT_OPACITY;
         this.brushPreset = CONFIG.BRUSH_PRESETS[0];
+        // Şekil algılama toggle (Şekil butonu bunu aç/kapat edecek)
+        this.shapeRecognitionEnabled = true;
         
         // Canvas state
         this.zoom = 1;
@@ -455,7 +457,7 @@ class TestifyCanvas {
                     <div class="tool-divider"></div>
                     
                     ${!isQuizMode ? `
-                    <button class="tool-btn" data-tool="shape" data-tooltip="Şekil (S)">
+                    <button class="tool-btn" data-tool="shape" data-tooltip="Şekil algılama (S)">
                         <i class="ph ph-shapes"></i>
                     </button>
                     <button class="tool-btn" data-tool="text" data-tooltip="Metin (T)">
@@ -585,8 +587,6 @@ class TestifyCanvas {
         
         const gridSize = 20;
         const majorGridSize = 100;
-        const width = CONFIG.CANVAS_WIDTH;
-        const height = CONFIG.CANVAS_HEIGHT;
         
         let gridHTML = `
             <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -626,14 +626,14 @@ class TestifyCanvas {
         
         // Tool buttons
         this.container.querySelectorAll('[data-tool]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 this.setTool(btn.dataset.tool);
             });
         });
         
         // Action buttons
         this.container.querySelectorAll('[data-action]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 this.handleAction(btn.dataset.action);
             });
         });
@@ -657,7 +657,7 @@ class TestifyCanvas {
         const sizeSlider = this.container.querySelector('.brush-size-slider');
         if (sizeSlider) {
             sizeSlider.addEventListener('input', (e) => {
-                this.setSize(parseInt(e.target.value));
+                this.setSize(parseInt(e.target.value, 10));
             });
         }
         
@@ -769,7 +769,6 @@ class TestifyCanvas {
     }
     
     handlePointerUp(e) {
-        // Release pointer
         if (e.pointerId !== undefined) {
             this.svg.releasePointerCapture(e.pointerId);
         }
@@ -830,7 +829,6 @@ class TestifyCanvas {
     handleKeyDown(e) {
         if (!this.isOpen) return;
         
-        // Prevent default for our shortcuts
         const key = e.key.toLowerCase();
         
         // Tool shortcuts
@@ -840,7 +838,7 @@ class TestifyCanvas {
                 case 'e': this.setTool(TOOLS.ERASER); break;
                 case 'v': this.setTool(TOOLS.SELECT); break;
                 case 'h': this.setTool(TOOLS.PAN); break;
-                case 's': this.setTool(TOOLS.SHAPE); break;
+                case 's': this.setTool(TOOLS.SHAPE); break; // sadece toggle
                 case 't': this.setTool(TOOLS.TEXT); break;
                 case 'l': this.setTool(TOOLS.LASER); break;
                 case 'escape': this.close(); break;
@@ -909,10 +907,12 @@ class TestifyCanvas {
     renderCurrentStroke() {
         if (!this.currentStroke || this.currentPoints.length < 2) return;
         
+        // KALINLAŞTIRMA FIX:
+        // size en son gelsin, preset'in default size'ı slider'daki değeri ezmesin
         const strokeOptions = {
-            size: this.size,
             ...CONFIG.STROKE_OPTIONS,
-            ...this.brushPreset
+            ...this.brushPreset,
+            size: this.size
         };
         
         const outlinePoints = getStroke(this.currentPoints, strokeOptions);
@@ -924,11 +924,9 @@ class TestifyCanvas {
     finalizeStroke() {
         if (!this.currentStroke || this.currentPoints.length < 2) return;
         
-        // Get active layer
         const layer = this.layers.find(l => l.id === this.activeLayerId);
         if (!layer) return;
         
-        // Save stroke data
         const strokeData = {
             id: this.generateId(),
             points: this.currentPoints,
@@ -941,16 +939,14 @@ class TestifyCanvas {
         
         layer.strokes.push(strokeData);
         
-        // Assign ID to path element
         this.currentStroke.dataset.strokeId = strokeData.id;
         
-        // Check for shape recognition
-        this.tryRecognizeShape(strokeData);
+        // Şekil algılama sadece açıkken çalışsın
+        if (this.shapeRecognitionEnabled) {
+            this.tryRecognizeShape(strokeData);
+        }
         
-        // Save history
         this.saveHistory();
-        
-        // Update UI
         this.updateStrokeCount();
     }
     
@@ -961,9 +957,7 @@ class TestifyCanvas {
         
         let erased = false;
         
-        // Find strokes that intersect with eraser
         layer.strokes = layer.strokes.filter(stroke => {
-            // Check if any point is within eraser radius
             const isNear = stroke.points.some(point => {
                 const dx = point[0] - x;
                 const dy = point[1] - y;
@@ -971,7 +965,6 @@ class TestifyCanvas {
             });
             
             if (isNear) {
-                // Remove from DOM
                 const pathEl = this.svg.querySelector(`[data-stroke-id="${stroke.id}"]`);
                 if (pathEl) {
                     pathEl.remove();
@@ -1004,7 +997,6 @@ class TestifyCanvas {
     tryRecognizeShape(strokeData) {
         if (strokeData.points.length < CONFIG.MIN_POINTS_FOR_SHAPE) return;
         
-        // Get bounding box
         const xs = strokeData.points.map(p => p[0]);
         const ys = strokeData.points.map(p => p[1]);
         const minX = Math.min(...xs);
@@ -1014,7 +1006,6 @@ class TestifyCanvas {
         const width = maxX - minX;
         const height = maxY - minY;
         
-        // Check if stroke is closed (start and end are close)
         const start = strokeData.points[0];
         const end = strokeData.points[strokeData.points.length - 1];
         const closedDistance = Math.hypot(end[0] - start[0], end[1] - start[1]);
@@ -1022,7 +1013,6 @@ class TestifyCanvas {
         
         if (!isClosed) return;
         
-        // Analyze shape
         const aspectRatio = width / height;
         const perimeter = this.calculatePerimeter(strokeData.points);
         const area = width * height;
@@ -1030,19 +1020,13 @@ class TestifyCanvas {
         
         let recognizedShape = null;
         
-        // Circle detection
         if (circularity > 0.7 && aspectRatio > 0.8 && aspectRatio < 1.2) {
             recognizedShape = 'circle';
-        }
-        // Rectangle detection
-        else if (aspectRatio > 0.8 && aspectRatio < 1.2 && this.hasRightAngles(strokeData.points)) {
+        } else if (aspectRatio > 0.8 && aspectRatio < 1.2 && this.hasRightAngles(strokeData.points)) {
             recognizedShape = 'square';
-        }
-        else if (this.hasRightAngles(strokeData.points)) {
+        } else if (this.hasRightAngles(strokeData.points)) {
             recognizedShape = 'rectangle';
-        }
-        // Triangle detection
-        else if (this.countCorners(strokeData.points) === 3) {
+        } else if (this.countCorners(strokeData.points) === 3) {
             recognizedShape = 'triangle';
         }
         
@@ -1063,7 +1047,6 @@ class TestifyCanvas {
     }
     
     hasRightAngles(points) {
-        // Simplified check for rectangular shapes
         const corners = this.findCorners(points);
         return corners.length >= 4;
     }
@@ -1153,6 +1136,7 @@ class TestifyCanvas {
 window.TestifyCanvasClass = TestifyCanvas;
 
 })();
+
 /**
  * TESTIFY CANVAS SYSTEM v1.0 - Part 2
  * ====================================
@@ -1181,10 +1165,26 @@ Object.assign(TestifyCanvas.prototype, {
     // ═══════════════════════════════════════════════════════════════════════
     
     setTool(tool) {
+        // ŞEKİL butonu → gerçek bir çizim aracı değil, sadece algılamayı aç/kapat
+        if (tool === TOOLS.SHAPE) {
+            this.shapeRecognitionEnabled = !this.shapeRecognitionEnabled;
+            this.updateToolUI();
+            
+            if (window.Utils && typeof Utils.showToast === 'function') {
+                Utils.showToast(
+                    this.shapeRecognitionEnabled
+                        ? 'Şekil algılama açıldı'
+                        : 'Şekil algılama kapatıldı',
+                    'info'
+                );
+            }
+            return; // kalem, silgi vs. tool'ları değiştirme
+        }
+        
         this.tool = tool;
         this.updateToolUI();
         
-        // Update cursor
+        // Cursor
         if (tool === TOOLS.ERASER) {
             this.wrapper.classList.add('eraser-active');
         } else {
@@ -1200,7 +1200,15 @@ Object.assign(TestifyCanvas.prototype, {
     
     updateToolUI() {
         this.container.querySelectorAll('[data-tool]').forEach(btn => {
-            btn.classList.toggle('is-active', btn.dataset.tool === this.tool);
+            const t = btn.dataset.tool;
+            let active = (t === this.tool);
+            
+            // Şekil butonu: aktiflik, shapeRecognitionEnabled'e göre
+            if (t === TOOLS.SHAPE) {
+                active = this.shapeRecognitionEnabled;
+            }
+            
+            btn.classList.toggle('is-active', active);
         });
     },
     
@@ -1352,16 +1360,12 @@ Object.assign(TestifyCanvas.prototype, {
     // ═══════════════════════════════════════════════════════════════════════
     
     saveHistory() {
-        // Remove any redo states
         this.history = this.history.slice(0, this.historyIndex + 1);
         
-        // Deep clone layers
         const snapshot = JSON.parse(JSON.stringify(this.layers));
         
-        // Add to history
         this.history.push(snapshot);
         
-        // Limit history size
         if (this.history.length > 100) {
             this.history.shift();
         } else {
@@ -1391,14 +1395,11 @@ Object.assign(TestifyCanvas.prototype, {
         const snapshot = this.history[this.historyIndex];
         if (!snapshot) return;
         
-        // Clear current strokes from DOM
         const contentGroup = this.svg.querySelector('#canvasContent');
         contentGroup.querySelectorAll('path[data-stroke-id]').forEach(el => el.remove());
         
-        // Restore layers
         this.layers = JSON.parse(JSON.stringify(snapshot));
         
-        // Re-render all strokes
         this.renderAllStrokes();
         this.updateStrokeCount();
     },
@@ -1448,13 +1449,14 @@ Object.assign(TestifyCanvas.prototype, {
         
         const preset = CONFIG.BRUSH_PRESETS.find(p => p.id === strokeData.brushPreset) || CONFIG.BRUSH_PRESETS[0];
         
+        // KALINLAŞTIRMA FIX:
+        // strokeData.size en son gelsin, preset size'ı ezsin
         const strokeOptions = {
-            size: strokeData.size,
             ...CONFIG.STROKE_OPTIONS,
-            ...preset
+            ...preset,
+            size: strokeData.size
         };
         
-        // Use embedded getStroke function
         const outlinePoints = window.TestifyCanvasUtils.getStroke(strokeData.points, strokeOptions);
         const pathData = window.TestifyCanvasUtils.getSvgPathFromStroke(outlinePoints);
         
@@ -1473,27 +1475,22 @@ Object.assign(TestifyCanvas.prototype, {
     // ═══════════════════════════════════════════════════════════════════════
     
     clear() {
-        // Confirm before clearing
         if (this.getTotalStrokeCount() > 0) {
             if (!confirm('Tüm çizimler silinecek. Emin misiniz?')) {
                 return;
             }
         }
         
-        // Clear all strokes from DOM
         const contentGroup = this.svg.querySelector('#canvasContent');
         contentGroup.querySelectorAll('path[data-stroke-id]').forEach(el => el.remove());
         
-        // Clear layer data
         this.layers.forEach(layer => {
             layer.strokes = [];
         });
         
-        // Save history
         this.saveHistory();
         this.updateStrokeCount();
         
-        // Show toast
         if (window.Utils && typeof Utils.showToast === 'function') {
             Utils.showToast('Çizim alanı temizlendi', 'info');
         }
@@ -1515,7 +1512,6 @@ Object.assign(TestifyCanvas.prototype, {
             
             localStorage.setItem('testify.canvas.data', JSON.stringify(data));
             
-            // Update last saved time
             const lastSaved = this.container.querySelector('#lastSaved');
             if (lastSaved) {
                 lastSaved.textContent = 'Az önce kaydedildi';
@@ -1551,13 +1547,11 @@ Object.assign(TestifyCanvas.prototype, {
                 this.panY = data.panY;
             }
             
-            // Render loaded strokes
             this.renderAllStrokes();
             this.updateViewBox();
             this.updateZoomUI();
             this.updateStrokeCount();
             
-            // Update last saved time
             if (data.lastSaved) {
                 const lastSaved = this.container.querySelector('#lastSaved');
                 if (lastSaved) {
@@ -1586,25 +1580,20 @@ Object.assign(TestifyCanvas.prototype, {
     
     async exportToPNG() {
         try {
-            // Create a canvas element
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // Set canvas size
             canvas.width = 1920;
             canvas.height = 1080;
             
-            // Fill background
             const theme = document.documentElement.getAttribute('data-theme');
             ctx.fillStyle = theme === 'dark' ? '#0f172a' : '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Get SVG data
             const svgData = new XMLSerializer().serializeToString(this.svg);
             const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
             const url = URL.createObjectURL(svgBlob);
             
-            // Create image from SVG
             const img = new Image();
             
             return new Promise((resolve, reject) => {
@@ -1612,7 +1601,6 @@ Object.assign(TestifyCanvas.prototype, {
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     URL.revokeObjectURL(url);
                     
-                    // Download
                     const link = document.createElement('a');
                     link.download = `testify-canvas-${Date.now()}.png`;
                     link.href = canvas.toDataURL('image/png');
@@ -1697,7 +1685,6 @@ Object.assign(TestifyCanvas.prototype, {
     },
     
     close() {
-        // Save before closing
         this.saveToStorage();
         
         this.container.classList.remove('is-open');
@@ -1739,7 +1726,6 @@ Object.assign(TestifyCanvas.prototype, {
     // ═══════════════════════════════════════════════════════════════════════
     
     getImageData() {
-        // Convert SVG to data URL for saving with quiz answers
         const svgData = new XMLSerializer().serializeToString(this.svg);
         const base64 = btoa(unescape(encodeURIComponent(svgData)));
         return 'data:image/svg+xml;base64,' + base64;
@@ -1765,18 +1751,18 @@ const TOOLS = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-// UTILITY FUNCTIONS (Global access for rendering)
+/** UTILITY FUNCTIONS (Global access for rendering) */
 // ═══════════════════════════════════════════════════════════════════════════
 
-const average = (a, b) => (a + b) / 2;
+const avg2 = (a, b) => (a + b) / 2;
 
-function getSvgPathFromStroke(stroke) {
+function getSvgPathFromStrokeUtil(stroke) {
     if (!stroke.length) return '';
     
     const d = stroke.reduce(
         (acc, [x0, y0], i, arr) => {
             const [x1, y1] = arr[(i + 1) % arr.length];
-            acc.push(x0, y0, average(x0, x1), average(y0, y1));
+            acc.push(x0, y0, avg2(x0, x1), avg2(y0, y1));
             return acc;
         },
         ['M', ...stroke[0], 'Q']
@@ -1786,7 +1772,7 @@ function getSvgPathFromStroke(stroke) {
     return d.join(' ');
 }
 
-function getStroke(points, options = {}) {
+function getStrokeUtil(points, options = {}) {
     const {
         size = 16,
         thinning = 0.5,
@@ -1800,15 +1786,10 @@ function getStroke(points, options = {}) {
     
     const strokePoints = [];
     let prevPoint = points[0];
-    let runningLength = 0;
     
     for (let i = 0; i < points.length; i++) {
         const point = points[i];
         const pressure = point[2] !== undefined ? point[2] : 0.5;
-        
-        if (i > 0) {
-            runningLength += Math.hypot(point[0] - prevPoint[0], point[1] - prevPoint[1]);
-        }
         
         strokePoints.push({
             point: [point[0], point[1]],
@@ -1888,8 +1869,8 @@ function getStroke(points, options = {}) {
 
 // Export utilities globally
 window.TestifyCanvasUtils = {
-    getStroke,
-    getSvgPathFromStroke
+    getStroke: getStrokeUtil,
+    getSvgPathFromStroke: getSvgPathFromStrokeUtil
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1899,9 +1880,6 @@ window.TestifyCanvasUtils = {
 let globalInstance = null;
 
 window.TestifyCanvas = {
-    /**
-     * Open the canvas in fullscreen mode
-     */
     open(options = {}) {
         if (globalInstance) {
             globalInstance.open();
@@ -1917,11 +1895,6 @@ window.TestifyCanvas = {
         return globalInstance;
     },
     
-    /**
-     * Create embedded canvas for quiz questions
-     * @param {HTMLElement} container - Container element
-     * @param {Object} options - Options
-     */
     createEmbedded(container, options = {}) {
         return new TestifyCanvas({
             container,
@@ -1930,25 +1903,16 @@ window.TestifyCanvas = {
         });
     },
     
-    /**
-     * Get the global instance
-     */
     getInstance() {
         return globalInstance;
     },
     
-    /**
-     * Close the canvas
-     */
     close() {
         if (globalInstance) {
             globalInstance.close();
         }
     },
     
-    /**
-     * Check if canvas is open
-     */
     isOpen() {
         return globalInstance && globalInstance.isOpen;
     }
@@ -1957,6 +1921,7 @@ window.TestifyCanvas = {
 console.log('[TestifyCanvas] System loaded and ready');
 
 })();
+
 /**
  * TESTIFY QUIZ CANVAS INTEGRATION v1.0
  * =====================================
@@ -1972,25 +1937,17 @@ console.log('[TestifyCanvas] System loaded and ready');
 // ═══════════════════════════════════════════════════════════════════════════
 
 const QuizCanvasManager = {
-    // State
-    canvasInstances: new Map(),  // questionId -> canvas instance
+    canvasInstances: new Map(),
     isEnabled: true,
     
-    /**
-     * Initialize canvas for a question
-     * @param {string} questionId - Question identifier
-     * @param {HTMLElement} container - Container to embed canvas
-     */
     initForQuestion(questionId, container) {
         if (!this.isEnabled || !container) return null;
         
-        // Check if TestifyCanvas is available
         if (!window.TestifyCanvas) {
             console.warn('[QuizCanvasManager] TestifyCanvas not loaded');
             return null;
         }
         
-        // Create canvas container
         const canvasContainer = document.createElement('div');
         canvasContainer.className = 'quiz-canvas-wrapper';
         canvasContainer.id = `quiz-canvas-${questionId}`;
@@ -2022,17 +1979,14 @@ const QuizCanvasManager = {
         
         container.appendChild(canvasContainer);
         
-        // Get embed container
         const embedContainer = canvasContainer.querySelector('.quiz-canvas-embed');
         
-        // Create embedded canvas
         const canvas = TestifyCanvas.createEmbedded(embedContainer, {
             onSave: (layers) => {
                 this.saveDrawingForQuestion(questionId, layers);
             }
         });
         
-        // Store instance
         this.canvasInstances.set(questionId, {
             canvas,
             container: canvasContainer,
@@ -2040,15 +1994,11 @@ const QuizCanvasManager = {
             isCollapsed: false
         });
         
-        // Attach action handlers
         this.attachQuizCanvasActions(questionId, canvasContainer);
         
         return canvas;
     },
     
-    /**
-     * Attach action handlers to quiz canvas buttons
-     */
     attachQuizCanvasActions(questionId, container) {
         const instance = this.canvasInstances.get(questionId);
         if (!instance) return;
@@ -2063,17 +2013,14 @@ const QuizCanvasManager = {
                             instance.canvas.clear();
                         }
                         break;
-                        
                     case 'undo':
                         if (instance.canvas) {
                             instance.canvas.undo();
                         }
                         break;
-                        
                     case 'expand':
                         this.toggleExpand(questionId);
                         break;
-                        
                     case 'toggle':
                         this.toggleCollapse(questionId);
                         break;
@@ -2082,9 +2029,6 @@ const QuizCanvasManager = {
         });
     },
     
-    /**
-     * Toggle expanded mode
-     */
     toggleExpand(questionId) {
         const instance = this.canvasInstances.get(questionId);
         if (!instance) return;
@@ -2092,7 +2036,6 @@ const QuizCanvasManager = {
         instance.isExpanded = !instance.isExpanded;
         instance.container.classList.toggle('is-expanded', instance.isExpanded);
         
-        // Update button icon
         const btn = instance.container.querySelector('[data-action="expand"]');
         if (btn) {
             btn.querySelector('i').className = instance.isExpanded 
@@ -2101,9 +2044,6 @@ const QuizCanvasManager = {
         }
     },
     
-    /**
-     * Toggle collapsed mode
-     */
     toggleCollapse(questionId) {
         const instance = this.canvasInstances.get(questionId);
         if (!instance) return;
@@ -2111,7 +2051,6 @@ const QuizCanvasManager = {
         instance.isCollapsed = !instance.isCollapsed;
         instance.container.classList.toggle('is-collapsed', instance.isCollapsed);
         
-        // Update button icon
         const btn = instance.container.querySelector('[data-action="toggle"]');
         if (btn) {
             btn.querySelector('i').className = instance.isCollapsed 
@@ -2120,9 +2059,6 @@ const QuizCanvasManager = {
         }
     },
     
-    /**
-     * Save drawing data for a question
-     */
     saveDrawingForQuestion(questionId, layers) {
         try {
             const key = `testify.quiz.drawing.${questionId}`;
@@ -2135,9 +2071,6 @@ const QuizCanvasManager = {
         }
     },
     
-    /**
-     * Load drawing data for a question
-     */
     loadDrawingForQuestion(questionId) {
         try {
             const key = `testify.quiz.drawing.${questionId}`;
@@ -2151,25 +2084,16 @@ const QuizCanvasManager = {
         return null;
     },
     
-    /**
-     * Get canvas instance for a question
-     */
     getCanvas(questionId) {
         const instance = this.canvasInstances.get(questionId);
         return instance ? instance.canvas : null;
     },
     
-    /**
-     * Check if question has drawings
-     */
     hasDrawings(questionId) {
         const instance = this.canvasInstances.get(questionId);
         return instance && instance.canvas && instance.canvas.hasDrawings();
     },
     
-    /**
-     * Get image data for question drawings
-     */
     getImageData(questionId) {
         const instance = this.canvasInstances.get(questionId);
         if (instance && instance.canvas) {
@@ -2178,9 +2102,6 @@ const QuizCanvasManager = {
         return null;
     },
     
-    /**
-     * Destroy canvas for a question
-     */
     destroyForQuestion(questionId) {
         const instance = this.canvasInstances.get(questionId);
         if (instance) {
@@ -2194,18 +2115,12 @@ const QuizCanvasManager = {
         }
     },
     
-    /**
-     * Destroy all canvases
-     */
     destroyAll() {
-        this.canvasInstances.forEach((instance, questionId) => {
+        this.canvasInstances.forEach((_, questionId) => {
             this.destroyForQuestion(questionId);
         });
     },
     
-    /**
-     * Enable/disable canvas feature
-     */
     setEnabled(enabled) {
         this.isEnabled = enabled;
     }
@@ -2312,7 +2227,6 @@ const styles = `
     height: 100%;
 }
 
-/* Override embedded canvas styles */
 .quiz-canvas-embed .testify-canvas-container {
     position: relative !important;
     width: 100% !important;
@@ -2329,12 +2243,10 @@ const styles = `
     border-radius: 0 !important;
 }
 
-/* Dark mode */
 [data-theme="dark"] .quiz-canvas-body {
     background: var(--bg-primary);
 }
 
-/* Mobile optimization */
 @media (max-width: 768px) {
     .quiz-canvas-body {
         height: 200px;
@@ -2355,7 +2267,6 @@ const styles = `
 }
 `;
 
-// Inject styles
 const styleEl = document.createElement('style');
 styleEl.textContent = styles;
 document.head.appendChild(styleEl);
@@ -2364,45 +2275,35 @@ document.head.appendChild(styleEl);
 // QUIZ MANAGER INTEGRATION
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Wait for QuizManager to be available
 function integrateWithQuizManager() {
     if (!window.QuizManager) {
         setTimeout(integrateWithQuizManager, 100);
         return;
     }
     
-    // Store original displayQuestion method
     const originalDisplayQuestion = QuizManager.displayQuestion.bind(QuizManager);
     
-    // Override displayQuestion to add canvas
     QuizManager.displayQuestion = function() {
-        // Call original method
         originalDisplayQuestion();
         
-        // Get current question
         const question = this.state.questions[this.state.currentIndex];
         if (!question) return;
         
         const questionId = question.id || `q_${this.state.currentIndex}`;
         
-        // Find container for canvas (after options list)
         const questionCard = document.querySelector('.question-card');
         if (!questionCard) return;
         
-        // Remove existing canvas wrapper if any
         const existingWrapper = questionCard.querySelector('.quiz-canvas-wrapper');
         if (existingWrapper) {
             existingWrapper.remove();
         }
         
-        // Initialize canvas for this question
         QuizCanvasManager.initForQuestion(questionId, questionCard);
     };
     
-    // Store original cleanupPreviousQuiz method
     const originalCleanup = QuizManager.cleanupPreviousQuiz.bind(QuizManager);
     
-    // Override cleanup to destroy canvases
     QuizManager.cleanupPreviousQuiz = function() {
         originalCleanup();
         QuizCanvasManager.destroyAll();
@@ -2411,14 +2312,12 @@ function integrateWithQuizManager() {
     console.log('[QuizCanvasManager] Integrated with QuizManager');
 }
 
-// Start integration
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', integrateWithQuizManager);
 } else {
     integrateWithQuizManager();
 }
 
-// Export globally
 window.QuizCanvasManager = QuizCanvasManager;
 
 })();
