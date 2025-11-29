@@ -66,7 +66,9 @@
             easing: endEasing = t => --t * t * t + 1
         } = end;
 
-        const minDistance = size * streamline;
+        // Titreme azaltma etkisini abartmamak için min mesafeyi küçülttük
+        const minDistance = Math.max(0.4, size * streamline * 0.35);
+
         const strokePoints = [];
         let prevPoint = points[0];
         let runningLength = 0;
@@ -181,11 +183,11 @@
         // daha dolu bir çizgi hissi veriyoruz.
         STROKE_SIZE_MULTIPLIER: 1.5,
 
-        // Perfect-freehand options
+        // Perfect-freehand options (titreme azaltma yumuşatıldı)
         STROKE_OPTIONS: {
-            thinning: 0.6,
-            smoothing: 0.5,
-            streamline: 0.5,
+            thinning: 0.55,
+            smoothing: 0.3,
+            streamline: 0.18,
             simulatePressure: true,
             start: { cap: true, taper: 0 },
             end: { cap: true, taper: 0 }
@@ -195,8 +197,7 @@
         MAX_HISTORY: 100,
 
         // Shape recognition
-        // Daha toleranslı olsun diye eşik 0.70'e çekildi
-        SHAPE_RECOGNITION_THRESHOLD: 0.7,
+        SHAPE_RECOGNITION_THRESHOLD: 0.8,
         MIN_POINTS_FOR_SHAPE: 10,
 
         // Colors
@@ -241,9 +242,9 @@
             MIN_BBOX_SIZE: 30,
             LINE_STRAIGHTNESS: 0.88,
             LINE_ASPECT_RATIO: 2.2,
-            // Daire çok abartı algılanmasın diye biraz sıkılaştırıldı
-            CIRCLE_UNIFORMITY: 0.8,
-            CIRCLE_CIRCULARITY: 0.75,
+            // Daire algılamasını zorlaştırdık ki her şeyi daire sanmasın
+            CIRCLE_UNIFORMITY: 0.9,
+            CIRCLE_CIRCULARITY: 0.87,
             CLOSED_SHAPE_RATIO: 0.28,
             CORNER_ANGLE_THRESHOLD: 0.38
         },
@@ -353,29 +354,34 @@
             // Daire / elips kontrolü
             const isCircular = radiusUniformity > this.config.CIRCLE_UNIFORMITY;
             const hasGoodCircularity = circularity > this.config.CIRCLE_CIRCULARITY;
-            const isRoundish = aspectRatio > 0.65 && aspectRatio < 1.55;
 
-            if (isCircular && hasGoodCircularity && isRoundish) {
-                const isSquarish = aspectRatio > 0.85 && aspectRatio < 1.18;
+            // Daire için çok daha sıkı oran: neredeyse kare gibi olmalı (width ≈ height)
+            const isAlmostPerfectCircleRatio = aspectRatio > 0.92 && aspectRatio < 1.08;
 
-                if (isSquarish) {
-                    return {
-                        type: 'circle',
-                        confidence: (radiusUniformity + circularity) / 2,
-                        data: { cx: analysis.center.x, cy: analysis.center.y, radius: analysis.avgRadius }
-                    };
-                } else {
-                    return {
-                        type: 'ellipse',
-                        confidence: (radiusUniformity + circularity) / 2,
-                        data: {
-                            cx: analysis.center.x,
-                            cy: analysis.center.y,
-                            rx: bbox.width / 2,
-                            ry: bbox.height / 2
-                        }
-                    };
-                }
+            if (isCircular && hasGoodCircularity && isAlmostPerfectCircleRatio) {
+                return {
+                    type: 'circle',
+                    confidence: Math.min(radiusUniformity, circularity),
+                    data: { cx: analysis.center.x, cy: analysis.center.y, radius: analysis.avgRadius }
+                };
+            }
+
+            // Elips: daireye göre daha esnek ama yine de her şeyi yakalamasın
+            const isEllipseRatio =
+                (aspectRatio >= 1.2 && aspectRatio <= 3.0) ||
+                (aspectRatio <= 1 / 1.2 && aspectRatio >= 1 / 3.0);
+
+            if (isCircular && hasGoodCircularity * 0.95 && isEllipseRatio) {
+                return {
+                    type: 'ellipse',
+                    confidence: (radiusUniformity + circularity) / 2,
+                    data: {
+                        cx: analysis.center.x,
+                        cy: analysis.center.y,
+                        rx: bbox.width / 2,
+                        ry: bbox.height / 2
+                    }
+                };
             }
 
             const cornerCount = corners.length;
@@ -398,13 +404,16 @@
                 };
             }
 
-            // Köşe yok ama kapalıysa: muhtemelen yumuşak dikdörtgen
+            // Köşe yok ama kapalıysa: muhtemelen yumuşak dikdörtgen / kare
             if (cornerCount < 3) {
-                const isRectangular = aspectRatio < 0.5 || aspectRatio > 2;
-                if (isRectangular && !isCircular) {
+                const isVeryRectLike =
+                    (aspectRatio > 1.25 || aspectRatio < 0.8) && // en-boy ilişkisi belirgin
+                    !isCircular;                                  // zaten daire/elips değil
+
+                if (isVeryRectLike) {
                     return {
                         type: 'rectangle',
-                        confidence: 0.7,
+                        confidence: 0.75,
                         data: { x: bbox.minX, y: bbox.minY, width: bbox.width, height: bbox.height }
                     };
                 }
@@ -852,7 +861,7 @@
                         <div class="tool-divider"></div>
                         
                         ${!isQuizMode ? `
-                        <!-- Şekil kalemi: Çizgiyi algılayıp line/circle/rect/triangle/arrow/ellipse'e çevirir -->
+                        <!-- Şekil kalemi: Çizgiyi algılayıp line/circle/rect/triangle'a çevirir -->
                         <button class="tool-btn" data-tool="shape" data-tooltip="Akıllı Şekil Kalemi (S)">
                             <i class="ph ph-shapes"></i>
                         </button>
@@ -1309,7 +1318,7 @@
         renderCurrentStroke() {
             if (!this.currentStroke || this.currentPoints.length < 2) return;
 
-            // ÖNEMLİ: preset size slider'ı ezmesin diye size en sona yazılıyor
+            // ÖNEMLİ: preset'in default size'ı slider'ı ezmesin diye size en sonda override ediliyor
             const strokeOptions = {
                 ...CONFIG.STROKE_OPTIONS,
                 ...this.brushPreset,
