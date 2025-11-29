@@ -4034,6 +4034,23 @@ html[data-theme="light"] [data-content-key] .yks-pill:hover {
     }
 }
 
+/* 4) Pomodoro sayaç rengi – sarıyı kaldır, tema bazlı siyah / beyaz yap */
+[data-theme="light"] #journey .yks-pomodoro-timer,
+[data-theme="light"] #journey #pomodoroTimeDisplay {
+    color: #000000 !important;      /* Light modda tam siyah */
+    text-shadow: none !important;   /* Sarı glow tamamen kapansın */
+}
+
+[data-theme="dark"] #journey .yks-pomodoro-timer,
+[data-theme="dark"] #journey #pomodoroTimeDisplay {
+    color: #f9fafb !important;      /* Dark modda beyaza yakın */
+    text-shadow:
+        0 0 18px rgba(15, 23, 42, 0.95) !important,
+        0 0 28px rgba(15, 23, 42, 0.85) !important;
+}
+
+
+
 
 
 
