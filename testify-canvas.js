@@ -1,369 +1,240 @@
 /**
- * TESTIFY CANVAS ENGINE v2.0 - ULTRA PREMIUM STROKE ENGINE
- * =========================================================
- * World-class drawing engine with:
- * - Bezier curve smoothing (eliminates hand tremor)
- * - Advanced pressure simulation
- * - Premium stroke rendering
- * - AI-powered shape recognition
- * 
- * Bu dosyayı testify-canvas.js'den ÖNCE yükle
+ * TESTIFY CANVAS SYSTEM v1.2
+ * ===========================
+ * Ultra-premium drawing/writing system for YKS test solving
+ * Features: pressure simulation, shape snapping (line / circle / rect / triangle / arrow / ellipse),
+ * infinite canvas, multi-layer support, undo/redo, brush presets, and more.
+ *
+ * Inspired by: Microsoft Whiteboard, Procreate, Excalidraw
+ * Built with: perfect-freehand style algorithm (embedded)
  */
 
 'use strict';
 
-(function() {
+/* ────────────────────────────────────────────────────────────────────────── */
+/* PART 1 – CORE + PERFECT FREEHAND                                          */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+(function () {
 
     // ═══════════════════════════════════════════════════════════════════════
-    // BEZIER CURVE SMOOTHING - El titremesini yok eder
+    // PERFECT-FREEHAND STYLE IMPLEMENTATION (SHARED)
     // ═══════════════════════════════════════════════════════════════════════
 
-    /**
-     * Catmull-Rom spline - Noktalar arasında yumuşak geçiş sağlar
-     */
-    function catmullRomSpline(points, tension, numSegments) {
-        if (points.length < 3) return points;
+    const average = (a, b) => (a + b) / 2;
 
-        tension = tension !== undefined ? tension : 0.5;
-        numSegments = numSegments !== undefined ? numSegments : 6;
+    function getSvgPathFromStroke(stroke) {
+        if (!stroke.length) return '';
 
-        const result = [];
-        
-        // Başa ve sona phantom noktalar ekle
-        const pts = [points[0]].concat(points).concat([points[points.length - 1]]);
+        const d = stroke.reduce(
+            (acc, [x0, y0], i, arr) => {
+                const [x1, y1] = arr[(i + 1) % arr.length];
+                acc.push(x0, y0, average(x0, x1), average(y0, y1));
+                return acc;
+            },
+            ['M', ...stroke[0], 'Q']
+        );
 
-        for (let i = 1; i < pts.length - 2; i++) {
-            const p0 = pts[i - 1];
-            const p1 = pts[i];
-            const p2 = pts[i + 1];
-            const p3 = pts[i + 2];
-
-            for (let t = 0; t < numSegments; t++) {
-                const s = t / numSegments;
-                const s2 = s * s;
-                const s3 = s2 * s;
-
-                // Catmull-Rom basis fonksiyonları
-                const h1 = -tension * s3 + 2 * tension * s2 - tension * s;
-                const h2 = (2 - tension) * s3 + (tension - 3) * s2 + 1;
-                const h3 = (tension - 2) * s3 + (3 - 2 * tension) * s2 + tension * s;
-                const h4 = tension * s3 - tension * s2;
-
-                const x = h1 * p0[0] + h2 * p1[0] + h3 * p2[0] + h4 * p3[0];
-                const y = h1 * p0[1] + h2 * p1[1] + h3 * p2[1] + h4 * p3[1];
-                
-                // Basıncı interpolate et
-                const pressure = p1[2] !== undefined && p2[2] !== undefined
-                    ? p1[2] + (p2[2] - p1[2]) * s
-                    : 0.5;
-
-                result.push([x, y, pressure]);
-            }
-        }
-
-        result.push(points[points.length - 1]);
-        return result;
+        d.push('Z');
+        return d.join(' ');
     }
 
-    /**
-     * Moving Average Filter - Gerçek zamanlı titreme azaltma
-     */
-    function movingAverageSmooth(points, windowSize) {
-        if (points.length < 3) return points;
-        windowSize = windowSize || 3;
+    // Daha yumuşak, hisli çizgi için basınç simülasyonlu stroke üretici
+    function getStroke(points, options = {}) {
+        const {
+            size = 16,
+            thinning = 0.5,
+            smoothing = 0.5,
+            streamline = 0.5,
+            easing = t => t,
+            simulatePressure = true,
+            start = {},
+            end = {}
+        } = options;
 
-        const result = [];
-        const half = Math.floor(windowSize / 2);
+        if (!points || points.length === 0) return [];
+
+        const {
+            cap: startCap = true,
+            taper: startTaper = 0,
+            easing: startEasing = t => t * (2 - t)
+        } = start;
+
+        const {
+            cap: endCap = true,
+            taper: endTaper = 0,
+            easing: endEasing = t => --t * t * t + 1
+        } = end;
+
+        const minDistance = size * streamline;
+        const strokePoints = [];
+        let prevPoint = points[0];
+        let runningLength = 0;
 
         for (let i = 0; i < points.length; i++) {
-            let sumX = 0, sumY = 0, sumP = 0, totalWeight = 0;
+            const point = points[i];
+            const pressure = point[2] !== undefined ? point[2] : 0.5;
 
-            for (let j = Math.max(0, i - half); j <= Math.min(points.length - 1, i + half); j++) {
-                // Gaussian benzeri ağırlık
-                const dist = Math.abs(j - i);
-                const weight = 1 - (dist / (half + 1));
-                
-                sumX += points[j][0] * weight;
-                sumY += points[j][1] * weight;
-                sumP += (points[j][2] || 0.5) * weight;
-                totalWeight += weight;
-            }
-
-            result.push([
-                sumX / totalWeight,
-                sumY / totalWeight,
-                sumP / totalWeight
-            ]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Douglas-Peucker algoritması - Gereksiz noktaları temizler
-     */
-    function simplifyPath(points, tolerance) {
-        if (points.length < 3) return points;
-        tolerance = tolerance || 1.0;
-
-        const sqTolerance = tolerance * tolerance;
-
-        function getSqSegDist(p, p1, p2) {
-            let x = p1[0], y = p1[1];
-            let dx = p2[0] - x, dy = p2[1] - y;
-
-            if (dx !== 0 || dy !== 0) {
-                const t = Math.max(0, Math.min(1, ((p[0] - x) * dx + (p[1] - y) * dy) / (dx * dx + dy * dy)));
-                x += dx * t;
-                y += dy * t;
-            }
-
-            dx = p[0] - x;
-            dy = p[1] - y;
-            return dx * dx + dy * dy;
-        }
-
-        function simplifyStep(points, first, last, sqTol, simplified) {
-            let maxSqDist = sqTol;
-            let index = -1;
-
-            for (let i = first + 1; i < last; i++) {
-                const sqDist = getSqSegDist(points[i], points[first], points[last]);
-                if (sqDist > maxSqDist) {
-                    index = i;
-                    maxSqDist = sqDist;
+            if (i > 0) {
+                const distance = Math.hypot(point[0] - prevPoint[0], point[1] - prevPoint[1]);
+                runningLength += distance;
+                // streamline – çok sık nokta geliyorsa bazılarını at
+                if (distance < minDistance && i !== points.length - 1) {
+                    continue;
                 }
             }
 
-            if (index !== -1) {
-                if (index - first > 1) simplifyStep(points, first, index, sqTol, simplified);
-                simplified.push(points[index]);
-                if (last - index > 1) simplifyStep(points, index, last, sqTol, simplified);
-            }
+            strokePoints.push({
+                point: [point[0], point[1]],
+                pressure,
+                distance: i > 0
+                    ? Math.hypot(point[0] - prevPoint[0], point[1] - prevPoint[1])
+                    : 0,
+                runningLength
+            });
+
+            prevPoint = point;
         }
 
-        const simplified = [points[0]];
-        simplifyStep(points, 0, points.length - 1, sqTolerance, simplified);
-        simplified.push(points[points.length - 1]);
+        if (strokePoints.length === 0) return [];
 
-        return simplified;
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // ADVANCED PRESSURE SIMULATION - Gerçekçi kalem hissi
-    // ═══════════════════════════════════════════════════════════════════════
-
-    /**
-     * Hız ve ivmeye dayalı basınç simülasyonu
-     */
-    function simulateAdvancedPressure(points) {
-        if (points.length < 2) return points;
-
-        const result = [];
-        const velocities = [0];
-
-        // Hızları hesapla
-        for (let i = 1; i < points.length; i++) {
-            const dx = points[i][0] - points[i - 1][0];
-            const dy = points[i][1] - points[i - 1][1];
-            velocities.push(Math.sqrt(dx * dx + dy * dy));
+        // Tek nokta ise küçük bir daire gibi göster
+        if (strokePoints.length === 1) {
+            const { point, pressure } = strokePoints[0];
+            const r = size * easing(pressure) / 2;
+            return [
+                [point[0] - r, point[1]],
+                [point[0], point[1] - r],
+                [point[0] + r, point[1]],
+                [point[0], point[1] + r]
+            ];
         }
 
-        // Hızları normalize et
-        const maxVel = Math.max.apply(null, velocities) || 1;
-        const normVel = velocities.map(function(v) { return v / maxVel; });
+        const leftPoints = [];
+        const rightPoints = [];
 
-        // Basınç değerlerini hesapla
-        for (let i = 0; i < points.length; i++) {
-            const point = points[i];
-            let pressure;
+        for (let i = 0; i < strokePoints.length; i++) {
+            const { point, pressure } = strokePoints[i];
 
-            if (point[2] !== undefined && point[2] !== 0.5 && point[2] !== 0) {
-                // Gerçek basınç varsa kullan
-                pressure = point[2];
-            } else {
-                // Hıza dayalı basınç simülasyonu
-                const velocityFactor = 1 - normVel[i] * 0.5;
-                
-                // Başlangıç/bitiş yumuşatma
-                const totalLen = points.length - 1;
-                const startTaper = Math.min(1, i / Math.max(5, totalLen * 0.15));
-                const endTaper = Math.min(1, (totalLen - i) / Math.max(5, totalLen * 0.15));
-                const positionFactor = Math.min(startTaper, endTaper);
-                
-                pressure = velocityFactor * 0.65 + positionFactor * 0.35;
-                pressure = Math.max(0.15, Math.min(1, pressure));
-            }
+            let sp = simulatePressure
+                ? Math.min(1, 1 - Math.min(1, strokePoints[i].distance / size))
+                : pressure;
 
-            result.push([point[0], point[1], pressure]);
-        }
+            // Thinning ile incelik/kalınlık ayarı
+            const radius = size * easing(0.5 - thinning * (0.5 - sp)) / 2;
 
-        return result;
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // PREMIUM STROKE GENERATOR - Dünya sınıfı çizgi kalitesi
-    // ═══════════════════════════════════════════════════════════════════════
-
-    /**
-     * Ultra premium stroke oluşturucu
-     * Tüm smoothing tekniklerini birleştirir
-     */
-    function getPremiumStroke(inputPoints, options) {
-        options = options || {};
-        
-        const size = options.size !== undefined ? options.size : 8;
-        const thinning = options.thinning !== undefined ? options.thinning : 0.5;
-        const smoothing = options.smoothing !== undefined ? options.smoothing : 0.6;
-        const streamline = options.streamline !== undefined ? options.streamline : 0.5;
-        const taperStart = options.taperStart !== undefined ? options.taperStart : 0;
-        const taperEnd = options.taperEnd !== undefined ? options.taperEnd : 0;
-        const simulatePressure = options.simulatePressure !== false;
-        const easing = options.easing || function(t) { return t * (2 - t); };
-
-        if (!inputPoints || inputPoints.length === 0) return [];
-
-        // Tek nokta = daire çiz
-        if (inputPoints.length === 1) {
-            var x = inputPoints[0][0];
-            var y = inputPoints[0][1];
-            var p = inputPoints[0][2] !== undefined ? inputPoints[0][2] : 0.5;
-            var r = size * easing(p) / 2;
-            var circle = [];
-            for (var a = 0; a <= 12; a++) {
-                var angle = (a / 12) * Math.PI * 2;
-                circle.push([x + Math.cos(angle) * r, y + Math.sin(angle) * r]);
-            }
-            return circle;
-        }
-
-        // Kopyala
-        var points = inputPoints.map(function(p) { return [p[0], p[1], p[2]]; });
-
-        // Step 1: Çok fazla nokta varsa sadeleştir
-        if (points.length > 300) {
-            points = simplifyPath(points, 0.8);
-        }
-
-        // Step 2: Moving average smoothing (titreme azaltma)
-        if (smoothing > 0 && points.length > 3) {
-            var windowSize = Math.round(3 + smoothing * 5);
-            points = movingAverageSmooth(points, windowSize);
-        }
-
-        // Step 3: Basınç simülasyonu
-        if (simulatePressure) {
-            points = simulateAdvancedPressure(points);
-        }
-
-        // Step 4: Catmull-Rom spline (yumuşak eğriler)
-        if (streamline > 0 && points.length > 3) {
-            var tension = 0.4 + streamline * 0.3;
-            var segments = Math.round(4 + streamline * 4);
-            points = catmullRomSpline(points, tension, segments);
-        }
-
-        // Step 5: Stroke outline oluştur
-        var leftPoints = [];
-        var rightPoints = [];
-        
-        // Toplam uzunluğu hesapla
-        var totalLength = 0;
-        for (var i = 1; i < points.length; i++) {
-            totalLength += Math.hypot(points[i][0] - points[i-1][0], points[i][1] - points[i-1][1]);
-        }
-
-        var runningLength = 0;
-
-        for (var i = 0; i < points.length; i++) {
-            var point = points[i];
-            var pressure = point[2] !== undefined ? point[2] : 0.5;
-
-            // Running length güncelle
-            if (i > 0) {
-                runningLength += Math.hypot(
-                    point[0] - points[i-1][0],
-                    point[1] - points[i-1][1]
-                );
-            }
-
-            // Taper çarpanı
-            var taperMultiplier = 1;
-            if (taperStart > 0 && runningLength < taperStart) {
-                taperMultiplier *= easing(runningLength / taperStart);
-            }
-            if (taperEnd > 0 && totalLength - runningLength < taperEnd) {
-                taperMultiplier *= easing((totalLength - runningLength) / taperEnd);
-            }
-
-            // ÖNEMLİ: Geliştirilmiş radius hesaplaması
-            var basePressure = Math.max(0.25, pressure);
-            var pressureEffect = easing(basePressure);
-            var thinningEffect = 1 - (thinning * 0.35 * (1 - basePressure));
-            var radius = (size / 2) * pressureEffect * thinningEffect * taperMultiplier;
-            
-            // Minimum kalınlık garantisi
-            radius = Math.max(size * 0.15, radius);
-
-            // Normal vektör hesapla
-            var nx, ny;
+            // Normale (dik vektör) ihtiyacımız var
+            let nx, ny;
             if (i === 0) {
-                nx = -(points[1][1] - point[1]);
-                ny = points[1][0] - point[0];
-            } else if (i === points.length - 1) {
-                nx = -(point[1] - points[i - 1][1]);
-                ny = point[0] - points[i - 1][0];
+                const next = strokePoints[1];
+                nx = -(next.point[1] - point[1]);
+                ny = next.point[0] - point[0];
+            } else if (i === strokePoints.length - 1) {
+                const prev = strokePoints[i - 1];
+                nx = -(point[1] - prev.point[1]);
+                ny = point[0] - prev.point[0];
             } else {
-                nx = -(points[i + 1][1] - points[i - 1][1]);
-                ny = points[i + 1][0] - points[i - 1][0];
+                const prev = strokePoints[i - 1];
+                const next = strokePoints[i + 1];
+                nx = -(next.point[1] - prev.point[1]);
+                ny = next.point[0] - prev.point[0];
             }
 
-            // Normalize
-            var len = Math.hypot(nx, ny) || 1;
+            const len = Math.hypot(nx, ny) || 1;
             nx /= len;
             ny /= len;
 
-            leftPoints.push([point[0] + nx * radius, point[1] + ny * radius]);
-            rightPoints.push([point[0] - nx * radius, point[1] - ny * radius]);
+            const offset = radius * (1 - smoothing * 0.5);
+
+            leftPoints.push([point[0] + nx * offset, point[1] + ny * offset]);
+            rightPoints.push([point[0] - nx * offset, point[1] - ny * offset]);
         }
 
-        // Outline birleştir
-        var outline = leftPoints.concat(rightPoints.reverse());
-        
-        return outline;
+        // ÖNEMLİ: Uçlardaki ekstra “cap” noktalarını kaldırıyoruz ki
+        // çizgi, tam dokunduğun yerden başlasın – başlangıçtaki minik boşluk kayboluyor.
+        return [...leftPoints, ...rightPoints.reverse()];
     }
 
-    /**
-     * Stroke outline'ı SVG path'e çevir
-     */
-    function getStrokeSvgPath(stroke) {
-        if (!stroke || stroke.length === 0) return '';
-        if (stroke.length === 1) {
-            return 'M ' + stroke[0][0] + ' ' + stroke[0][1] + ' L ' + stroke[0][0] + ' ' + stroke[0][1];
-        }
-
-        var d = 'M ' + stroke[0][0].toFixed(2) + ' ' + stroke[0][1].toFixed(2);
-
-        // Quadratic bezier ile smooth render
-        for (var i = 1; i < stroke.length - 1; i++) {
-            var p0 = stroke[i];
-            var p1 = stroke[i + 1];
-            var midX = (p0[0] + p1[0]) / 2;
-            var midY = (p0[1] + p1[1]) / 2;
-            d += ' Q ' + p0[0].toFixed(2) + ' ' + p0[1].toFixed(2) + ' ' + midX.toFixed(2) + ' ' + midY.toFixed(2);
-        }
-
-        var last = stroke[stroke.length - 1];
-        d += ' L ' + last[0].toFixed(2) + ' ' + last[1].toFixed(2) + ' Z';
-
-        return d;
-    }
+    // Global export – Part 2 ve başka yerler buradan kullanıyor
+    window.TestifyCanvasUtils = { getStroke, getSvgPathFromStroke };
 
     // ═══════════════════════════════════════════════════════════════════════
-    // ADVANCED SHAPE RECOGNITION - %98+ doğruluk
+    // CONFIGURATION
     // ═══════════════════════════════════════════════════════════════════════
 
-    var ShapeRecognizer = {
+    const CONFIG = {
+        // Canvas
+        CANVAS_WIDTH: 4000,
+        CANVAS_HEIGHT: 3000,
+        MIN_ZOOM: 0.1,
+        MAX_ZOOM: 5,
+        ZOOM_STEP: 0.1,
+
+        // Drawing
+        DEFAULT_COLOR: '#1f2937',
+        DEFAULT_SIZE: 8,
+        MIN_SIZE: 1,
+        MAX_SIZE: 64,
+        DEFAULT_OPACITY: 1,
+
+        // Kalınlık çarpanı – sliderdaki değeri biraz büyüterek
+        // daha dolu bir çizgi hissi veriyoruz.
+        STROKE_SIZE_MULTIPLIER: 1.5,
+
+        // Perfect-freehand options
+        STROKE_OPTIONS: {
+            thinning: 0.6,
+            smoothing: 0.5,
+            streamline: 0.5,
+            simulatePressure: true,
+            start: { cap: true, taper: 0 },
+            end: { cap: true, taper: 0 }
+        },
+
+        // History
+        MAX_HISTORY: 100,
+
+        // Shape recognition
+        SHAPE_RECOGNITION_THRESHOLD: 0.85,
+        MIN_POINTS_FOR_SHAPE: 10,
+
+        // Colors
+        COLORS: [
+            '#1f2937', // black
+            '#3b82f6', // blue
+            '#ef4444', // red
+            '#10b981', // green
+            '#8b5cf6', // purple
+            '#f59e0b', // orange
+            '#ec4899', // pink
+            '#06b6d4', // cyan
+            '#84cc16', // lime
+            '#f97316', // dark orange
+            '#6366f1', // indigo
+            '#14b8a6', // teal
+        ],
+
+        // Brush presets
+        BRUSH_PRESETS: [
+            { id: 'pen', name: 'Kalem', size: 4, thinning: 0.5, smoothing: 0.5 },
+            { id: 'marker', name: 'Marker', size: 16, thinning: 0.2, smoothing: 0.3 },
+            { id: 'highlighter', name: 'Fosforlu', size: 24, thinning: 0, smoothing: 0.8, opacity: 0.4 },
+            { id: 'pencil', name: 'Kurşun Kalem', size: 3, thinning: 0.8, smoothing: 0.2 },
+            { id: 'brush', name: 'Fırça', size: 12, thinning: 0.7, smoothing: 0.6 }
+        ],
+
+        // Storage
+        STORAGE_KEY: 'testify.canvas.data',
+        AUTOSAVE_INTERVAL: 30000
+    };
+
+    window.TestifyCanvasConfig = CONFIG;
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // ADVANCED SHAPE RECOGNIZER (Line / Arrow / Circle / Ellipse / Rect / Square / Triangle)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    const AdvancedShapeRecognizer = {
         config: {
             MIN_POINTS: 10,
             MIN_BBOX_SIZE: 30,
@@ -375,23 +246,22 @@
             CORNER_ANGLE_THRESHOLD: 0.38
         },
 
-        /**
-         * Ana tanıma metodu
-         */
-        recognize: function(points) {
+        recognize(points) {
             if (!points || points.length < this.config.MIN_POINTS) {
                 return null;
             }
 
-            var analysis = this.analyzeStroke(points);
-            
-            // Çok küçük şekilleri atla
-            if (analysis.bbox.width < this.config.MIN_BBOX_SIZE && 
-                analysis.bbox.height < this.config.MIN_BBOX_SIZE) {
+            const analysis = this.analyzeStroke(points);
+
+            // Çok küçük şekilleri at
+            if (
+                analysis.bbox.width < this.config.MIN_BBOX_SIZE &&
+                analysis.bbox.height < this.config.MIN_BBOX_SIZE
+            ) {
                 return null;
             }
 
-            var isClosed = analysis.closedRatio < this.config.CLOSED_SHAPE_RATIO;
+            const isClosed = analysis.closedRatio < this.config.CLOSED_SHAPE_RATIO;
 
             if (!isClosed) {
                 return this.recognizeOpenShape(points, analysis);
@@ -400,72 +270,67 @@
             }
         },
 
-        /**
-         * Stroke analizi
-         */
-        analyzeStroke: function(points) {
-            var xs = points.map(function(p) { return p[0]; });
-            var ys = points.map(function(p) { return p[1]; });
+        analyzeStroke(points) {
+            const xs = points.map(p => p[0]);
+            const ys = points.map(p => p[1]);
 
-            var minX = Math.min.apply(null, xs);
-            var maxX = Math.max.apply(null, xs);
-            var minY = Math.min.apply(null, ys);
-            var maxY = Math.max.apply(null, ys);
+            const minX = Math.min(...xs);
+            const maxX = Math.max(...xs);
+            const minY = Math.min(...ys);
+            const maxY = Math.max(...ys);
 
-            var width = maxX - minX;
-            var height = maxY - minY;
-            var diagonal = Math.hypot(width, height);
+            const width = maxX - minX;
+            const height = maxY - minY;
+            const diagonal = Math.hypot(width, height);
 
-            var start = points[0];
-            var end = points[points.length - 1];
-            var closedDist = Math.hypot(end[0] - start[0], end[1] - start[1]);
-            var closedRatio = diagonal > 0 ? closedDist / diagonal : 0;
+            const start = points[0];
+            const end = points[points.length - 1];
+            const closedDist = Math.hypot(end[0] - start[0], end[1] - start[1]);
+            const closedRatio = diagonal > 0 ? closedDist / diagonal : 0;
 
-            var perimeter = this.calculatePerimeter(points);
-            var area = width * height;
-            var circularity = perimeter > 0 ? (4 * Math.PI * area) / (perimeter * perimeter) : 0;
+            const perimeter = this.calculatePerimeter(points);
+            const area = width * height || 1;
+            const circularity = perimeter > 0 ? (4 * Math.PI * area) / (perimeter * perimeter) : 0;
 
-            var cx = (minX + maxX) / 2;
-            var cy = (minY + maxY) / 2;
+            const cx = (minX + maxX) / 2;
+            const cy = (minY + maxY) / 2;
 
             // Daire için radius uniformity
-            var radii = points.map(function(p) { return Math.hypot(p[0] - cx, p[1] - cy); });
-            var avgRadius = radii.reduce(function(a, b) { return a + b; }, 0) / radii.length;
-            var radiusVariance = radii.reduce(function(sum, r) { return sum + Math.pow(r - avgRadius, 2); }, 0) / radii.length;
-            var radiusStdDev = Math.sqrt(radiusVariance);
-            var radiusUniformity = avgRadius > 0 ? 1 - (radiusStdDev / avgRadius) : 0;
+            const radii = points.map(p => Math.hypot(p[0] - cx, p[1] - cy));
+            const avgRadius = radii.reduce((a, b) => a + b, 0) / radii.length;
+            const radiusVariance =
+                radii.reduce((sum, r) => sum + Math.pow(r - avgRadius, 2), 0) / radii.length;
+            const radiusStdDev = Math.sqrt(radiusVariance);
+            const radiusUniformity = avgRadius > 0 ? 1 - radiusStdDev / avgRadius : 0;
 
-            var corners = this.findCorners(points);
-            var aspectRatio = height > 0 ? width / height : 1;
-            var straightness = this.calculateStraightness(points);
+            const corners = this.findCorners(points);
+            const aspectRatio = height > 0 ? width / height : 1;
+            const straightness = this.calculateStraightness(points);
 
             return {
-                bbox: { minX: minX, maxX: maxX, minY: minY, maxY: maxY, width: width, height: height, diagonal: diagonal },
+                bbox: { minX, maxX, minY, maxY, width, height, diagonal },
                 center: { x: cx, y: cy },
-                closedRatio: closedRatio,
-                perimeter: perimeter,
-                circularity: circularity,
-                avgRadius: avgRadius,
-                radiusUniformity: radiusUniformity,
-                corners: corners,
-                aspectRatio: aspectRatio,
-                straightness: straightness,
-                start: start,
-                end: end
+                closedRatio,
+                perimeter,
+                circularity,
+                avgRadius,
+                radiusUniformity,
+                corners,
+                aspectRatio,
+                straightness,
+                start,
+                end
             };
         },
 
-        /**
-         * Açık şekil tanıma (çizgi, ok)
-         */
-        recognizeOpenShape: function(points, analysis) {
-            var isLine = analysis.straightness > this.config.LINE_STRAIGHTNESS;
-            var aspect = Math.max(analysis.aspectRatio, 1 / analysis.aspectRatio);
-            var hasGoodAspect = aspect > this.config.LINE_ASPECT_RATIO;
+        recognizeOpenShape(points, analysis) {
+            const isLine = analysis.straightness > this.config.LINE_STRAIGHTNESS;
+            const aspect = Math.max(analysis.aspectRatio, 1 / analysis.aspectRatio);
+            const hasGoodAspect = aspect > this.config.LINE_ASPECT_RATIO;
 
             if (isLine && hasGoodAspect) {
-                var isArrow = this.detectArrowHead(points);
-                
+                const isArrow = this.detectArrowHead(points);
+
                 return {
                     type: isArrow ? 'arrow' : 'line',
                     confidence: analysis.straightness,
@@ -476,25 +341,21 @@
             return null;
         },
 
-        /**
-         * Kapalı şekil tanıma (daire, dikdörtgen, üçgen)
-         */
-        recognizeClosedShape: function(points, analysis) {
-            var bbox = analysis.bbox;
-            var aspectRatio = analysis.aspectRatio;
-            var radiusUniformity = analysis.radiusUniformity;
-            var circularity = analysis.circularity;
-            var corners = analysis.corners;
+        recognizeClosedShape(points, analysis) {
+            const bbox = analysis.bbox;
+            const aspectRatio = analysis.aspectRatio;
+            const radiusUniformity = analysis.radiusUniformity;
+            const circularity = analysis.circularity;
+            const corners = analysis.corners;
 
-            // Daire kontrolü - en önce
-            var isCircular = radiusUniformity > this.config.CIRCLE_UNIFORMITY;
-            var hasGoodCircularity = circularity > this.config.CIRCLE_CIRCULARITY;
-            var isRoundish = aspectRatio > 0.65 && aspectRatio < 1.55;
+            // Daire / elips kontrolü
+            const isCircular = radiusUniformity > this.config.CIRCLE_UNIFORMITY;
+            const hasGoodCircularity = circularity > this.config.CIRCLE_CIRCULARITY;
+            const isRoundish = aspectRatio > 0.65 && aspectRatio < 1.55;
 
             if (isCircular && hasGoodCircularity && isRoundish) {
-                // Elips mi daire mi?
-                var isSquarish = aspectRatio > 0.85 && aspectRatio < 1.18;
-                
+                const isSquarish = aspectRatio > 0.85 && aspectRatio < 1.18;
+
                 if (isSquarish) {
                     return {
                         type: 'circle',
@@ -505,13 +366,17 @@
                     return {
                         type: 'ellipse',
                         confidence: (radiusUniformity + circularity) / 2,
-                        data: { cx: analysis.center.x, cy: analysis.center.y, rx: bbox.width / 2, ry: bbox.height / 2 }
+                        data: {
+                            cx: analysis.center.x,
+                            cy: analysis.center.y,
+                            rx: bbox.width / 2,
+                            ry: bbox.height / 2
+                        }
                     };
                 }
             }
 
-            // Köşe sayısına göre polygon
-            var cornerCount = corners.length;
+            const cornerCount = corners.length;
 
             if (cornerCount === 3) {
                 return {
@@ -522,8 +387,8 @@
             }
 
             if (cornerCount >= 4) {
-                var isSquare = aspectRatio > 0.82 && aspectRatio < 1.22;
-                
+                const isSquare = aspectRatio > 0.82 && aspectRatio < 1.22;
+
                 return {
                     type: isSquare ? 'square' : 'rectangle',
                     confidence: 0.85,
@@ -531,10 +396,9 @@
                 };
             }
 
-            // Köşe bulunamadıysa ama kapalıysa, aspect ratio'ya bak
+            // Köşe yok ama kapalıysa: muhtemelen yumuşak dikdörtgen
             if (cornerCount < 3) {
-                // Belki yumuşak köşeli dikdörtgen
-                var isRectangular = aspectRatio < 0.5 || aspectRatio > 2;
+                const isRectangular = aspectRatio < 0.5 || aspectRatio > 2;
                 if (isRectangular && !isCircular) {
                     return {
                         type: 'rectangle',
@@ -547,73 +411,73 @@
             return null;
         },
 
-        /**
-         * Çizgi düzlüğü hesapla
-         */
-        calculateStraightness: function(points) {
+        calculateStraightness(points) {
             if (points.length < 3) return 1;
 
-            var start = points[0];
-            var end = points[points.length - 1];
-            var lineLen = Math.hypot(end[0] - start[0], end[1] - start[1]);
+            const start = points[0];
+            const end = points[points.length - 1];
+            const lineLen = Math.hypot(end[0] - start[0], end[1] - start[1]);
 
             if (lineLen < 15) return 0;
 
-            var maxDev = 0;
-            for (var i = 1; i < points.length - 1; i++) {
-                var dist = this.pointToLineDistance(points[i], start, end);
+            let maxDev = 0;
+            for (let i = 1; i < points.length - 1; i++) {
+                const dist = this.pointToLineDistance(points[i], start, end);
                 if (dist > maxDev) maxDev = dist;
             }
 
-            var ratio = maxDev / lineLen;
+            const ratio = maxDev / lineLen;
             return Math.max(0, Math.min(1, 1 - ratio * 2.5));
         },
 
-        /**
-         * Noktadan çizgiye mesafe
-         */
-        pointToLineDistance: function(point, lineStart, lineEnd) {
-            var x0 = point[0], y0 = point[1];
-            var x1 = lineStart[0], y1 = lineStart[1];
-            var x2 = lineEnd[0], y2 = lineEnd[1];
+        pointToLineDistance(point, lineStart, lineEnd) {
+            const x0 = point[0],
+                y0 = point[1];
+            const x1 = lineStart[0],
+                y1 = lineStart[1];
+            const x2 = lineEnd[0],
+                y2 = lineEnd[1];
 
-            var A = x0 - x1, B = y0 - y1;
-            var C = x2 - x1, D = y2 - y1;
+            let A = x0 - x1,
+                B = y0 - y1;
+            let C = x2 - x1,
+                D = y2 - y1;
 
-            var dot = A * C + B * D;
-            var lenSq = C * C + D * D;
+            let dot = A * C + B * D;
+            let lenSq = C * C + D * D;
 
             if (lenSq === 0) return Math.hypot(A, B);
 
-            var t = Math.max(0, Math.min(1, dot / lenSq));
-            return Math.hypot(x0 - (x1 + t * C), y0 - (y1 + t * D));
+            let t = Math.max(0, Math.min(1, dot / lenSq));
+            const projX = x1 + t * C;
+            const projY = y1 + t * D;
+
+            return Math.hypot(x0 - projX, y0 - projY);
         },
 
-        /**
-         * Köşe bulma
-         */
-        findCorners: function(points) {
-            var windowSize = Math.max(3, Math.floor(points.length / 12));
-            var minAngle = this.config.CORNER_ANGLE_THRESHOLD * Math.PI;
-            var corners = [];
-            var minDist = windowSize * 2.5;
+        findCorners(points) {
+            const windowSize = Math.max(3, Math.floor(points.length / 12));
+            const minAngle = this.config.CORNER_ANGLE_THRESHOLD * Math.PI;
+            const corners = [];
+            const minDist = windowSize * 2.5;
 
-            for (var i = windowSize; i < points.length - windowSize; i++) {
-                var prev = points[i - windowSize];
-                var curr = points[i];
-                var next = points[i + windowSize];
+            for (let i = windowSize; i < points.length - windowSize; i++) {
+                const prev = points[i - windowSize];
+                const curr = points[i];
+                const next = points[i + windowSize];
 
-                var v1x = curr[0] - prev[0], v1y = curr[1] - prev[1];
-                var v2x = next[0] - curr[0], v2y = next[1] - curr[1];
+                const v1x = curr[0] - prev[0];
+                const v1y = curr[1] - prev[1];
+                const v2x = next[0] - curr[0];
+                const v2y = next[1] - curr[1];
 
-                var dot = v1x * v2x + v1y * v2y;
-                var cross = v1x * v2y - v1y * v2x;
-                var angle = Math.abs(Math.atan2(cross, dot));
+                const dot = v1x * v2x + v1y * v2y;
+                const cross = v1x * v2y - v1y * v2x;
+                const angle = Math.abs(Math.atan2(cross, dot));
 
                 if (angle > minAngle) {
-                    // Yakın köşe var mı kontrol et
-                    var tooClose = false;
-                    for (var j = 0; j < corners.length; j++) {
+                    let tooClose = false;
+                    for (let j = 0; j < corners.length; j++) {
                         if (Math.hypot(corners[j][0] - curr[0], corners[j][1] - curr[1]) < minDist) {
                             tooClose = true;
                             break;
@@ -629,40 +493,35 @@
             return corners;
         },
 
-        /**
-         * Ok ucu algılama
-         */
-        detectArrowHead: function(points) {
+        detectArrowHead(points) {
             if (points.length < 12) return false;
 
-            var checkLen = Math.max(6, Math.floor(points.length * 0.25));
-            var endPoints = points.slice(-checkLen);
-            var corners = this.findCorners(endPoints);
-            
+            const checkLen = Math.max(6, Math.floor(points.length * 0.25));
+            const endPoints = points.slice(-checkLen);
+            const corners = this.findCorners(endPoints);
+
             return corners.length >= 1;
         },
 
-        /**
-         * Perimeter hesapla
-         */
-        calculatePerimeter: function(points) {
-            var perimeter = 0;
-            for (var i = 1; i < points.length; i++) {
-                perimeter += Math.hypot(points[i][0] - points[i-1][0], points[i][1] - points[i-1][1]);
+        calculatePerimeter(points) {
+            let perimeter = 0;
+            for (let i = 1; i < points.length; i++) {
+                perimeter += Math.hypot(
+                    points[i][0] - points[i - 1][0],
+                    points[i][1] - points[i - 1][1]
+                );
             }
-            // Kapanış
-            perimeter += Math.hypot(points[0][0] - points[points.length-1][0], points[0][1] - points[points.length-1][1]);
+            perimeter += Math.hypot(
+                points[0][0] - points[points.length - 1][0],
+                points[0][1] - points[points.length - 1][1]
+            );
             return perimeter;
         },
 
-        /**
-         * Üçgen köşelerini çıkar
-         */
-        extractTriangleVertices: function(corners, bbox) {
+        extractTriangleVertices(corners, bbox) {
             if (corners.length >= 3) {
                 return corners.slice(0, 3);
             }
-            // Varsayılan üçgen
             return [
                 [(bbox.minX + bbox.maxX) / 2, bbox.minY],
                 [bbox.maxX, bbox.maxY],
@@ -670,1534 +529,2022 @@
             ];
         },
 
-        /**
-         * Şekil noktalarını oluştur
-         */
-        generateShapePoints: function(shape, originalPoints) {
-            var pressure = 0.55;
-            var points = [];
+        generateShapePoints(shape, originalPoints) {
+            const pressure = 0.55;
+            const result = [];
 
-            var addPoint = function(x, y) { points.push([x, y, pressure]); };
-            
-            var addSegment = function(x1, y1, x2, y2, segments) {
-                segments = segments || 10;
-                for (var i = 0; i <= segments; i++) {
-                    var t = i / segments;
+            const addPoint = (x, y) => result.push([x, y, pressure]);
+
+            const addSegment = (x1, y1, x2, y2, segments = 10) => {
+                for (let i = 0; i <= segments; i++) {
+                    const t = i / segments;
                     addPoint(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t);
                 }
             };
 
             switch (shape.type) {
-                case 'line':
-                    addSegment(shape.data.start[0], shape.data.start[1], shape.data.end[0], shape.data.end[1], 16);
+                case 'line': {
+                    const s = shape.data.start;
+                    const e = shape.data.end;
+                    addSegment(s[0], s[1], e[0], e[1], 16);
                     break;
+                }
+                case 'arrow': {
+                    const s = shape.data.start;
+                    const e = shape.data.end;
 
-                case 'arrow':
-                    var start = shape.data.start;
-                    var end = shape.data.end;
-                    addSegment(start[0], start[1], end[0], end[1], 16);
-                    
-                    // Ok başı
-                    var angle = Math.atan2(end[1] - start[1], end[0] - start[0]);
-                    var headLen = 18;
-                    var headAngle = Math.PI / 6;
+                    addSegment(s[0], s[1], e[0], e[1], 16);
 
-                    addPoint(end[0], end[1]);
-                    addPoint(end[0] - headLen * Math.cos(angle - headAngle), end[1] - headLen * Math.sin(angle - headAngle));
-                    addPoint(end[0], end[1]);
-                    addPoint(end[0] - headLen * Math.cos(angle + headAngle), end[1] - headLen * Math.sin(angle + headAngle));
+                    const angle = Math.atan2(e[1] - s[1], e[0] - s[0]);
+                    const headLen = 18;
+                    const headAngle = Math.PI / 6;
+
+                    addPoint(e[0], e[1]);
+                    addPoint(
+                        e[0] - headLen * Math.cos(angle - headAngle),
+                        e[1] - headLen * Math.sin(angle - headAngle)
+                    );
+                    addPoint(e[0], e[1]);
+                    addPoint(
+                        e[0] - headLen * Math.cos(angle + headAngle),
+                        e[1] - headLen * Math.sin(angle + headAngle)
+                    );
                     break;
-
-                case 'circle':
-                    var cx = shape.data.cx, cy = shape.data.cy, r = shape.data.radius;
-                    for (var i = 0; i <= 48; i++) {
-                        var a = (i / 48) * Math.PI * 2;
-                        addPoint(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+                }
+                case 'circle': {
+                    const { cx, cy, radius } = shape.data;
+                    const segments = 48;
+                    for (let i = 0; i <= segments; i++) {
+                        const a = (i / segments) * Math.PI * 2;
+                        addPoint(cx + Math.cos(a) * radius, cy + Math.sin(a) * radius);
                     }
                     break;
-
-                case 'ellipse':
-                    var ecx = shape.data.cx, ecy = shape.data.cy;
-                    var rx = shape.data.rx, ry = shape.data.ry;
-                    for (var i = 0; i <= 48; i++) {
-                        var a = (i / 48) * Math.PI * 2;
-                        addPoint(ecx + Math.cos(a) * rx, ecy + Math.sin(a) * ry);
+                }
+                case 'ellipse': {
+                    const { cx, cy, rx, ry } = shape.data;
+                    const segments = 48;
+                    for (let i = 0; i <= segments; i++) {
+                        const a = (i / segments) * Math.PI * 2;
+                        addPoint(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry);
                     }
                     break;
-
+                }
                 case 'rectangle':
-                case 'square':
-                    var x = shape.data.x, y = shape.data.y;
-                    var w = shape.data.width, h = shape.data.height;
-                    
-                    addSegment(x, y, x + w, y, 8);
-                    addSegment(x + w, y, x + w, y + h, 8);
-                    addSegment(x + w, y + h, x, y + h, 8);
-                    addSegment(x, y + h, x, y, 8);
+                case 'square': {
+                    const { x, y, width, height } = shape.data;
+                    const corners = [
+                        [x, y],
+                        [x + width, y],
+                        [x + width, y + height],
+                        [x, y + height],
+                        [x, y]
+                    ];
+                    const segs = 8;
+                    for (let i = 0; i < corners.length - 1; i++) {
+                        const [x1, y1] = corners[i];
+                        const [x2, y2] = corners[i + 1];
+                        addSegment(x1, y1, x2, y2, segs);
+                    }
                     break;
-
-                case 'triangle':
-                    var verts = shape.data.vertices;
-                    addSegment(verts[0][0], verts[0][1], verts[1][0], verts[1][1], 10);
-                    addSegment(verts[1][0], verts[1][1], verts[2][0], verts[2][1], 10);
-                    addSegment(verts[2][0], verts[2][1], verts[0][0], verts[0][1], 10);
+                }
+                case 'triangle': {
+                    const verts = shape.data.vertices;
+                    const corners = [verts[0], verts[1], verts[2], verts[0]];
+                    const segs = 12;
+                    for (let i = 0; i < corners.length - 1; i++) {
+                        const [x1, y1] = corners[i];
+                        const [x2, y2] = corners[i + 1];
+                        addSegment(x1, y1, x2, y2, segs);
+                    }
                     break;
-
+                }
                 default:
                     return originalPoints;
             }
 
-            return points;
+            return result;
         }
     };
 
     // ═══════════════════════════════════════════════════════════════════════
-    // GLOBAL EXPORT
+    // TOOLS ENUM
     // ═══════════════════════════════════════════════════════════════════════
 
-    window.TestifyCanvasEngine = {
-        // Stroke fonksiyonları
-        getPremiumStroke: getPremiumStroke,
-        getStrokeSvgPath: getStrokeSvgPath,
-        
-        // Smoothing utilities
-        catmullRomSpline: catmullRomSpline,
-        movingAverageSmooth: movingAverageSmooth,
-        simplifyPath: simplifyPath,
-        simulateAdvancedPressure: simulateAdvancedPressure,
-        
-        // Shape recognition
-        ShapeRecognizer: ShapeRecognizer
-    };
-
-    console.log('[TestifyCanvasEngine] Ultra Premium Stroke Engine loaded');
-
-})();
-
-/**
- * TESTIFY CANVAS SYSTEM v2.0 - ULTRA PREMIUM EDITION
- * ===================================================
- * Ana canvas sistemi - testify-canvas-engine.js'den SONRA yükle
- * 
- * Özellikler:
- * - Premium çizim kalitesi
- * - Gelişmiş şekil tanıma
- * - Mobile-first responsive UI
- * - Multi-touch gesture desteği
- * - Sınırsız undo/redo
- */
-
-'use strict';
-
-(function() {
-
-    // Engine yüklendi mi kontrol et
-    if (!window.TestifyCanvasEngine) {
-        console.error('[TestifyCanvas] Engine not loaded! Load testify-canvas-engine.js first.');
-        return;
-    }
-
-    var Engine = window.TestifyCanvasEngine;
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // CONFIGURATION
-    // ═══════════════════════════════════════════════════════════════════════
-
-    var CONFIG = {
-        // Canvas
-        CANVAS_WIDTH: 4000,
-        CANVAS_HEIGHT: 3000,
-        MIN_ZOOM: 0.1,
-        MAX_ZOOM: 10,
-        ZOOM_STEP: 0.15,
-
-        // Drawing - ÖNEMLİ: Kalınlık artırıldı
-        DEFAULT_COLOR: '#1a1a2e',
-        DEFAULT_SIZE: 6,
-        MIN_SIZE: 1,
-        MAX_SIZE: 80,
-        DEFAULT_OPACITY: 1,
-        STROKE_SIZE_MULTIPLIER: 2.5, // ÖNEMLİ: 1.5'ten 2.5'e çıkarıldı
-
-        // Premium stroke options
-        STROKE_OPTIONS: {
-            thinning: 0.4,
-            smoothing: 0.65,
-            streamline: 0.55,
-            taperStart: 0,
-            taperEnd: 0,
-            simulatePressure: true
-        },
-
-        // History
-        MAX_HISTORY: 100,
-
-        // Colors
-        COLORS: [
-            '#1a1a2e', '#16213e', '#0f3460', '#e94560',
-            '#533483', '#0d7377', '#14a76c', '#ff9a3c',
-            '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'
-        ],
-
-        // Brush presets
-        BRUSH_PRESETS: [
-            { id: 'finepen', name: 'İnce Kalem', size: 3, thinning: 0.55, smoothing: 0.7, streamline: 0.6 },
-            { id: 'pen', name: 'Tükenmez', size: 6, thinning: 0.4, smoothing: 0.65, streamline: 0.55 },
-            { id: 'marker', name: 'Keçeli', size: 14, thinning: 0.15, smoothing: 0.5, streamline: 0.4 },
-            { id: 'highlighter', name: 'Fosforlu', size: 22, thinning: 0, smoothing: 0.7, streamline: 0.3, opacity: 0.35 },
-            { id: 'brush', name: 'Fırça', size: 18, thinning: 0.65, smoothing: 0.55, streamline: 0.5 },
-            { id: 'calligraphy', name: 'Kaligrafi', size: 10, thinning: 0.8, smoothing: 0.45, streamline: 0.6 }
-        ],
-
-        // Storage
-        STORAGE_KEY: 'testify.canvas.v2'
-    };
-
-    // Tools
-    var TOOLS = {
+    const TOOLS = {
         PEN: 'pen',
         ERASER: 'eraser',
         SELECT: 'select',
         PAN: 'pan',
-        SHAPE: 'shape'
+        SHAPE: 'shape', // Akıllı şekil kalemi – çizerken shape snapping
+        TEXT: 'text',
+        LASER: 'laser'
+    };
+
+    const SHAPES = {
+        LINE: 'line',
+        RECTANGLE: 'rectangle',
+        CIRCLE: 'circle',
+        TRIANGLE: 'triangle',
+        ARROW: 'arrow'
     };
 
     // ═══════════════════════════════════════════════════════════════════════
-    // MAIN CANVAS CLASS
+    // TESTIFY CANVAS CLASS – CORE
     // ═══════════════════════════════════════════════════════════════════════
 
-    function TestifyCanvas(options) {
-        options = options || {};
-        
-        this.options = {
-            container: options.container || null,
-            mode: options.mode || 'fullscreen',
-            onSave: options.onSave || null,
-            onClose: options.onClose || null
-        };
+    class TestifyCanvas {
+        constructor(options = {}) {
+            this.options = {
+                container: null,
+                mode: 'fullscreen', // 'fullscreen' | 'embedded' | 'quiz'
+                onSave: null,
+                onClose: null,
+                ...options
+            };
 
-        // State
-        this.isOpen = false;
-        this.tool = TOOLS.PEN;
-        this.color = CONFIG.DEFAULT_COLOR;
-        this.size = CONFIG.DEFAULT_SIZE;
-        this.opacity = CONFIG.DEFAULT_OPACITY;
-        this.brushPreset = CONFIG.BRUSH_PRESETS[1];
+            // State
+            this.isOpen = false;
+            this.tool = TOOLS.PEN;
+            this.color = CONFIG.DEFAULT_COLOR;
+            this.size = CONFIG.DEFAULT_SIZE;
+            this.opacity = CONFIG.DEFAULT_OPACITY;
+            this.brushPreset = CONFIG.BRUSH_PRESETS[0];
 
-        // Canvas state
-        this.zoom = 1;
-        this.panX = 0;
-        this.panY = 0;
-        this.isDrawing = false;
-        this.isPanning = false;
-        this.isErasing = false;
-        this.isPinching = false;
-        this.currentPoints = [];
-        this.currentStroke = null;
-        this.lastPanPoint = null;
-        this.lastPinchDist = 0;
-
-        // Device detection
-        this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        this.deviceType = this.detectDevice();
-
-        // Layers
-        this.layers = [
-            { id: 'layer-1', name: 'Katman 1', visible: true, strokes: [] }
-        ];
-        this.activeLayerId = 'layer-1';
-
-        // History
-        this.history = [];
-        this.historyIndex = -1;
-
-        // Elements
-        this.container = null;
-        this.svg = null;
-        this.wrapper = null;
-        this.eraserCursor = null;
-
-        // Shape recognizer
-        this.shapeRecognizer = Engine.ShapeRecognizer;
-
-        // Bind methods
-        var self = this;
-        this.handlePointerDown = function(e) { self._handlePointerDown(e); };
-        this.handlePointerMove = function(e) { self._handlePointerMove(e); };
-        this.handlePointerUp = function(e) { self._handlePointerUp(e); };
-        this.handleWheel = function(e) { self._handleWheel(e); };
-        this.handleKeyDown = function(e) { self._handleKeyDown(e); };
-        this.handleTouchStart = function(e) { self._handleTouchStart(e); };
-        this.handleTouchMove = function(e) { self._handleTouchMove(e); };
-        this.handleTouchEnd = function(e) { self._handleTouchEnd(e); };
-
-        // Initialize
-        this.init();
-    }
-
-    TestifyCanvas.prototype.detectDevice = function() {
-        var ua = navigator.userAgent;
-        var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-        var isTablet = /iPad|Android/i.test(ua) && window.innerWidth >= 768;
-        return isTablet ? 'tablet' : (isMobile ? 'mobile' : 'desktop');
-    };
-
-    TestifyCanvas.prototype.init = function() {
-        this.createElements();
-        this.attachEventListeners();
-        this.loadFromStorage();
-        this.saveHistory();
-        console.log('[TestifyCanvas v2.0] Initialized - Device:', this.deviceType);
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // ELEMENT CREATION
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype.createElements = function() {
-        this.container = document.createElement('div');
-        this.container.className = 'tcanvas';
-        this.container.setAttribute('data-device', this.deviceType);
-        
-        if (this.options.mode === 'quiz') {
-            this.container.classList.add('quiz-mode');
-        }
-
-        this.container.innerHTML = this.getTemplate();
-
-        if (this.options.container) {
-            this.options.container.appendChild(this.container);
-            this.container.classList.add('is-open');
-            this.isOpen = true;
-        } else {
-            document.body.appendChild(this.container);
-        }
-
-        // References
-        this.svg = this.container.querySelector('#tcanvasSvg');
-        this.wrapper = this.container.querySelector('.tcanvas-wrapper');
-        this.gridEl = this.container.querySelector('.tcanvas-grid');
-        this.eraserCursor = this.container.querySelector('.tcanvas-eraser-cursor');
-
-        this.updateViewBox();
-        this.createGrid();
-        this.updateAllUI();
-    };
-
-    TestifyCanvas.prototype.getTemplate = function() {
-        var isQuiz = this.options.mode === 'quiz';
-        var isMobile = this.deviceType !== 'desktop';
-        var self = this;
-
-        // Color swatches HTML
-        var colorSwatches = CONFIG.COLORS.map(function(c) {
-            return '<button class="tcanvas-color' + (c === self.color ? ' is-active' : '') + '" data-color="' + c + '" style="background:' + c + '"></button>';
-        }).join('');
-
-        // Brush presets HTML
-        var brushPresets = CONFIG.BRUSH_PRESETS.map(function(p) {
-            return '<button class="tcanvas-brush-btn' + (p.id === self.brushPreset.id ? ' is-active' : '') + '" data-preset="' + p.id + '">' + p.name + '</button>';
-        }).join('');
-
-        return '\
-            <!-- Header -->\
-            <header class="tcanvas-header">\
-                <div class="tcanvas-header-left">\
-                    ' + (!isQuiz ? '<div class="tcanvas-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg><span>Çizim</span></div>' : '') + '\
-                </div>\
-                <div class="tcanvas-header-center">\
-                    <button class="tcanvas-icon-btn" data-action="undo" title="Geri Al" disabled>\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h10a5 5 0 0 1 5 5v2"/><path d="M3 10l4-4M3 10l4 4"/></svg>\
-                    </button>\
-                    <button class="tcanvas-icon-btn" data-action="redo" title="İleri Al" disabled>\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10H11a5 5 0 0 0-5 5v2"/><path d="M21 10l-4-4M21 10l-4 4"/></svg>\
-                    </button>\
-                </div>\
-                <div class="tcanvas-header-right">\
-                    ' + (!isQuiz ? '\
-                    <button class="tcanvas-icon-btn" data-action="clear" title="Temizle">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>\
-                    </button>\
-                    <button class="tcanvas-icon-btn" data-action="download" title="İndir">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>\
-                    </button>\
-                    ' : '') + '\
-                    <button class="tcanvas-icon-btn tcanvas-close-btn" data-action="' + (isQuiz ? 'minimize' : 'close') + '" title="Kapat">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>\
-                    </button>\
-                </div>\
-            </header>\
-            \
-            <!-- Main Area -->\
-            <main class="tcanvas-main">\
-                <div class="tcanvas-wrapper">\
-                    <div class="tcanvas-grid"></div>\
-                    <svg id="tcanvasSvg" xmlns="http://www.w3.org/2000/svg">\
-                        <g id="tcanvasContent" transform="translate(0,0) scale(1)"></g>\
-                    </svg>\
-                    <div class="tcanvas-eraser-cursor"></div>\
-                </div>\
-                \
-                <!-- Desktop Tools -->\
-                <aside class="tcanvas-tools tcanvas-desktop">\
-                    <button class="tcanvas-tool is-active" data-tool="pen" title="Kalem (P)">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>\
-                    </button>\
-                    <button class="tcanvas-tool" data-tool="eraser" title="Silgi (E)">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16c-.4-.4-.4-1 0-1.4l9.9-9.9c.4-.4 1-.4 1.4 0l5.3 5.3c.4.4.4 1 0 1.4L11 20"/><path d="M6 11l4 4"/></svg>\
-                    </button>\
-                    <button class="tcanvas-tool" data-tool="shape" title="Şekil (S)">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><circle cx="17.5" cy="6.5" r="4.5"/><path d="M14 14l3 6 3-6z"/></svg>\
-                    </button>\
-                    <div class="tcanvas-tool-divider"></div>\
-                    <button class="tcanvas-tool" data-tool="pan" title="Kaydır (H)">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>\
-                    </button>\
-                </aside>\
-                \
-                <!-- Desktop Options -->\
-                ' + (!isQuiz ? '\
-                <aside class="tcanvas-options tcanvas-desktop">\
-                    <section class="tcanvas-section">\
-                        <h4>Renk</h4>\
-                        <div class="tcanvas-color-grid">' + colorSwatches + '</div>\
-                        <div class="tcanvas-custom-color">\
-                            <input type="color" class="tcanvas-color-input" value="' + this.color + '">\
-                            <span class="tcanvas-color-hex">' + this.color + '</span>\
-                        </div>\
-                    </section>\
-                    <section class="tcanvas-section">\
-                        <h4>Boyut</h4>\
-                        <div class="tcanvas-size-control">\
-                            <div class="tcanvas-size-preview"><div class="tcanvas-preview-dot" style="width:' + this.size + 'px;height:' + this.size + 'px;background:' + this.color + '"></div></div>\
-                            <input type="range" class="tcanvas-size-slider" min="' + CONFIG.MIN_SIZE + '" max="' + CONFIG.MAX_SIZE + '" value="' + this.size + '">\
-                            <span class="tcanvas-size-value">' + this.size + 'px</span>\
-                        </div>\
-                    </section>\
-                    <section class="tcanvas-section">\
-                        <h4>Opaklık</h4>\
-                        <div class="tcanvas-opacity-control">\
-                            <input type="range" class="tcanvas-opacity-slider" min="0.1" max="1" step="0.05" value="' + this.opacity + '">\
-                            <span class="tcanvas-opacity-value">' + Math.round(this.opacity * 100) + '%</span>\
-                        </div>\
-                    </section>\
-                    <section class="tcanvas-section">\
-                        <h4>Fırça</h4>\
-                        <div class="tcanvas-brush-grid">' + brushPresets + '</div>\
-                    </section>\
-                </aside>\
-                ' : '') + '\
-            </main>\
-            \
-            <!-- Mobile Bottom Bar -->\
-            <nav class="tcanvas-mobile-bar tcanvas-mobile">\
-                <div class="tcanvas-mobile-tools">\
-                    <button class="tcanvas-mobile-tool is-active" data-tool="pen">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>\
-                        <span>Kalem</span>\
-                    </button>\
-                    <button class="tcanvas-mobile-tool" data-tool="eraser">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16c-.4-.4-.4-1 0-1.4l9.9-9.9c.4-.4 1-.4 1.4 0l5.3 5.3c.4.4.4 1 0 1.4L11 20"/></svg>\
-                        <span>Silgi</span>\
-                    </button>\
-                    <button class="tcanvas-mobile-tool" data-tool="shape">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><circle cx="17.5" cy="6.5" r="4.5"/></svg>\
-                        <span>Şekil</span>\
-                    </button>\
-                    <button class="tcanvas-mobile-tool" data-tool="pan">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-4 0"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/></svg>\
-                        <span>Kaydır</span>\
-                    </button>\
-                </div>\
-                <div class="tcanvas-mobile-options">\
-                    <button class="tcanvas-mobile-opt" data-action="toggle-colors">\
-                        <div class="tcanvas-color-indicator" style="background:' + this.color + '"></div>\
-                    </button>\
-                    <button class="tcanvas-mobile-opt" data-action="toggle-size">\
-                        <div class="tcanvas-size-indicator"><div class="tcanvas-size-dot" style="width:' + Math.min(this.size, 18) + 'px;height:' + Math.min(this.size, 18) + 'px"></div></div>\
-                    </button>\
-                </div>\
-            </nav>\
-            \
-            <!-- Mobile Color Panel -->\
-            <div class="tcanvas-panel tcanvas-color-panel" id="tcanvasColorPanel">\
-                <div class="tcanvas-panel-header">\
-                    <span>Renk Seç</span>\
-                    <button class="tcanvas-panel-close" data-action="close-panel">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>\
-                    </button>\
-                </div>\
-                <div class="tcanvas-panel-colors">' + colorSwatches + '</div>\
-            </div>\
-            \
-            <!-- Mobile Size Panel -->\
-            <div class="tcanvas-panel tcanvas-size-panel" id="tcanvasSizePanel">\
-                <div class="tcanvas-panel-header">\
-                    <span>Boyut: <strong id="tcanvasMobileSizeVal">' + this.size + 'px</strong></span>\
-                    <button class="tcanvas-panel-close" data-action="close-panel">\
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>\
-                    </button>\
-                </div>\
-                <div class="tcanvas-panel-size">\
-                    <input type="range" class="tcanvas-mobile-size-slider" min="' + CONFIG.MIN_SIZE + '" max="' + CONFIG.MAX_SIZE + '" value="' + this.size + '">\
-                    <div class="tcanvas-mobile-size-preview" style="width:' + (this.size * 2) + 'px;height:' + (this.size * 2) + 'px;background:' + this.color + '"></div>\
-                </div>\
-                <div class="tcanvas-panel-brushes">' + brushPresets + '</div>\
-            </div>\
-            \
-            <!-- Shape Hint -->\
-            <div class="tcanvas-shape-hint" id="tcanvasShapeHint">\
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>\
-                <span></span>\
-            </div>\
-            \
-            <!-- Zoom Controls -->\
-            <div class="tcanvas-zoom tcanvas-desktop">\
-                <button class="tcanvas-zoom-btn" data-action="zoom-out" title="Uzaklaştır">\
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>\
-                </button>\
-                <span class="tcanvas-zoom-value" id="tcanvasZoomVal">' + Math.round(this.zoom * 100) + '%</span>\
-                <button class="tcanvas-zoom-btn" data-action="zoom-in" title="Yakınlaştır">\
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>\
-                </button>\
-                <button class="tcanvas-zoom-btn" data-action="zoom-reset" title="Sıfırla">\
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>\
-                </button>\
-            </div>\
-        ';
-    };
-
-    TestifyCanvas.prototype.createGrid = function() {
-        if (!this.gridEl) return;
-        this.gridEl.innerHTML = '\
-            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">\
-                <defs>\
-                    <pattern id="tcSmallGrid" width="20" height="20" patternUnits="userSpaceOnUse">\
-                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--tc-grid)" stroke-width="0.5" opacity="0.5"/>\
-                    </pattern>\
-                    <pattern id="tcLargeGrid" width="100" height="100" patternUnits="userSpaceOnUse">\
-                        <rect width="100" height="100" fill="url(#tcSmallGrid)"/>\
-                        <path d="M 100 0 L 0 0 0 100" fill="none" stroke="var(--tc-grid)" stroke-width="1" opacity="0.7"/>\
-                    </pattern>\
-                </defs>\
-                <rect width="100%" height="100%" fill="url(#tcLargeGrid)"/>\
-            </svg>\
-        ';
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // EVENT LISTENERS
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype.attachEventListeners = function() {
-        var self = this;
-
-        // Pointer events
-        this.svg.addEventListener('pointerdown', this.handlePointerDown);
-        this.svg.addEventListener('pointermove', this.handlePointerMove);
-        this.svg.addEventListener('pointerup', this.handlePointerUp);
-        this.svg.addEventListener('pointerleave', this.handlePointerUp);
-        this.svg.addEventListener('pointercancel', this.handlePointerUp);
-
-        // Touch events (multi-touch)
-        this.wrapper.addEventListener('touchstart', this.handleTouchStart, { passive: false });
-        this.wrapper.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-        this.wrapper.addEventListener('touchend', this.handleTouchEnd, { passive: false });
-
-        // Wheel zoom
-        this.wrapper.addEventListener('wheel', this.handleWheel, { passive: false });
-
-        // Keyboard
-        document.addEventListener('keydown', this.handleKeyDown);
-
-        // Tool buttons
-        this.container.querySelectorAll('[data-tool]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                self.setTool(btn.getAttribute('data-tool'));
-            });
-        });
-
-        // Action buttons
-        this.container.querySelectorAll('[data-action]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                self.handleAction(btn.getAttribute('data-action'));
-            });
-        });
-
-        // Color buttons
-        this.container.querySelectorAll('[data-color]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                self.setColor(btn.getAttribute('data-color'));
-                self.closeAllPanels();
-            });
-        });
-
-        // Color input
-        var colorInput = this.container.querySelector('.tcanvas-color-input');
-        if (colorInput) {
-            colorInput.addEventListener('input', function(e) {
-                self.setColor(e.target.value);
-            });
-        }
-
-        // Size sliders
-        this.container.querySelectorAll('.tcanvas-size-slider, .tcanvas-mobile-size-slider').forEach(function(slider) {
-            slider.addEventListener('input', function(e) {
-                self.setSize(parseInt(e.target.value, 10));
-            });
-        });
-
-        // Opacity slider
-        var opacitySlider = this.container.querySelector('.tcanvas-opacity-slider');
-        if (opacitySlider) {
-            opacitySlider.addEventListener('input', function(e) {
-                self.setOpacity(parseFloat(e.target.value));
-            });
-        }
-
-        // Brush presets
-        this.container.querySelectorAll('[data-preset]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                self.setBrushPreset(btn.getAttribute('data-preset'));
-            });
-        });
-
-        // Context menu prevention
-        this.svg.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-    };
-
-    TestifyCanvas.prototype.removeEventListeners = function() {
-        this.svg.removeEventListener('pointerdown', this.handlePointerDown);
-        this.svg.removeEventListener('pointermove', this.handlePointerMove);
-        this.svg.removeEventListener('pointerup', this.handlePointerUp);
-        this.svg.removeEventListener('pointerleave', this.handlePointerUp);
-        this.svg.removeEventListener('pointercancel', this.handlePointerUp);
-        this.wrapper.removeEventListener('touchstart', this.handleTouchStart);
-        this.wrapper.removeEventListener('touchmove', this.handleTouchMove);
-        this.wrapper.removeEventListener('touchend', this.handleTouchEnd);
-        this.wrapper.removeEventListener('wheel', this.handleWheel);
-        document.removeEventListener('keydown', this.handleKeyDown);
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // POINTER HANDLERS
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype._handlePointerDown = function(e) {
-        e.preventDefault();
-
-        if (e.pointerId !== undefined) {
-            try { this.svg.setPointerCapture(e.pointerId); } catch(ex) {}
-        }
-
-        var point = this.getPointerPosition(e);
-        var pressure = e.pressure || 0.5;
-
-        // Pan mode
-        if (this.tool === TOOLS.PAN || e.button === 1 || (e.button === 0 && e.ctrlKey)) {
-            this.startPanning(e.clientX, e.clientY);
-            return;
-        }
-
-        // Eraser
-        if (this.tool === TOOLS.ERASER) {
-            this.isErasing = true;
-            this.updateEraserCursor(e.clientX, e.clientY);
-            this.eraseAt(point.x, point.y);
-            return;
-        }
-
-        // Drawing
-        if (this.tool === TOOLS.PEN || this.tool === TOOLS.SHAPE) {
-            this.isDrawing = true;
-            this.currentPoints = [[point.x, point.y, pressure]];
-            this.currentStroke = this.createStrokePath();
-            this.renderCurrentStroke();
-        }
-    };
-
-    TestifyCanvas.prototype._handlePointerMove = function(e) {
-        var point = this.getPointerPosition(e);
-        var pressure = e.pressure || 0.5;
-
-        // Eraser
-        if (this.tool === TOOLS.ERASER) {
-            this.updateEraserCursor(e.clientX, e.clientY);
-            if (this.isErasing) {
-                this.eraseAt(point.x, point.y);
-            }
-            return;
-        }
-
-        // Panning
-        if (this.isPanning && this.lastPanPoint) {
-            var dx = e.clientX - this.lastPanPoint.x;
-            var dy = e.clientY - this.lastPanPoint.y;
-            this.panX += dx;
-            this.panY += dy;
-            this.lastPanPoint = { x: e.clientX, y: e.clientY };
-            this.updateViewBox();
-            return;
-        }
-
-        // Drawing
-        if (this.isDrawing) {
-            this.currentPoints.push([point.x, point.y, pressure]);
-            this.renderCurrentStroke();
-        }
-    };
-
-    TestifyCanvas.prototype._handlePointerUp = function(e) {
-        if (e.pointerId !== undefined) {
-            try { this.svg.releasePointerCapture(e.pointerId); } catch(ex) {}
-        }
-
-        if (this.isPanning) {
-            this.stopPanning();
-            return;
-        }
-
-        if (this.isErasing) {
-            this.isErasing = false;
-            this.saveHistory();
-            return;
-        }
-
-        if (this.isDrawing) {
+            // Canvas state
+            this.zoom = 1;
+            this.panX = 0;
+            this.panY = 0;
             this.isDrawing = false;
-
-            if (this.currentPoints.length > 1) {
-                this.finalizeStroke();
-            } else if (this.currentStroke) {
-                this.currentStroke.remove();
-            }
-
+            this.isPanning = false;
+            this.isErasing = false;
             this.currentPoints = [];
             this.currentStroke = null;
+
+            // Layers
+            this.layers = [
+                { id: 'layer-1', name: 'Katman 1', visible: true, strokes: [] }
+            ];
+            this.activeLayerId = 'layer-1';
+
+            // History
+            this.history = [];
+            this.historyIndex = -1;
+
+            // Elements
+            this.container = null;
+            this.svg = null;
+            this.wrapper = null;
+
+            // Bindings
+            this.handlePointerDown = this.handlePointerDown.bind(this);
+            this.handlePointerMove = this.handlePointerMove.bind(this);
+            this.handlePointerUp = this.handlePointerUp.bind(this);
+            this.handleWheel = this.handleWheel.bind(this);
+            this.handleKeyDown = this.handleKeyDown.bind(this);
+
+            // Initialize
+            this.init();
         }
-    };
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // TOUCH HANDLERS (Multi-touch pinch zoom)
-    // ═══════════════════════════════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════════
 
-    TestifyCanvas.prototype._handleTouchStart = function(e) {
-        if (e.touches.length === 2) {
-            e.preventDefault();
-            this.isPinching = true;
-            this.lastPinchDist = this.getPinchDistance(e.touches);
+        init() {
+            this.createElements();
+            this.attachEventListeners();
+            this.loadFromStorage();
+            this.saveHistory();
 
-            // Çizimi iptal et
-            if (this.isDrawing) {
-                this.isDrawing = false;
-                if (this.currentStroke) {
-                    this.currentStroke.remove();
+            console.log('[TestifyCanvas] Initialized');
+        }
+
+        createElements() {
+            // Main container
+            this.container = document.createElement('div');
+            this.container.className = 'testify-canvas-container';
+            if (this.options.mode === 'quiz') {
+                this.container.classList.add('quiz-mode');
+            }
+
+            this.container.innerHTML = this.getTemplate();
+
+            // Append to body or custom container
+            if (this.options.container) {
+                this.options.container.appendChild(this.container);
+                this.container.classList.add('is-open');
+                this.isOpen = true;
+            } else {
+                document.body.appendChild(this.container);
+            }
+
+            // Get references
+            this.svg = this.container.querySelector('#testifyDrawCanvas');
+            this.wrapper = this.container.querySelector('.canvas-wrapper');
+            this.gridEl = this.container.querySelector('.canvas-grid');
+            this.eraserCursor = this.container.querySelector('.eraser-cursor');
+
+            // Setup SVG viewBox
+            this.updateViewBox();
+
+            // Create grid
+            this.createGrid();
+
+            // Update UI
+            this.updateToolUI();
+            this.updateColorUI();
+            this.updateBrushUI();
+            this.updateOpacityUI();
+            this.updateZoomUI();
+            this.updateStrokeCount();
+        }
+
+        getTemplate() {
+            const isQuizMode = this.options.mode === 'quiz';
+
+            return `
+                <!-- Top Toolbar -->
+                <div class="canvas-top-toolbar">
+                    <div class="canvas-toolbar-left">
+                        ${!isQuizMode ? `
+                        <h1 class="canvas-title">
+                            <span class="canvas-title-icon">
+                                <i class="ph ph-pencil-simple"></i>
+                            </span>
+                            Çizim Alanı
+                        </h1>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="canvas-toolbar-center">
+                        <button class="canvas-btn" data-action="undo" title="Geri Al (Ctrl+Z)" disabled>
+                            <i class="ph ph-arrow-counter-clockwise"></i>
+                        </button>
+                        <button class="canvas-btn" data-action="redo" title="İleri Al (Ctrl+Y)" disabled>
+                            <i class="ph ph-arrow-clockwise"></i>
+                        </button>
+                        ${!isQuizMode ? `
+                        <div style="width: 1px; height: 20px; background: var(--toolbar-border); margin: 0 0.25rem;"></div>
+                        <button class="canvas-btn" data-action="clear" title="Temizle">
+                            <i class="ph ph-trash"></i>
+                        </button>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="canvas-toolbar-right">
+                        ${!isQuizMode ? `
+                        <button class="canvas-btn canvas-btn-text" data-action="save">
+                            <i class="ph ph-floppy-disk"></i>
+                            Kaydet
+                        </button>
+                        <button class="canvas-btn" data-action="download" title="PNG olarak indir">
+                            <i class="ph ph-download-simple"></i>
+                        </button>
+                        ` : ''}
+                        <button class="canvas-btn" data-action="minimize" title="${isQuizMode ? 'Kapat' : 'Küçült'}">
+                            <i class="ph ph-${isQuizMode ? 'x' : 'minus'}"></i>
+                        </button>
+                        ${!isQuizMode ? `
+                        <button class="canvas-btn" data-action="close" title="Kapat">
+                            <i class="ph ph-x"></i>
+                        </button>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <!-- Main Canvas Area -->
+                <div class="canvas-main-area">
+                    <div class="canvas-wrapper">
+                        <div class="canvas-grid"></div>
+                        <svg id="testifyDrawCanvas" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <filter id="pencilTexture">
+                                    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5" result="noise"/>
+                                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="1" xChannelSelector="R" yChannelSelector="G"/>
+                                </filter>
+                            </defs>
+                            <g id="canvasContent" transform="translate(0,0) scale(1)">
+                                <!-- Strokes will be rendered here -->
+                            </g>
+                        </svg>
+                        <div class="eraser-cursor"></div>
+                    </div>
+                    
+                    <!-- Tools Panel -->
+                    <div class="canvas-tools-panel">
+                        <button class="tool-btn is-active" data-tool="pen" data-tooltip="Kalem (P)">
+                            <i class="ph ph-pen"></i>
+                        </button>
+                        <button class="tool-btn" data-tool="eraser" data-tooltip="Silgi (E)">
+                            <i class="ph ph-eraser"></i>
+                        </button>
+                        ${!isQuizMode ? `
+                        <button class="tool-btn" data-tool="select" data-tooltip="Seç (V)">
+                            <i class="ph ph-cursor"></i>
+                        </button>
+                        ` : ''}
+                        <button class="tool-btn" data-tool="pan" data-tooltip="Kaydır (H)">
+                            <i class="ph ph-hand"></i>
+                        </button>
+                        
+                        <div class="tool-divider"></div>
+                        
+                        ${!isQuizMode ? `
+                        <!-- Şekil kalemi: Çizgiyi algılayıp line/circle/rect/triangle'a çevirir -->
+                        <button class="tool-btn" data-tool="shape" data-tooltip="Akıllı Şekil Kalemi (S)">
+                            <i class="ph ph-shapes"></i>
+                        </button>
+                        <button class="tool-btn" data-tool="text" data-tooltip="Metin (T)">
+                            <i class="ph ph-text-t"></i>
+                        </button>
+                        <button class="tool-btn" data-tool="laser" data-tooltip="Lazer (L)">
+                            <i class="ph ph-cursor-click"></i>
+                        </button>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- Options Panel -->
+                    ${!isQuizMode ? `
+                    <div class="canvas-options-panel">
+                        <!-- Colors -->
+                        <div class="options-section">
+                            <div class="options-label">Renk</div>
+                            <div class="color-palette">
+                                ${CONFIG.COLORS.map(c => `
+                                    <button class="color-swatch ${c === this.color ? 'is-active' : ''}" 
+                                            data-color="${c}" 
+                                            style="background: ${c}"></button>
+                                `).join('')}
+                            </div>
+                            <div class="color-picker-wrapper">
+                                <button class="color-picker-btn"></button>
+                                <input type="color" class="color-picker-input" value="${this.color}">
+                            </div>
+                        </div>
+                        
+                        <!-- Brush Size -->
+                        <div class="options-section">
+                            <div class="options-label">Boyut</div>
+                            <div class="brush-size-control">
+                                <div class="brush-size-preview">
+                                    <div class="brush-preview-dot" style="width: ${this.size}px; height: ${this.size}px; background: ${this.color}"></div>
+                                </div>
+                                <input type="range" class="brush-size-slider" 
+                                       min="${CONFIG.MIN_SIZE}" 
+                                       max="${CONFIG.MAX_SIZE}" 
+                                       value="${this.size}">
+                                <div class="brush-size-value">${this.size}px</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Opacity -->
+                        <div class="options-section">
+                            <div class="options-label">Opaklık</div>
+                            <div class="opacity-control">
+                                <input type="range" class="opacity-slider" 
+                                       min="0.1" max="1" step="0.1" 
+                                       value="${this.opacity}">
+                                <span class="opacity-value">${Math.round(this.opacity * 100)}%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Brush Presets -->
+                        <div class="options-section">
+                            <div class="options-label">Fırça Stili</div>
+                            <div class="brush-presets">
+                                ${CONFIG.BRUSH_PRESETS.map(preset => `
+                                    <button class="brush-preset ${preset.id === this.brushPreset.id ? 'is-active' : ''}" 
+                                            data-preset="${preset.id}" 
+                                            title="${preset.name}">
+                                        ${this.getBrushPresetIcon(preset.id)}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                <!-- Bottom Bar -->
+                ${!isQuizMode ? `
+                <div class="canvas-bottom-bar">
+                    <div class="canvas-info-left">
+                        <span class="canvas-info-item">
+                            <i class="ph ph-stack"></i>
+                            <span id="strokeCount">${this.getTotalStrokeCount()} çizgi</span>
+                        </span>
+                        <span class="canvas-info-item">
+                            <i class="ph ph-clock"></i>
+                            <span id="lastSaved">-</span>
+                        </span>
+                    </div>
+                    
+                    <div class="canvas-info-right">
+                        <button class="canvas-btn" data-action="toggle-grid" title="Izgara">
+                            <i class="ph ph-grid-four"></i>
+                        </button>
+                        
+                        <div class="zoom-controls">
+                            <button class="zoom-btn" data-action="zoom-out">
+                                <i class="ph ph-minus"></i>
+                            </button>
+                            <span class="zoom-value">${Math.round(this.zoom * 100)}%</span>
+                            <button class="zoom-btn" data-action="zoom-in">
+                                <i class="ph ph-plus"></i>
+                            </button>
+                            <button class="zoom-btn" data-action="zoom-reset" title="Sıfırla">
+                                <i class="ph ph-frame-corners"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                <!-- Shape Recognition Hint -->
+                <div class="shape-recognition-hint" id="shapeHint"></div>
+            `;
+        }
+
+        getBrushPresetIcon(presetId) {
+            const icons = {
+                pen: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>',
+                marker: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.5 1.15c-.53 0-1.04.19-1.43.58l-5.81 5.82 5.65 5.65 5.82-5.81c.77-.78.77-2.05 0-2.83l-2.82-2.83c-.39-.39-.9-.58-1.41-.58zM10.3 8.5l-7.37 7.37c-.39.39-.39 1.01 0 1.41l3.24 3.23c.39.38 1.03.39 1.42 0l7.36-7.35L10.3 8.5z"/></svg>',
+                highlighter: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 14l3 3v5h6v-5l3-3V9H6v5zm5-12h2v3h-2V2zM3.5 5.88l1.41-1.41 2.12 2.12L5.62 8 3.5 5.88zm13.46.71l2.12-2.12 1.41 1.41L18.38 8l-1.42-1.41z" opacity="0.6"/></svg>',
+                pencil: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.3 8.93l-1.41-1.41-9.59 9.59 1.41 1.41 9.59-9.59zM15.89 5.52l-1.41-1.41-9.59 9.59 1.41 1.41 9.59-9.59zM5 19h14v2H5v-2z"/></svg>',
+                brush: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14c-1.66 0-3 1.34-3 3 0 1.31-1.16 2-2 2 .92 1.22 2.49 2 4 2 2.21 0 4-1.79 4-4 0-1.66-1.34-3-3-3zm13.71-9.37l-1.34-1.34c-.39-.39-1.02-.39-1.41 0L9 12.25 11.75 15l8.96-8.96c.39-.39.39-1.02 0-1.41z"/></svg>'
+            };
+            return icons[presetId] || icons.pen;
+        }
+
+        createGrid() {
+            if (!this.gridEl) return;
+
+            const gridSize = 20;
+            const majorGridSize = 100;
+
+            const gridHTML = `
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="smallGrid" width="${gridSize}" height="${gridSize}" patternUnits="userSpaceOnUse">
+                            <path d="M ${gridSize} 0 L 0 0 0 ${gridSize}" fill="none" stroke="var(--canvas-grid)" stroke-width="0.5"/>
+                        </pattern>
+                        <pattern id="grid" width="${majorGridSize}" height="${majorGridSize}" patternUnits="userSpaceOnUse">
+                            <rect width="${majorGridSize}" height="${majorGridSize}" fill="url(#smallGrid)"/>
+                            <path d="M ${majorGridSize} 0 L 0 0 0 ${majorGridSize}" fill="none" stroke="var(--canvas-grid-major)" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                </svg>
+            `;
+
+            this.gridEl.innerHTML = gridHTML;
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // EVENT LISTENERS
+        // ═══════════════════════════════════════════════════════════════════
+
+        attachEventListeners() {
+            // Pointer events on SVG
+            this.svg.addEventListener('pointerdown', this.handlePointerDown);
+            this.svg.addEventListener('pointermove', this.handlePointerMove);
+            this.svg.addEventListener('pointerup', this.handlePointerUp);
+            this.svg.addEventListener('pointerleave', this.handlePointerUp);
+            this.svg.addEventListener('pointercancel', this.handlePointerUp);
+
+            // Wheel for zoom
+            this.wrapper.addEventListener('wheel', this.handleWheel, { passive: false });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', this.handleKeyDown);
+
+            // Tool buttons
+            this.container.querySelectorAll('[data-tool]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    this.setTool(btn.dataset.tool);
+                });
+            });
+
+            // Action buttons
+            this.container.querySelectorAll('[data-action]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    this.handleAction(btn.dataset.action);
+                });
+            });
+
+            // Color swatches
+            this.container.querySelectorAll('.color-swatch').forEach(swatch => {
+                swatch.addEventListener('click', () => {
+                    this.setColor(swatch.dataset.color);
+                });
+            });
+
+            // Color picker
+            const colorPicker = this.container.querySelector('.color-picker-input');
+            if (colorPicker) {
+                colorPicker.addEventListener('input', (e) => {
+                    this.setColor(e.target.value);
+                });
+            }
+
+            // Brush size slider
+            const sizeSlider = this.container.querySelector('.brush-size-slider');
+            if (sizeSlider) {
+                sizeSlider.addEventListener('input', (e) => {
+                    this.setSize(parseInt(e.target.value, 10));
+                });
+            }
+
+            // Opacity slider
+            const opacitySlider = this.container.querySelector('.opacity-slider');
+            if (opacitySlider) {
+                opacitySlider.addEventListener('input', (e) => {
+                    this.setOpacity(parseFloat(e.target.value));
+                });
+            }
+
+            // Brush presets
+            this.container.querySelectorAll('.brush-preset').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    this.setBrushPreset(btn.dataset.preset);
+                });
+            });
+
+            // Prevent context menu
+            this.svg.addEventListener('contextmenu', (e) => e.preventDefault());
+
+            // Touch handling
+            this.svg.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 1) {
+                    this.isPanning = true;
                 }
+            }, { passive: true });
+        }
+
+        removeEventListeners() {
+            this.svg.removeEventListener('pointerdown', this.handlePointerDown);
+            this.svg.removeEventListener('pointermove', this.handlePointerMove);
+            this.svg.removeEventListener('pointerup', this.handlePointerUp);
+            this.svg.removeEventListener('pointerleave', this.handlePointerUp);
+            this.svg.removeEventListener('pointercancel', this.handlePointerUp);
+            this.wrapper.removeEventListener('wheel', this.handleWheel);
+            document.removeEventListener('keydown', this.handleKeyDown);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // POINTER HANDLERS
+        // ═══════════════════════════════════════════════════════════════════
+
+        handlePointerDown(e) {
+            e.preventDefault();
+
+            // Capture pointer
+            if (e.pointerId !== undefined) {
+                this.svg.setPointerCapture(e.pointerId);
+            }
+
+            const point = this.getPointerPosition(e);
+            const pressure = e.pressure || 0.5;
+
+            // Pan mode
+            if (this.tool === TOOLS.PAN || e.button === 1 || (e.button === 0 && e.ctrlKey)) {
+                this.isPanning = true;
+                this.lastPanPoint = { x: e.clientX, y: e.clientY };
+                this.wrapper.classList.add('is-panning', 'is-dragging');
+                return;
+            }
+
+            // Eraser
+            if (this.tool === TOOLS.ERASER) {
+                this.isErasing = true;
+                this.updateEraserCursor(e.clientX, e.clientY);
+                this.eraseAt(point.x, point.y);
+                return;
+            }
+
+            // Çizim (hem PEN hem SHAPE kalemi burada çiziyor)
+            if (this.tool === TOOLS.PEN || this.tool === TOOLS.SHAPE) {
+                this.isDrawing = true;
+                this.currentPoints = [[point.x, point.y, pressure]];
+                this.currentStroke = this.createStrokePath();
+                this.renderCurrentStroke();
+            }
+        }
+
+        handlePointerMove(e) {
+            const point = this.getPointerPosition(e);
+            const pressure = e.pressure || 0.5;
+
+            // Eraser cursor
+            if (this.tool === TOOLS.ERASER) {
+                this.updateEraserCursor(e.clientX, e.clientY);
+
+                if (this.isErasing) {
+                    this.eraseAt(point.x, point.y);
+                }
+                return;
+            }
+
+            // Pan
+            if (this.isPanning && this.lastPanPoint) {
+                const dx = e.clientX - this.lastPanPoint.x;
+                const dy = e.clientY - this.lastPanPoint.y;
+
+                this.panX += dx;
+                this.panY += dy;
+
+                this.lastPanPoint = { x: e.clientX, y: e.clientY };
+                this.updateViewBox();
+                return;
+            }
+
+            // Draw
+            if (this.isDrawing && (this.tool === TOOLS.PEN || this.tool === TOOLS.SHAPE)) {
+                this.currentPoints.push([point.x, point.y, pressure]);
+                this.renderCurrentStroke();
+            }
+        }
+
+        handlePointerUp(e) {
+            // Release pointer
+            if (e.pointerId !== undefined) {
+                try {
+                    this.svg.releasePointerCapture(e.pointerId);
+                } catch (_) { /* ignore */ }
+            }
+
+            if (this.isPanning) {
+                this.isPanning = false;
+                this.lastPanPoint = null;
+                this.wrapper.classList.remove('is-panning', 'is-dragging');
+                return;
+            }
+
+            if (this.isErasing) {
+                this.isErasing = false;
+                this.saveHistory();
+                return;
+            }
+
+            if (this.isDrawing && (this.tool === TOOLS.PEN || this.tool === TOOLS.SHAPE)) {
+                this.isDrawing = false;
+
+                if (this.currentPoints.length > 1) {
+                    // Finalize stroke
+                    this.finalizeStroke();
+                } else {
+                    // Remove single-point stroke
+                    if (this.currentStroke) {
+                        this.currentStroke.remove();
+                    }
+                }
+
                 this.currentPoints = [];
                 this.currentStroke = null;
             }
         }
-    };
 
-    TestifyCanvas.prototype._handleTouchMove = function(e) {
-        if (e.touches.length === 2 && this.isPinching) {
+        handleWheel(e) {
             e.preventDefault();
 
-            var dist = this.getPinchDistance(e.touches);
-            var scale = dist / this.lastPinchDist;
-            var newZoom = Math.max(CONFIG.MIN_ZOOM, Math.min(CONFIG.MAX_ZOOM, this.zoom * scale));
+            const delta = e.deltaY > 0 ? -CONFIG.ZOOM_STEP : CONFIG.ZOOM_STEP;
+            const newZoom = Math.max(CONFIG.MIN_ZOOM, Math.min(CONFIG.MAX_ZOOM, this.zoom + delta));
 
             if (newZoom !== this.zoom) {
-                var centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                var centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-                var rect = this.svg.getBoundingClientRect();
+                // Zoom towards cursor
+                const rect = this.svg.getBoundingClientRect();
+                const cursorX = e.clientX - rect.left;
+                const cursorY = e.clientY - rect.top;
 
-                var scaleChange = newZoom / this.zoom;
-                this.panX = centerX - rect.left - (centerX - rect.left - this.panX) * scaleChange;
-                this.panY = centerY - rect.top - (centerY - rect.top - this.panY) * scaleChange;
+                const scale = newZoom / this.zoom;
+                this.panX = cursorX - (cursorX - this.panX) * scale;
+                this.panY = cursorY - (cursorY - this.panY) * scale;
 
                 this.zoom = newZoom;
                 this.updateViewBox();
                 this.updateZoomUI();
             }
-
-            this.lastPinchDist = dist;
         }
-    };
 
-    TestifyCanvas.prototype._handleTouchEnd = function(e) {
-        if (e.touches.length < 2) {
-            this.isPinching = false;
-        }
-    };
+        handleKeyDown(e) {
+            if (!this.isOpen) return;
 
-    TestifyCanvas.prototype.getPinchDistance = function(touches) {
-        return Math.hypot(
-            touches[0].clientX - touches[1].clientX,
-            touches[0].clientY - touches[1].clientY
-        );
-    };
+            const key = e.key.toLowerCase();
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // WHEEL & KEYBOARD
-    // ═══════════════════════════════════════════════════════════════════════
+            // Tool shortcuts
+            if (!e.ctrlKey && !e.metaKey) {
+                switch (key) {
+                    case 'p': this.setTool(TOOLS.PEN); break;
+                    case 'e': this.setTool(TOOLS.ERASER); break;
+                    case 'v': this.setTool(TOOLS.SELECT); break;
+                    case 'h': this.setTool(TOOLS.PAN); break;
+                    case 's': this.setTool(TOOLS.SHAPE); break;
+                    case 't': this.setTool(TOOLS.TEXT); break;
+                    case 'l': this.setTool(TOOLS.LASER); break;
+                    case 'escape': this.close(); break;
+                }
+            }
 
-    TestifyCanvas.prototype._handleWheel = function(e) {
-        e.preventDefault();
+            // Ctrl shortcuts
+            if (e.ctrlKey || e.metaKey) {
+                switch (key) {
+                    case 'z':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            this.redo();
+                        } else {
+                            this.undo();
+                        }
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        this.redo();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        this.save();
+                        break;
+                    case '0':
+                        e.preventDefault();
+                        this.resetZoom();
+                        break;
+                    case '=':
+                    case '+':
+                        e.preventDefault();
+                        this.zoomIn();
+                        break;
+                    case '-':
+                        e.preventDefault();
+                        this.zoomOut();
+                        break;
+                }
+            }
 
-        var delta = e.deltaY > 0 ? -CONFIG.ZOOM_STEP : CONFIG.ZOOM_STEP;
-        var newZoom = Math.max(CONFIG.MIN_ZOOM, Math.min(CONFIG.MAX_ZOOM, this.zoom + delta));
-
-        if (newZoom !== this.zoom) {
-            var rect = this.svg.getBoundingClientRect();
-            var cursorX = e.clientX - rect.left;
-            var cursorY = e.clientY - rect.top;
-
-            var scale = newZoom / this.zoom;
-            this.panX = cursorX - (cursorX - this.panX) * scale;
-            this.panY = cursorY - (cursorY - this.panY) * scale;
-
-            this.zoom = newZoom;
-            this.updateViewBox();
-            this.updateZoomUI();
-        }
-    };
-
-    TestifyCanvas.prototype._handleKeyDown = function(e) {
-        if (!this.isOpen) return;
-
-        var key = e.key.toLowerCase();
-
-        if (!e.ctrlKey && !e.metaKey) {
-            switch (key) {
-                case 'p': this.setTool(TOOLS.PEN); break;
-                case 'e': this.setTool(TOOLS.ERASER); break;
-                case 'h': this.setTool(TOOLS.PAN); break;
-                case 's': this.setTool(TOOLS.SHAPE); break;
-                case 'escape': this.close(); break;
-                case '[': this.setSize(Math.max(CONFIG.MIN_SIZE, this.size - 2)); break;
-                case ']': this.setSize(Math.min(CONFIG.MAX_SIZE, this.size + 2)); break;
+            // Bracket shortcuts for brush size
+            if (key === '[') {
+                this.setSize(Math.max(CONFIG.MIN_SIZE, this.size - 2));
+            } else if (key === ']') {
+                this.setSize(Math.min(CONFIG.MAX_SIZE, this.size + 2));
             }
         }
 
-        if (e.ctrlKey || e.metaKey) {
-            switch (key) {
-                case 'z':
-                    e.preventDefault();
-                    e.shiftKey ? this.redo() : this.undo();
+        // ═══════════════════════════════════════════════════════════════════
+        // DRAWING METHODS
+        // ═══════════════════════════════════════════════════════════════════
+
+        createStrokePath() {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.classList.add('canvas-stroke-filled');
+            path.style.fill = this.color;
+            path.style.opacity = this.opacity;
+
+            const contentGroup = this.svg.querySelector('#canvasContent');
+            contentGroup.appendChild(path);
+
+            return path;
+        }
+
+        renderCurrentStroke() {
+            if (!this.currentStroke || this.currentPoints.length < 2) return;
+
+            const strokeOptions = {
+                size: this.size * CONFIG.STROKE_SIZE_MULTIPLIER, // kalınlaştırma
+                ...CONFIG.STROKE_OPTIONS,
+                ...this.brushPreset
+            };
+
+            const outlinePoints = getStroke(this.currentPoints, strokeOptions);
+            const pathData = getSvgPathFromStroke(outlinePoints);
+
+            this.currentStroke.setAttribute('d', pathData);
+        }
+
+        finalizeStroke() {
+            if (!this.currentStroke || this.currentPoints.length < 2) return;
+
+            // Get active layer
+            const layer = this.layers.find(l => l.id === this.activeLayerId);
+            if (!layer) return;
+
+            // Save stroke data
+            const strokeData = {
+                id: this.generateId(),
+                points: this.currentPoints.slice(),
+                color: this.color,
+                size: this.size,
+                opacity: this.opacity,
+                brushPreset: this.brushPreset.id,
+                timestamp: Date.now()
+            };
+
+            layer.strokes.push(strokeData);
+
+            // Assign ID to path element
+            this.currentStroke.dataset.strokeId = strokeData.id;
+
+            // Akıllı şekil sadece SHAPE aracındayken devreye girsin
+            if (this.tool === TOOLS.SHAPE) {
+                this.tryRecognizeShape(strokeData);
+            }
+
+            // Save history
+            this.saveHistory();
+
+            // Update UI
+            this.updateStrokeCount();
+        }
+
+        eraseAt(x, y) {
+            const eraserSize = this.size * 2;
+            const layer = this.layers.find(l => l.id === this.activeLayerId);
+            if (!layer) return;
+
+            let erased = false;
+
+            // Find strokes that intersect with eraser
+            layer.strokes = layer.strokes.filter(stroke => {
+                const isNear = stroke.points.some(point => {
+                    const dx = point[0] - x;
+                    const dy = point[1] - y;
+                    return Math.sqrt(dx * dx + dy * dy) < eraserSize;
+                });
+
+                if (isNear) {
+                    const pathEl = this.svg.querySelector(`[data-stroke-id="${stroke.id}"]`);
+                    if (pathEl) pathEl.remove();
+                    erased = true;
+                    return false;
+                }
+
+                return true;
+            });
+
+            if (erased) {
+                this.updateStrokeCount();
+            }
+        }
+
+        updateEraserCursor(clientX, clientY) {
+            if (!this.eraserCursor) return;
+
+            this.eraserCursor.style.left = clientX + 'px';
+            this.eraserCursor.style.top = clientY + 'px';
+            this.eraserCursor.style.width = (this.size * 4) + 'px';
+            this.eraserCursor.style.height = (this.size * 4) + 'px';
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // SHAPE RECOGNITION + SNAP (UPGRADED)
+        // ═══════════════════════════════════════════════════════════════════
+
+        tryRecognizeShape(strokeData) {
+            const pts = strokeData.points;
+            if (!pts || pts.length < CONFIG.MIN_POINTS_FOR_SHAPE) return;
+
+            // Gelişmiş algılayıcıyı kullan
+            const result = AdvancedShapeRecognizer.recognize(pts);
+            if (!result) return;
+
+            // Güven eşiği
+            const minConfidence = CONFIG.SHAPE_RECOGNITION_THRESHOLD || 0.75;
+            if (result.confidence < minConfidence) return;
+
+            // Yeni, düzgün shape noktalarını üret
+            const newPoints = AdvancedShapeRecognizer.generateShapePoints(result, pts);
+            if (!newPoints || newPoints.length < 2) return;
+
+            // Çok minik şekilleri yine çöp say
+            const xs = newPoints.map(p => p[0]);
+            const ys = newPoints.map(p => p[1]);
+            const minX = Math.min(...xs);
+            const maxX = Math.max(...xs);
+            const minY = Math.min(...ys);
+            const maxY = Math.max(...ys);
+            const width = maxX - minX;
+            const height = maxY - minY;
+            const MIN_BBOX = 24;
+
+            if (width < MIN_BBOX && height < MIN_BBOX) return;
+
+            // Stroke verisini güncelle
+            strokeData.points = newPoints;
+            strokeData.shapeType = result.type;
+
+            // SVG path'i yeniden oluştur
+            const pathEl = this.svg.querySelector(`[data-stroke-id="${strokeData.id}"]`);
+            if (pathEl) {
+                const preset =
+                    CONFIG.BRUSH_PRESETS.find(p => p.id === strokeData.brushPreset) ||
+                    CONFIG.BRUSH_PRESETS[0];
+
+                const strokeOptions = {
+                    size: strokeData.size * CONFIG.STROKE_SIZE_MULTIPLIER,
+                    ...CONFIG.STROKE_OPTIONS,
+                    ...preset
+                };
+
+                const outlinePoints = getStroke(strokeData.points, strokeOptions);
+                const pathData = getSvgPathFromStroke(outlinePoints);
+                pathEl.setAttribute('d', pathData);
+            }
+
+            // Hint'i şeklin üstüne koy
+            const centerX = (minX + maxX) / 2;
+            const hintY = minY - 20;
+            this.showShapeHint(result.type, centerX, hintY);
+        }
+
+        // (Eski yardımcı fonksiyonlar kalabilir, kullanılmıyor ama zararı yok)
+        getLineStraightnessScore(points) {
+            const p0 = points[0];
+            const p1 = points[points.length - 1];
+            const lineLen = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) || 1;
+
+            let maxDev = 0;
+            for (let i = 1; i < points.length - 1; i++) {
+                const p = points[i];
+                const dev = this.pointToLineDistance(p, p0, p1);
+                if (dev > maxDev) maxDev = dev;
+            }
+            const ratio = maxDev / lineLen;
+            return Math.max(0, Math.min(1, 1 - ratio));
+        }
+
+        pointToLineDistance(p, a, b) {
+            const [x0, y0] = p;
+            const [x1, y1] = a;
+            const [x2, y2] = b;
+            const A = x0 - x1;
+            const B = y0 - y1;
+            const C = x2 - x1;
+            const D = y2 - y1;
+            const dot = A * C + B * D;
+            const lenSq = C * C + D * D || 1;
+            const param = dot / lenSq;
+            let xx, yy;
+            if (param < 0) {
+                xx = x1; yy = y1;
+            } else if (param > 1) {
+                xx = x2; yy = y2;
+            } else {
+                xx = x1 + param * C;
+                yy = y1 + param * D;
+            }
+            return Math.hypot(x0 - xx, y0 - yy);
+        }
+
+        buildShapePoints(shape, meta, originalPoints) {
+            // Artık AdvancedShapeRecognizer.generateShapePoints kullanılıyor.
+            // Bu fonksiyon yedek dursun.
+            return originalPoints;
+        }
+
+        calculatePerimeter(points) {
+            let perimeter = 0;
+            for (let i = 1; i < points.length; i++) {
+                perimeter += Math.hypot(
+                    points[i][0] - points[i - 1][0],
+                    points[i][1] - points[i - 1][1]
+                );
+            }
+            return perimeter;
+        }
+
+        findCorners(points, threshold = 0.25) {
+            const corners = [];
+            const windowSize = Math.max(2, Math.floor(points.length / 12));
+
+            for (let i = windowSize; i < points.length - windowSize; i++) {
+                const prev = points[i - windowSize];
+                const curr = points[i];
+                const next = points[i + windowSize];
+
+                const v1 = [curr[0] - prev[0], curr[1] - prev[1]];
+                const v2 = [next[0] - curr[0], next[1] - curr[1]];
+
+                const dot = v1[0] * v2[0] + v1[1] * v2[1];
+                const len1 = Math.hypot(v1[0], v1[1]) || 1;
+                const len2 = Math.hypot(v2[0], v2[1]) || 1;
+                const cos = dot / (len1 * len2);
+
+                if (Math.abs(cos) < threshold) {
+                    corners.push(curr);
+                }
+            }
+            return corners;
+        }
+
+        showShapeHint(shape, x, y) {
+            const hint = this.container.querySelector('#shapeHint');
+            if (!hint) return;
+
+            const shapeNames = {
+                line: 'Çizgiye dönüştürüldü',
+                arrow: 'Oka dönüştürüldü',
+                circle: 'Daireye dönüştürüldü',
+                ellipse: 'Elipse dönüştürüldü',
+                square: 'Kareye dönüştürüldü',
+                rectangle: 'Dikdörtgene dönüştürüldü',
+                triangle: 'Üçgene dönüştürüldü'
+            };
+
+            hint.textContent = shapeNames[shape] || shape;
+            hint.style.left = x + 'px';
+            hint.style.top = y + 'px';
+            hint.classList.add('is-visible');
+
+            setTimeout(() => {
+                hint.classList.remove('is-visible');
+            }, 1600);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // UTILITY METHODS
+        // ═══════════════════════════════════════════════════════════════════
+
+        getPointerPosition(e) {
+            const rect = this.svg.getBoundingClientRect();
+            const x = (e.clientX - rect.left - this.panX) / this.zoom;
+            const y = (e.clientY - rect.top - this.panY) / this.zoom;
+            return { x, y };
+        }
+
+        updateViewBox() {
+            const contentGroup = this.svg.querySelector('#canvasContent');
+            if (contentGroup) {
+                contentGroup.setAttribute('transform', `translate(${this.panX}, ${this.panY}) scale(${this.zoom})`);
+            }
+        }
+
+        generateId() {
+            return 'stroke_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        getTotalStrokeCount() {
+            return this.layers.reduce((sum, layer) => sum + layer.strokes.length, 0);
+        }
+    }
+
+    // Store class for global access
+    window.TestifyCanvasClass = TestifyCanvas;
+
+})();
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* PART 2 – UI, HISTORY, STORAGE, EXPORT & GLOBAL API                        */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+(function () {
+
+    const TestifyCanvas = window.TestifyCanvasClass;
+    if (!TestifyCanvas) {
+        console.error('[TestifyCanvas] Core module not loaded!');
+        return;
+    }
+
+    const { getStroke, getSvgPathFromStroke } = window.TestifyCanvasUtils;
+    const CONFIG = window.TestifyCanvasConfig;
+
+    const TOOLS = {
+        PEN: 'pen',
+        ERASER: 'eraser',
+        SELECT: 'select',
+        PAN: 'pan',
+        SHAPE: 'shape',
+        TEXT: 'text',
+        LASER: 'laser'
+    };
+
+    Object.assign(TestifyCanvas.prototype, {
+
+        // ═══════════════════════════════════════════════════════════════════
+        // TOOL MANAGEMENT
+        // ═══════════════════════════════════════════════════════════════════
+
+        setTool(tool) {
+            this.tool = tool;
+            this.updateToolUI();
+
+            if (tool === TOOLS.ERASER) {
+                this.wrapper.classList.add('eraser-active');
+            } else {
+                this.wrapper.classList.remove('eraser-active');
+            }
+
+            if (tool === TOOLS.PAN) {
+                this.wrapper.classList.add('is-panning');
+            } else {
+                this.wrapper.classList.remove('is-panning');
+            }
+        },
+
+        updateToolUI() {
+            this.container.querySelectorAll('[data-tool]').forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.tool === this.tool);
+            });
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // COLOR MANAGEMENT
+        // ═══════════════════════════════════════════════════════════════════
+
+        setColor(color) {
+            this.color = color;
+            this.updateColorUI();
+            this.updateBrushPreview();
+        },
+
+        updateColorUI() {
+            this.container.querySelectorAll('.color-swatch').forEach(swatch => {
+                swatch.classList.toggle('is-active', swatch.dataset.color === this.color);
+            });
+
+            const colorPicker = this.container.querySelector('.color-picker-input');
+            if (colorPicker) {
+                colorPicker.value = this.color;
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // SIZE & OPACITY
+        // ═══════════════════════════════════════════════════════════════════
+
+        setSize(size) {
+            this.size = Math.max(CONFIG.MIN_SIZE, Math.min(CONFIG.MAX_SIZE, size));
+            this.updateBrushUI();
+            this.updateBrushPreview();
+        },
+
+        setOpacity(opacity) {
+            this.opacity = Math.max(0.1, Math.min(1, opacity));
+            this.updateOpacityUI();
+            this.updateBrushPreview();
+        },
+
+        updateBrushUI() {
+            const slider = this.container.querySelector('.brush-size-slider');
+            const value = this.container.querySelector('.brush-size-value');
+
+            if (slider) slider.value = this.size;
+            if (value) value.textContent = this.size + 'px';
+        },
+
+        updateOpacityUI() {
+            const slider = this.container.querySelector('.opacity-slider');
+            const value = this.container.querySelector('.opacity-value');
+
+            if (slider) slider.value = this.opacity;
+            if (value) value.textContent = Math.round(this.opacity * 100) + '%';
+        },
+
+        updateBrushPreview() {
+            const preview = this.container.querySelector('.brush-preview-dot');
+            if (preview) {
+                preview.style.width = this.size + 'px';
+                preview.style.height = this.size + 'px';
+                preview.style.background = this.color;
+                preview.style.opacity = this.opacity;
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // BRUSH PRESETS
+        // ═══════════════════════════════════════════════════════════════════
+
+        setBrushPreset(presetId) {
+            const preset = CONFIG.BRUSH_PRESETS.find(p => p.id === presetId);
+            if (!preset) return;
+
+            this.brushPreset = preset;
+            this.size = preset.size;
+
+            if (preset.opacity !== undefined) {
+                this.opacity = preset.opacity;
+                this.updateOpacityUI();
+            }
+
+            this.updateBrushUI();
+            this.updatePresetUI();
+        },
+
+        updatePresetUI() {
+            this.container.querySelectorAll('.brush-preset').forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.preset === this.brushPreset.id);
+            });
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // ZOOM
+        // ═══════════════════════════════════════════════════════════════════
+
+        zoomIn() {
+            this.zoom = Math.min(CONFIG.MAX_ZOOM, this.zoom + CONFIG.ZOOM_STEP);
+            this.updateViewBox();
+            this.updateZoomUI();
+        },
+
+        zoomOut() {
+            this.zoom = Math.max(CONFIG.MIN_ZOOM, this.zoom - CONFIG.ZOOM_STEP);
+            this.updateViewBox();
+            this.updateZoomUI();
+        },
+
+        resetZoom() {
+            this.zoom = 1;
+            this.panX = 0;
+            this.panY = 0;
+            this.updateViewBox();
+            this.updateZoomUI();
+        },
+
+        updateZoomUI() {
+            const zoomValue = this.container.querySelector('.zoom-value');
+            if (zoomValue) {
+                zoomValue.textContent = Math.round(this.zoom * 100) + '%';
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // STROKE COUNT
+        // ═══════════════════════════════════════════════════════════════════
+
+        updateStrokeCount() {
+            const count = this.getTotalStrokeCount();
+            const el = this.container.querySelector('#strokeCount');
+            if (el) {
+                el.textContent = count + ' çizgi';
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // HISTORY
+        // ═══════════════════════════════════════════════════════════════════
+
+        saveHistory() {
+            // Remove any redo states
+            this.history = this.history.slice(0, this.historyIndex + 1);
+
+            const snapshot = JSON.parse(JSON.stringify(this.layers));
+            this.history.push(snapshot);
+
+            if (this.history.length > CONFIG.MAX_HISTORY) {
+                this.history.shift();
+            } else {
+                this.historyIndex++;
+            }
+
+            this.updateHistoryButtons();
+        },
+
+        undo() {
+            if (this.historyIndex <= 0) return;
+
+            this.historyIndex--;
+            this.restoreFromHistory();
+            this.updateHistoryButtons();
+        },
+
+        redo() {
+            if (this.historyIndex >= this.history.length - 1) return;
+
+            this.historyIndex++;
+            this.restoreFromHistory();
+            this.updateHistoryButtons();
+        },
+
+        restoreFromHistory() {
+            const snapshot = this.history[this.historyIndex];
+            if (!snapshot) return;
+
+            const contentGroup = this.svg.querySelector('#canvasContent');
+            contentGroup.querySelectorAll('path[data-stroke-id]').forEach(el => el.remove());
+
+            this.layers = JSON.parse(JSON.stringify(snapshot));
+
+            this.renderAllStrokes();
+            this.updateStrokeCount();
+        },
+
+        updateHistoryButtons() {
+            const undoBtn = this.container.querySelector('[data-action="undo"]');
+            const redoBtn = this.container.querySelector('[data-action="redo"]');
+
+            if (undoBtn) undoBtn.disabled = this.historyIndex <= 0;
+            if (redoBtn) redoBtn.disabled = this.historyIndex >= this.history.length - 1;
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // RENDERING
+        // ═══════════════════════════════════════════════════════════════════
+
+        renderAllStrokes() {
+            const contentGroup = this.svg.querySelector('#canvasContent');
+
+            this.layers.forEach(layer => {
+                if (!layer.visible) return;
+
+                layer.strokes.forEach(stroke => {
+                    this.renderStrokeFromData(stroke, contentGroup);
+                });
+            });
+        },
+
+        renderStrokeFromData(strokeData, parent) {
+            const preset = CONFIG.BRUSH_PRESETS.find(p => p.id === strokeData.brushPreset) || CONFIG.BRUSH_PRESETS[0];
+
+            const strokeOptions = {
+                size: strokeData.size * CONFIG.STROKE_SIZE_MULTIPLIER,
+                ...CONFIG.STROKE_OPTIONS,
+                ...preset
+            };
+
+            const outlinePoints = getStroke(strokeData.points, strokeOptions);
+            const pathData = getSvgPathFromStroke(outlinePoints);
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.classList.add('canvas-stroke-filled');
+            path.setAttribute('d', pathData);
+            path.style.fill = strokeData.color;
+            path.style.opacity = strokeData.opacity;
+            path.dataset.strokeId = strokeData.id;
+
+            parent.appendChild(path);
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // CLEAR
+        // ═══════════════════════════════════════════════════════════════════
+
+        clear() {
+            if (this.getTotalStrokeCount() > 0) {
+                if (!confirm('Tüm çizimler silinecek. Emin misiniz?')) {
+                    return;
+                }
+            }
+
+            const contentGroup = this.svg.querySelector('#canvasContent');
+            contentGroup.querySelectorAll('path[data-stroke-id]').forEach(el => el.remove());
+
+            this.layers.forEach(layer => {
+                layer.strokes = [];
+            });
+
+            this.saveHistory();
+            this.updateStrokeCount();
+
+            if (window.Utils && typeof Utils.showToast === 'function') {
+                Utils.showToast('Çizim alanı temizlendi', 'info');
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // STORAGE
+        // ═══════════════════════════════════════════════════════════════════
+
+        saveToStorage() {
+            try {
+                const data = {
+                    layers: this.layers,
+                    zoom: this.zoom,
+                    panX: this.panX,
+                    panY: this.panY,
+                    lastSaved: Date.now()
+                };
+
+                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
+
+                const lastSaved = this.container.querySelector('#lastSaved');
+                if (lastSaved) {
+                    lastSaved.textContent = 'Az önce kaydedildi';
+                }
+
+                return true;
+            } catch (e) {
+                console.error('[TestifyCanvas] Save error:', e);
+                return false;
+            }
+        },
+
+        loadFromStorage() {
+            try {
+                const raw = localStorage.getItem(CONFIG.STORAGE_KEY);
+                if (!raw) return;
+
+                const data = JSON.parse(raw);
+
+                if (data.layers && Array.isArray(data.layers)) {
+                    this.layers = data.layers;
+                }
+
+                if (typeof data.zoom === 'number') {
+                    this.zoom = data.zoom;
+                }
+
+                if (typeof data.panX === 'number') {
+                    this.panX = data.panX;
+                }
+
+                if (typeof data.panY === 'number') {
+                    this.panY = data.panY;
+                }
+
+                this.renderAllStrokes();
+                this.updateViewBox();
+                this.updateZoomUI();
+                this.updateStrokeCount();
+
+                if (data.lastSaved) {
+                    const lastSaved = this.container.querySelector('#lastSaved');
+                    if (lastSaved) {
+                        const ago = this.formatTimeAgo(data.lastSaved);
+                        lastSaved.textContent = ago;
+                    }
+                }
+            } catch (e) {
+                console.error('[TestifyCanvas] Load error:', e);
+            }
+        },
+
+        formatTimeAgo(timestamp) {
+            const seconds = Math.floor((Date.now() - timestamp) / 1000);
+
+            if (seconds < 60) return 'Az önce';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' dk önce';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' saat önce';
+            return Math.floor(seconds / 86400) + ' gün önce';
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // EXPORT
+        // ═══════════════════════════════════════════════════════════════════
+
+        async exportToPNG() {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                canvas.width = 1920;
+                canvas.height = 1080;
+
+                const theme = document.documentElement.getAttribute('data-theme');
+                ctx.fillStyle = theme === 'dark' ? '#0f172a' : '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const svgData = new XMLSerializer().serializeToString(this.svg);
+                const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(svgBlob);
+
+                const img = new Image();
+
+                return new Promise((resolve, reject) => {
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        URL.revokeObjectURL(url);
+
+                        const link = document.createElement('a');
+                        link.download = `testify-canvas-${Date.now()}.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+
+                        resolve(true);
+                    };
+
+                    img.onerror = reject;
+                    img.src = url;
+                });
+
+            } catch (e) {
+                console.error('[TestifyCanvas] Export error:', e);
+                if (window.Utils && typeof Utils.showToast === 'function') {
+                    Utils.showToast('Dışa aktarma hatası', 'error');
+                }
+                return false;
+            }
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // ACTION HANDLER
+        // ═══════════════════════════════════════════════════════════════════
+
+        handleAction(action) {
+            switch (action) {
+                case 'undo':
+                    this.undo();
                     break;
-                case 'y':
-                    e.preventDefault();
+                case 'redo':
                     this.redo();
                     break;
-                case 's':
-                    e.preventDefault();
+                case 'clear':
+                    this.clear();
+                    break;
+                case 'save':
                     this.save();
                     break;
-                case '0':
-                    e.preventDefault();
+                case 'download':
+                    this.exportToPNG();
+                    break;
+                case 'minimize':
+                    this.minimize();
+                    break;
+                case 'close':
+                    this.close();
+                    break;
+                case 'toggle-grid':
+                    this.toggleGrid();
+                    break;
+                case 'zoom-in':
+                    this.zoomIn();
+                    break;
+                case 'zoom-out':
+                    this.zoomOut();
+                    break;
+                case 'zoom-reset':
                     this.resetZoom();
                     break;
             }
-        }
-    };
+        },
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // DRAWING METHODS
-    // ═══════════════════════════════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════════════════
+        // GRID TOGGLE
+        // ═══════════════════════════════════════════════════════════════════
 
-    TestifyCanvas.prototype.createStrokePath = function() {
-        var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.classList.add('tcanvas-stroke');
-        path.style.fill = this.color;
-        path.style.opacity = this.opacity;
-
-        var content = this.svg.querySelector('#tcanvasContent');
-        content.appendChild(path);
-
-        return path;
-    };
-
-    TestifyCanvas.prototype.renderCurrentStroke = function() {
-        if (!this.currentStroke || this.currentPoints.length < 2) return;
-
-        var strokeOptions = {
-            size: this.size * CONFIG.STROKE_SIZE_MULTIPLIER,
-            thinning: this.brushPreset.thinning !== undefined ? this.brushPreset.thinning : CONFIG.STROKE_OPTIONS.thinning,
-            smoothing: this.brushPreset.smoothing !== undefined ? this.brushPreset.smoothing : CONFIG.STROKE_OPTIONS.smoothing,
-            streamline: this.brushPreset.streamline !== undefined ? this.brushPreset.streamline : CONFIG.STROKE_OPTIONS.streamline,
-            simulatePressure: true
-        };
-
-        var outline = Engine.getPremiumStroke(this.currentPoints, strokeOptions);
-        var pathData = Engine.getStrokeSvgPath(outline);
-
-        this.currentStroke.setAttribute('d', pathData);
-    };
-
-    TestifyCanvas.prototype.finalizeStroke = function() {
-        if (!this.currentStroke || this.currentPoints.length < 2) return;
-
-        var layer = null;
-        for (var i = 0; i < this.layers.length; i++) {
-            if (this.layers[i].id === this.activeLayerId) {
-                layer = this.layers[i];
-                break;
+        toggleGrid() {
+            if (this.gridEl) {
+                this.gridEl.classList.toggle('is-hidden');
             }
-        }
-        if (!layer) return;
+        },
 
-        var strokeData = {
-            id: this.generateId(),
-            points: this.currentPoints.slice(),
-            color: this.color,
-            size: this.size,
-            opacity: this.opacity,
-            brushPreset: this.brushPreset.id,
-            timestamp: Date.now()
-        };
+        // ═══════════════════════════════════════════════════════════════════
+        // OPEN / CLOSE / MINIMIZE
+        // ═══════════════════════════════════════════════════════════════════
 
-        // Shape recognition
-        if (this.tool === TOOLS.SHAPE) {
-            var recognized = this.shapeRecognizer.recognize(this.currentPoints);
-
-            if (recognized && recognized.confidence > 0.72) {
-                strokeData.points = this.shapeRecognizer.generateShapePoints(recognized, this.currentPoints);
-                strokeData.shapeType = recognized.type;
-
-                // Re-render
-                var strokeOptions = {
-                    size: this.size * CONFIG.STROKE_SIZE_MULTIPLIER,
-                    thinning: this.brushPreset.thinning || CONFIG.STROKE_OPTIONS.thinning,
-                    smoothing: this.brushPreset.smoothing || CONFIG.STROKE_OPTIONS.smoothing,
-                    streamline: this.brushPreset.streamline || CONFIG.STROKE_OPTIONS.streamline,
-                    simulatePressure: true
-                };
-
-                var outline = Engine.getPremiumStroke(strokeData.points, strokeOptions);
-                var pathData = Engine.getStrokeSvgPath(outline);
-                this.currentStroke.setAttribute('d', pathData);
-
-                this.showShapeHint(recognized.type);
+        open() {
+            this.container.classList.add('is-open');
+            this.isOpen = true;
+            if (this.options.mode === 'fullscreen') {
+                document.body.style.overflow = 'hidden';
             }
-        }
+        },
 
-        layer.strokes.push(strokeData);
-        this.currentStroke.setAttribute('data-stroke-id', strokeData.id);
+        close() {
+            this.saveToStorage();
 
-        this.saveHistory();
-        this.updateStrokeCount();
-    };
+            this.container.classList.remove('is-open');
+            this.isOpen = false;
+            document.body.style.overflow = '';
 
-    TestifyCanvas.prototype.eraseAt = function(x, y) {
-        var eraserSize = this.size * 3.5;
-        var layer = null;
-        for (var i = 0; i < this.layers.length; i++) {
-            if (this.layers[i].id === this.activeLayerId) {
-                layer = this.layers[i];
-                break;
+            if (this.options.onClose) {
+                this.options.onClose();
             }
-        }
-        if (!layer) return;
+        },
 
-        var erased = false;
-        var self = this;
+        minimize() {
+            this.container.classList.toggle('is-minimized');
+        },
 
-        layer.strokes = layer.strokes.filter(function(stroke) {
-            var isNear = stroke.points.some(function(point) {
-                var dx = point[0] - x;
-                var dy = point[1] - y;
-                return Math.sqrt(dx * dx + dy * dy) < eraserSize;
-            });
+        save() {
+            const success = this.saveToStorage();
 
-            if (isNear) {
-                var pathEl = self.svg.querySelector('[data-stroke-id="' + stroke.id + '"]');
-                if (pathEl) pathEl.remove();
-                erased = true;
-                return false;
+            if (success && window.Utils && typeof Utils.showToast === 'function') {
+                Utils.showToast('Çizim kaydedildi', 'success');
             }
-            return true;
-        });
 
-        if (erased) {
-            this.updateStrokeCount();
-        }
-    };
-
-    TestifyCanvas.prototype.updateEraserCursor = function(clientX, clientY) {
-        if (!this.eraserCursor) return;
-        this.eraserCursor.style.left = clientX + 'px';
-        this.eraserCursor.style.top = clientY + 'px';
-        this.eraserCursor.style.width = (this.size * 7) + 'px';
-        this.eraserCursor.style.height = (this.size * 7) + 'px';
-    };
-
-    TestifyCanvas.prototype.showShapeHint = function(shapeType) {
-        var hint = this.container.querySelector('#tcanvasShapeHint');
-        if (!hint) return;
-
-        var names = {
-            line: 'Çizgi', arrow: 'Ok', circle: 'Daire', ellipse: 'Elips',
-            rectangle: 'Dikdörtgen', square: 'Kare', triangle: 'Üçgen'
-        };
-
-        hint.querySelector('span').textContent = (names[shapeType] || shapeType) + ' algılandı';
-        hint.classList.add('is-visible');
-
-        setTimeout(function() {
-            hint.classList.remove('is-visible');
-        }, 1400);
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // UTILITY METHODS
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype.getPointerPosition = function(e) {
-        var rect = this.svg.getBoundingClientRect();
-        return {
-            x: (e.clientX - rect.left - this.panX) / this.zoom,
-            y: (e.clientY - rect.top - this.panY) / this.zoom
-        };
-    };
-
-    TestifyCanvas.prototype.updateViewBox = function() {
-        var content = this.svg.querySelector('#tcanvasContent');
-        if (content) {
-            content.setAttribute('transform', 'translate(' + this.panX + ',' + this.panY + ') scale(' + this.zoom + ')');
-        }
-    };
-
-    TestifyCanvas.prototype.generateId = function() {
-        return 'stroke_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    };
-
-    TestifyCanvas.prototype.getTotalStrokeCount = function() {
-        var count = 0;
-        for (var i = 0; i < this.layers.length; i++) {
-            count += this.layers[i].strokes.length;
-        }
-        return count;
-    };
-
-    TestifyCanvas.prototype.startPanning = function(x, y) {
-        this.isPanning = true;
-        this.lastPanPoint = { x: x, y: y };
-        this.wrapper.classList.add('is-panning');
-    };
-
-    TestifyCanvas.prototype.stopPanning = function() {
-        this.isPanning = false;
-        this.lastPanPoint = null;
-        this.wrapper.classList.remove('is-panning');
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // SETTERS
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype.setTool = function(tool) {
-        this.tool = tool;
-        this.updateToolUI();
-        this.closeAllPanels();
-    };
-
-    TestifyCanvas.prototype.setColor = function(color) {
-        this.color = color;
-        this.updateColorUI();
-    };
-
-    TestifyCanvas.prototype.setSize = function(size) {
-        this.size = Math.max(CONFIG.MIN_SIZE, Math.min(CONFIG.MAX_SIZE, size));
-        this.updateSizeUI();
-    };
-
-    TestifyCanvas.prototype.setOpacity = function(opacity) {
-        this.opacity = Math.max(0.1, Math.min(1, opacity));
-        this.updateOpacityUI();
-    };
-
-    TestifyCanvas.prototype.setBrushPreset = function(presetId) {
-        var preset = null;
-        for (var i = 0; i < CONFIG.BRUSH_PRESETS.length; i++) {
-            if (CONFIG.BRUSH_PRESETS[i].id === presetId) {
-                preset = CONFIG.BRUSH_PRESETS[i];
-                break;
+            if (this.options.onSave) {
+                this.options.onSave(this.layers);
             }
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // DESTROY
+        // ═══════════════════════════════════════════════════════════════════
+
+        destroy() {
+            this.removeEventListeners();
+            this.container.remove();
+        },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // QUIZ IMAGE DATA
+        // ═══════════════════════════════════════════════════════════════════
+
+        getImageData() {
+            const svgData = new XMLSerializer().serializeToString(this.svg);
+            const base64 = btoa(unescape(encodeURIComponent(svgData)));
+            return 'data:image/svg+xml;base64,' + base64;
+        },
+
+        hasDrawings() {
+            return this.getTotalStrokeCount() > 0;
         }
-        if (!preset) return;
-
-        this.brushPreset = preset;
-        this.size = preset.size;
-
-        if (preset.opacity !== undefined) {
-            this.opacity = preset.opacity;
-            this.updateOpacityUI();
-        }
-
-        this.updateSizeUI();
-        this.updateBrushUI();
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // UI UPDATES
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype.updateAllUI = function() {
-        this.updateToolUI();
-        this.updateColorUI();
-        this.updateSizeUI();
-        this.updateOpacityUI();
-        this.updateBrushUI();
-        this.updateZoomUI();
-        this.updateStrokeCount();
-        this.updateHistoryButtons();
-    };
-
-    TestifyCanvas.prototype.updateToolUI = function() {
-        var self = this;
-        this.container.querySelectorAll('[data-tool]').forEach(function(btn) {
-            btn.classList.toggle('is-active', btn.getAttribute('data-tool') === self.tool);
-        });
-        this.wrapper.classList.toggle('eraser-active', this.tool === TOOLS.ERASER);
-        this.wrapper.classList.toggle('pan-mode', this.tool === TOOLS.PAN);
-    };
-
-    TestifyCanvas.prototype.updateColorUI = function() {
-        var self = this;
-        this.container.querySelectorAll('[data-color]').forEach(function(btn) {
-            btn.classList.toggle('is-active', btn.getAttribute('data-color') === self.color);
-        });
-
-        var colorInput = this.container.querySelector('.tcanvas-color-input');
-        if (colorInput) colorInput.value = this.color;
-
-        var colorHex = this.container.querySelector('.tcanvas-color-hex');
-        if (colorHex) colorHex.textContent = this.color;
-
-        var colorIndicator = this.container.querySelector('.tcanvas-color-indicator');
-        if (colorIndicator) colorIndicator.style.background = this.color;
-
-        this.updatePreviewDot();
-    };
-
-    TestifyCanvas.prototype.updateSizeUI = function() {
-        var self = this;
-        this.container.querySelectorAll('.tcanvas-size-slider, .tcanvas-mobile-size-slider').forEach(function(slider) {
-            slider.value = self.size;
-        });
-
-        var sizeVal = this.container.querySelector('.tcanvas-size-value');
-        if (sizeVal) sizeVal.textContent = this.size + 'px';
-
-        var mobileSizeVal = this.container.querySelector('#tcanvasMobileSizeVal');
-        if (mobileSizeVal) mobileSizeVal.textContent = this.size + 'px';
-
-        var sizeDot = this.container.querySelector('.tcanvas-size-dot');
-        if (sizeDot) {
-            var displaySize = Math.min(this.size, 18);
-            sizeDot.style.width = displaySize + 'px';
-            sizeDot.style.height = displaySize + 'px';
-        }
-
-        var mobilePreview = this.container.querySelector('.tcanvas-mobile-size-preview');
-        if (mobilePreview) {
-            mobilePreview.style.width = (this.size * 2) + 'px';
-            mobilePreview.style.height = (this.size * 2) + 'px';
-            mobilePreview.style.background = this.color;
-        }
-
-        this.updatePreviewDot();
-    };
-
-    TestifyCanvas.prototype.updateOpacityUI = function() {
-        var slider = this.container.querySelector('.tcanvas-opacity-slider');
-        if (slider) slider.value = this.opacity;
-
-        var val = this.container.querySelector('.tcanvas-opacity-value');
-        if (val) val.textContent = Math.round(this.opacity * 100) + '%';
-    };
-
-    TestifyCanvas.prototype.updateBrushUI = function() {
-        var self = this;
-        this.container.querySelectorAll('[data-preset]').forEach(function(btn) {
-            btn.classList.toggle('is-active', btn.getAttribute('data-preset') === self.brushPreset.id);
-        });
-    };
-
-    TestifyCanvas.prototype.updateZoomUI = function() {
-        var zoomVal = this.container.querySelector('#tcanvasZoomVal');
-        if (zoomVal) zoomVal.textContent = Math.round(this.zoom * 100) + '%';
-    };
-
-    TestifyCanvas.prototype.updatePreviewDot = function() {
-        var dot = this.container.querySelector('.tcanvas-preview-dot');
-        if (dot) {
-            dot.style.width = this.size + 'px';
-            dot.style.height = this.size + 'px';
-            dot.style.background = this.color;
-            dot.style.opacity = this.opacity;
-        }
-    };
-
-    TestifyCanvas.prototype.updateStrokeCount = function() {
-        // Gerekirse UI'da stroke sayısını göster
-    };
-
-    TestifyCanvas.prototype.updateHistoryButtons = function() {
-        var undoBtn = this.container.querySelector('[data-action="undo"]');
-        var redoBtn = this.container.querySelector('[data-action="redo"]');
-
-        if (undoBtn) undoBtn.disabled = this.historyIndex <= 0;
-        if (redoBtn) redoBtn.disabled = this.historyIndex >= this.history.length - 1;
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // ZOOM CONTROLS
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype.zoomIn = function() {
-        this.zoom = Math.min(CONFIG.MAX_ZOOM, this.zoom + CONFIG.ZOOM_STEP);
-        this.updateViewBox();
-        this.updateZoomUI();
-    };
-
-    TestifyCanvas.prototype.zoomOut = function() {
-        this.zoom = Math.max(CONFIG.MIN_ZOOM, this.zoom - CONFIG.ZOOM_STEP);
-        this.updateViewBox();
-        this.updateZoomUI();
-    };
-
-    TestifyCanvas.prototype.resetZoom = function() {
-        this.zoom = 1;
-        this.panX = 0;
-        this.panY = 0;
-        this.updateViewBox();
-        this.updateZoomUI();
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // HISTORY
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype.saveHistory = function() {
-        this.history = this.history.slice(0, this.historyIndex + 1);
-        var snapshot = JSON.parse(JSON.stringify(this.layers));
-        this.history.push(snapshot);
-
-        if (this.history.length > CONFIG.MAX_HISTORY) {
-            this.history.shift();
-        } else {
-            this.historyIndex++;
-        }
-
-        this.updateHistoryButtons();
-    };
-
-    TestifyCanvas.prototype.undo = function() {
-        if (this.historyIndex <= 0) return;
-        this.historyIndex--;
-        this.restoreFromHistory();
-        this.updateHistoryButtons();
-    };
-
-    TestifyCanvas.prototype.redo = function() {
-        if (this.historyIndex >= this.history.length - 1) return;
-        this.historyIndex++;
-        this.restoreFromHistory();
-        this.updateHistoryButtons();
-    };
-
-    TestifyCanvas.prototype.restoreFromHistory = function() {
-        var snapshot = this.history[this.historyIndex];
-        if (!snapshot) return;
-
-        var content = this.svg.querySelector('#tcanvasContent');
-        content.querySelectorAll('[data-stroke-id]').forEach(function(el) { el.remove(); });
-
-        this.layers = JSON.parse(JSON.stringify(snapshot));
-        this.renderAllStrokes();
-    };
-
-    TestifyCanvas.prototype.renderAllStrokes = function() {
-        var self = this;
-        var content = this.svg.querySelector('#tcanvasContent');
-
-        this.layers.forEach(function(layer) {
-            if (!layer.visible) return;
-
-            layer.strokes.forEach(function(stroke) {
-                self.renderStrokeFromData(stroke, content);
-            });
-        });
-    };
-
-    TestifyCanvas.prototype.renderStrokeFromData = function(strokeData, parent) {
-        var preset = null;
-        for (var i = 0; i < CONFIG.BRUSH_PRESETS.length; i++) {
-            if (CONFIG.BRUSH_PRESETS[i].id === strokeData.brushPreset) {
-                preset = CONFIG.BRUSH_PRESETS[i];
-                break;
-            }
-        }
-        if (!preset) preset = CONFIG.BRUSH_PRESETS[1];
-
-        var strokeOptions = {
-            size: strokeData.size * CONFIG.STROKE_SIZE_MULTIPLIER,
-            thinning: preset.thinning || CONFIG.STROKE_OPTIONS.thinning,
-            smoothing: preset.smoothing || CONFIG.STROKE_OPTIONS.smoothing,
-            streamline: preset.streamline || CONFIG.STROKE_OPTIONS.streamline,
-            simulatePressure: true
-        };
-
-        var outline = Engine.getPremiumStroke(strokeData.points, strokeOptions);
-        var pathData = Engine.getStrokeSvgPath(outline);
-
-        var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.classList.add('tcanvas-stroke');
-        path.setAttribute('d', pathData);
-        path.style.fill = strokeData.color;
-        path.style.opacity = strokeData.opacity;
-        path.setAttribute('data-stroke-id', strokeData.id);
-
-        parent.appendChild(path);
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // ACTIONS
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype.handleAction = function(action) {
-        switch (action) {
-            case 'undo': this.undo(); break;
-            case 'redo': this.redo(); break;
-            case 'clear': this.clear(); break;
-            case 'download': this.exportToPNG(); break;
-            case 'close': this.close(); break;
-            case 'minimize': this.minimize(); break;
-            case 'zoom-in': this.zoomIn(); break;
-            case 'zoom-out': this.zoomOut(); break;
-            case 'zoom-reset': this.resetZoom(); break;
-            case 'toggle-colors': this.togglePanel('tcanvasColorPanel'); break;
-            case 'toggle-size': this.togglePanel('tcanvasSizePanel'); break;
-            case 'close-panel': this.closeAllPanels(); break;
-        }
-    };
-
-    TestifyCanvas.prototype.togglePanel = function(panelId) {
-        var panel = this.container.querySelector('#' + panelId);
-        if (!panel) return;
-
-        var isOpen = panel.classList.contains('is-open');
-        this.closeAllPanels();
-
-        if (!isOpen) {
-            panel.classList.add('is-open');
-        }
-    };
-
-    TestifyCanvas.prototype.closeAllPanels = function() {
-        this.container.querySelectorAll('.tcanvas-panel').forEach(function(p) {
-            p.classList.remove('is-open');
-        });
-    };
-
-    TestifyCanvas.prototype.clear = function() {
-        if (this.getTotalStrokeCount() > 0) {
-            if (!confirm('Tüm çizimler silinecek. Emin misiniz?')) return;
-        }
-
-        var content = this.svg.querySelector('#tcanvasContent');
-        content.querySelectorAll('[data-stroke-id]').forEach(function(el) { el.remove(); });
-
-        for (var i = 0; i < this.layers.length; i++) {
-            this.layers[i].strokes = [];
-        }
-
-        this.saveHistory();
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // STORAGE
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype.saveToStorage = function() {
-        try {
-            var data = {
-                layers: this.layers,
-                zoom: this.zoom,
-                panX: this.panX,
-                panY: this.panY,
-                lastSaved: Date.now()
-            };
-            localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(data));
-            return true;
-        } catch (e) {
-            console.error('[TestifyCanvas] Save error:', e);
-            return false;
-        }
-    };
-
-    TestifyCanvas.prototype.loadFromStorage = function() {
-        try {
-            var raw = localStorage.getItem(CONFIG.STORAGE_KEY);
-            if (!raw) return;
-
-            var data = JSON.parse(raw);
-
-            if (data.layers && Array.isArray(data.layers)) {
-                this.layers = data.layers;
-            }
-            if (typeof data.zoom === 'number') this.zoom = data.zoom;
-            if (typeof data.panX === 'number') this.panX = data.panX;
-            if (typeof data.panY === 'number') this.panY = data.panY;
-
-            this.renderAllStrokes();
-            this.updateViewBox();
-            this.updateZoomUI();
-        } catch (e) {
-            console.error('[TestifyCanvas] Load error:', e);
-        }
-    };
-
-    TestifyCanvas.prototype.save = function() {
-        this.saveToStorage();
-        if (this.options.onSave) {
-            this.options.onSave(this.layers);
-        }
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // EXPORT
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype.exportToPNG = function() {
-        var self = this;
-        
-        try {
-            var canvas = document.createElement('canvas');
-            var ctx = canvas.getContext('2d');
-
-            canvas.width = 1920;
-            canvas.height = 1080;
-
-            // Background
-            var theme = document.documentElement.getAttribute('data-theme');
-            ctx.fillStyle = theme === 'dark' ? '#0f172a' : '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            var svgData = new XMLSerializer().serializeToString(this.svg);
-            var svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-            var url = URL.createObjectURL(svgBlob);
-
-            var img = new Image();
-            img.onload = function() {
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                URL.revokeObjectURL(url);
-
-                var link = document.createElement('a');
-                link.download = 'testify-canvas-' + Date.now() + '.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            };
-            img.src = url;
-
-        } catch (e) {
-            console.error('[TestifyCanvas] Export error:', e);
-        }
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // OPEN / CLOSE
-    // ═══════════════════════════════════════════════════════════════════════
-
-    TestifyCanvas.prototype.open = function() {
-        this.container.classList.add('is-open');
-        this.isOpen = true;
-        if (this.options.mode === 'fullscreen') {
-            document.body.style.overflow = 'hidden';
-        }
-    };
-
-    TestifyCanvas.prototype.close = function() {
-        this.saveToStorage();
-        this.container.classList.remove('is-open');
-        this.isOpen = false;
-        document.body.style.overflow = '';
-
-        if (this.options.onClose) {
-            this.options.onClose();
-        }
-    };
-
-    TestifyCanvas.prototype.minimize = function() {
-        this.container.classList.toggle('is-minimized');
-    };
-
-    TestifyCanvas.prototype.destroy = function() {
-        this.removeEventListeners();
-        this.container.remove();
-    };
-
-    // Quiz helpers
-    TestifyCanvas.prototype.getImageData = function() {
-        var svgData = new XMLSerializer().serializeToString(this.svg);
-        var base64 = btoa(unescape(encodeURIComponent(svgData)));
-        return 'data:image/svg+xml;base64,' + base64;
-    };
-
-    TestifyCanvas.prototype.hasDrawings = function() {
-        return this.getTotalStrokeCount() > 0;
-    };
+    });
 
     // ═══════════════════════════════════════════════════════════════════════
     // GLOBAL API
     // ═══════════════════════════════════════════════════════════════════════
 
-    var globalInstance = null;
+    let globalInstance = null;
 
     window.TestifyCanvas = {
-        open: function(options) {
+        open(options = {}) {
             if (globalInstance) {
                 globalInstance.open();
                 return globalInstance;
             }
 
-            options = options || {};
-            options.mode = options.mode || 'fullscreen';
+            globalInstance = new TestifyCanvas({
+                mode: 'fullscreen',
+                ...options
+            });
 
-            globalInstance = new TestifyCanvas(options);
             globalInstance.open();
             return globalInstance;
         },
 
-        createEmbedded: function(container, options) {
-            options = options || {};
-            options.container = container;
-            options.mode = 'quiz';
-            return new TestifyCanvas(options);
+        createEmbedded(container, options = {}) {
+            return new TestifyCanvas({
+                container,
+                mode: 'quiz',
+                ...options
+            });
         },
 
-        getInstance: function() {
+        getInstance() {
             return globalInstance;
         },
 
-        close: function() {
+        close() {
             if (globalInstance) {
                 globalInstance.close();
             }
         },
 
-        isOpen: function() {
+        isOpen() {
             return globalInstance && globalInstance.isOpen;
-        },
-
-        // Constructor'ı dışarı aç
-        Canvas: TestifyCanvas,
-        CONFIG: CONFIG,
-        TOOLS: TOOLS
+        }
     };
 
-    console.log('[TestifyCanvas v2.0] Ultra Premium Edition Ready');
+    console.log('[TestifyCanvas] System loaded and ready');
+
+})();
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* PART 3 – QUIZ CANVAS INTEGRATION                                          */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+(function () {
+
+    const QuizCanvasManager = {
+        canvasInstances: new Map(),
+        isEnabled: true,
+
+        initForQuestion(questionId, container) {
+            if (!this.isEnabled || !container) return null;
+
+            if (!window.TestifyCanvas) {
+                console.warn('[QuizCanvasManager] TestifyCanvas not loaded');
+                return null;
+            }
+
+            const canvasContainer = document.createElement('div');
+            canvasContainer.className = 'quiz-canvas-wrapper';
+            canvasContainer.id = `quiz-canvas-${questionId}`;
+            canvasContainer.innerHTML = `
+                <div class="quiz-canvas-header">
+                    <span class="quiz-canvas-title">
+                        <i class="ph ph-pencil-simple"></i>
+                        Çizim Alanı
+                    </span>
+                    <div class="quiz-canvas-actions">
+                        <button type="button" class="quiz-canvas-btn" data-action="clear" title="Temizle">
+                            <i class="ph ph-trash"></i>
+                        </button>
+                        <button type="button" class="quiz-canvas-btn" data-action="undo" title="Geri Al">
+                            <i class="ph ph-arrow-counter-clockwise"></i>
+                        </button>
+                        <button type="button" class="quiz-canvas-btn" data-action="expand" title="Genişlet">
+                            <i class="ph ph-arrows-out"></i>
+                        </button>
+                        <button type="button" class="quiz-canvas-btn is-active" data-action="toggle" title="Gizle/Göster">
+                            <i class="ph ph-caret-down"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="quiz-canvas-body">
+                    <div class="quiz-canvas-embed"></div>
+                </div>
+            `;
+
+            container.appendChild(canvasContainer);
+
+            const embedContainer = canvasContainer.querySelector('.quiz-canvas-embed');
+
+            const canvas = TestifyCanvas.createEmbedded(embedContainer, {
+                onSave: (layers) => {
+                    this.saveDrawingForQuestion(questionId, layers);
+                }
+            });
+
+            this.canvasInstances.set(questionId, {
+                canvas,
+                container: canvasContainer,
+                isExpanded: false,
+                isCollapsed: false
+            });
+
+            this.attachQuizCanvasActions(questionId, canvasContainer);
+
+            return canvas;
+        },
+
+        attachQuizCanvasActions(questionId, container) {
+            const instance = this.canvasInstances.get(questionId);
+            if (!instance) return;
+
+            container.querySelectorAll('[data-action]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const action = btn.dataset.action;
+
+                    switch (action) {
+                        case 'clear':
+                            if (instance.canvas) instance.canvas.clear();
+                            break;
+
+                        case 'undo':
+                            if (instance.canvas) instance.canvas.undo();
+                            break;
+
+                        case 'expand':
+                            this.toggleExpand(questionId);
+                            break;
+
+                        case 'toggle':
+                            this.toggleCollapse(questionId);
+                            break;
+                    }
+                });
+            });
+        },
+
+        toggleExpand(questionId) {
+            const instance = this.canvasInstances.get(questionId);
+            if (!instance) return;
+
+            instance.isExpanded = !instance.isExpanded;
+            instance.container.classList.toggle('is-expanded', instance.isExpanded);
+
+            const btn = instance.container.querySelector('[data-action="expand"]');
+            if (btn) {
+                btn.querySelector('i').className = instance.isExpanded
+                    ? 'ph ph-arrows-in'
+                    : 'ph ph-arrows-out';
+            }
+        },
+
+        toggleCollapse(questionId) {
+            const instance = this.canvasInstances.get(questionId);
+            if (!instance) return;
+
+            instance.isCollapsed = !instance.isCollapsed;
+            instance.container.classList.toggle('is-collapsed', instance.isCollapsed);
+
+            const btn = instance.container.querySelector('[data-action="toggle"]');
+            if (btn) {
+                btn.querySelector('i').className = instance.isCollapsed
+                    ? 'ph ph-caret-up'
+                    : 'ph ph-caret-down';
+            }
+        },
+
+        saveDrawingForQuestion(questionId, layers) {
+            try {
+                const key = `testify.quiz.drawing.${questionId}`;
+                localStorage.setItem(key, JSON.stringify({
+                    layers,
+                    savedAt: Date.now()
+                }));
+            } catch (e) {
+                console.error('[QuizCanvasManager] Save error:', e);
+            }
+        },
+
+        loadDrawingForQuestion(questionId) {
+            try {
+                const key = `testify.quiz.drawing.${questionId}`;
+                const raw = localStorage.getItem(key);
+                if (raw) {
+                    return JSON.parse(raw);
+                }
+            } catch (e) {
+                console.error('[QuizCanvasManager] Load error:', e);
+            }
+            return null;
+        },
+
+        getCanvas(questionId) {
+            const instance = this.canvasInstances.get(questionId);
+            return instance ? instance.canvas : null;
+        },
+
+        hasDrawings(questionId) {
+            const instance = this.canvasInstances.get(questionId);
+            return instance && instance.canvas && instance.canvas.hasDrawings();
+        },
+
+        getImageData(questionId) {
+            const instance = this.canvasInstances.get(questionId);
+            if (instance && instance.canvas) {
+                return instance.canvas.getImageData();
+            }
+            return null;
+        },
+
+        destroyForQuestion(questionId) {
+            const instance = this.canvasInstances.get(questionId);
+            if (instance) {
+                if (instance.canvas) {
+                    instance.canvas.destroy();
+                }
+                if (instance.container) {
+                    instance.container.remove();
+                }
+                this.canvasInstances.delete(questionId);
+            }
+        },
+
+        destroyAll() {
+            this.canvasInstances.forEach((_instance, questionId) => {
+                this.destroyForQuestion(questionId);
+            });
+        },
+
+        setEnabled(enabled) {
+            this.isEnabled = enabled;
+        }
+    };
+
+    // Styles (senin CSS dosyan zaten var, bu kısım aynı kalabilir)
+    const styles = `
+.quiz-canvas-wrapper {
+    margin-top: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-secondary);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+.quiz-canvas-wrapper.is-expanded {
+    position: fixed;
+    inset: 1rem;
+    z-index: 9999;
+    margin: 0;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+.quiz-canvas-wrapper.is-collapsed .quiz-canvas-body {
+    display: none;
+}
+.quiz-canvas-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-subtle);
+}
+.quiz-canvas-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+.quiz-canvas-title i {
+    font-size: 1rem;
+    color: var(--primary);
+}
+.quiz-canvas-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.quiz-canvas-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.quiz-canvas-btn:hover {
+    background: var(--bg-primary);
+    color: var(--primary);
+}
+.quiz-canvas-btn.is-active {
+    color: var(--primary);
+}
+.quiz-canvas-btn i {
+    font-size: 1rem;
+}
+.quiz-canvas-body {
+    position: relative;
+    height: 250px;
+    background: var(--canvas-bg, #ffffff);
+}
+.quiz-canvas-wrapper.is-expanded .quiz-canvas-body {
+    height: calc(100% - 44px);
+}
+.quiz-canvas-embed {
+    width: 100%;
+    height: 100%;
+}
+.quiz-canvas-embed .testify-canvas-container {
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+}
+.quiz-canvas-embed .testify-canvas-container.quiz-mode {
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+}
+[data-theme="dark"] .quiz-canvas-body {
+    background: var(--bg-primary);
+}
+@media (max-width: 768px) {
+    .quiz-canvas-body {
+        height: 200px;
+    }
+    .quiz-canvas-header {
+        padding: 0.35rem 0.5rem;
+    }
+    .quiz-canvas-title {
+        font-size: 0.75rem;
+    }
+    .quiz-canvas-btn {
+        width: 32px;
+        height: 32px;
+    }
+}
+`;
+
+    const styleEl = document.createElement('style');
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+
+    // QUIZ MANAGER INTEGRATION
+    function integrateWithQuizManager() {
+        if (!window.QuizManager) {
+            setTimeout(integrateWithQuizManager, 100);
+            return;
+        }
+
+        const originalDisplayQuestion = QuizManager.displayQuestion.bind(QuizManager);
+
+        QuizManager.displayQuestion = function () {
+            originalDisplayQuestion();
+
+            const question = this.state.questions[this.state.currentIndex];
+            if (!question) return;
+
+            const questionId = question.id || `q_${this.state.currentIndex}`;
+
+            const questionCard = document.querySelector('.question-card');
+            if (!questionCard) return;
+
+            const existingWrapper = questionCard.querySelector('.quiz-canvas-wrapper');
+            if (existingWrapper) {
+                existingWrapper.remove();
+            }
+
+            QuizCanvasManager.initForQuestion(questionId, questionCard);
+        };
+
+        const originalCleanup = QuizManager.cleanupPreviousQuiz.bind(QuizManager);
+
+        QuizManager.cleanupPreviousQuiz = function () {
+            originalCleanup();
+            QuizCanvasManager.destroyAll();
+        };
+
+        console.log('[QuizCanvasManager] Integrated with QuizManager');
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', integrateWithQuizManager);
+    } else {
+        integrateWithQuizManager();
+    }
+
+    window.QuizCanvasManager = QuizCanvasManager;
 
 })();
