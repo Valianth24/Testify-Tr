@@ -195,7 +195,8 @@
         MAX_HISTORY: 100,
 
         // Shape recognition
-        SHAPE_RECOGNITION_THRESHOLD: 0.85,
+        // Daha toleranslı olsun diye eşik 0.70'e çekildi
+        SHAPE_RECOGNITION_THRESHOLD: 0.7,
         MIN_POINTS_FOR_SHAPE: 10,
 
         // Colors
@@ -240,8 +241,9 @@
             MIN_BBOX_SIZE: 30,
             LINE_STRAIGHTNESS: 0.88,
             LINE_ASPECT_RATIO: 2.2,
-            CIRCLE_UNIFORMITY: 0.75,
-            CIRCLE_CIRCULARITY: 0.68,
+            // Daire çok abartı algılanmasın diye biraz sıkılaştırıldı
+            CIRCLE_UNIFORMITY: 0.8,
+            CIRCLE_CIRCULARITY: 0.75,
             CLOSED_SHAPE_RATIO: 0.28,
             CORNER_ANGLE_THRESHOLD: 0.38
         },
@@ -850,7 +852,7 @@
                         <div class="tool-divider"></div>
                         
                         ${!isQuizMode ? `
-                        <!-- Şekil kalemi: Çizgiyi algılayıp line/circle/rect/triangle'a çevirir -->
+                        <!-- Şekil kalemi: Çizgiyi algılayıp line/circle/rect/triangle/arrow/ellipse'e çevirir -->
                         <button class="tool-btn" data-tool="shape" data-tooltip="Akıllı Şekil Kalemi (S)">
                             <i class="ph ph-shapes"></i>
                         </button>
@@ -1307,10 +1309,11 @@
         renderCurrentStroke() {
             if (!this.currentStroke || this.currentPoints.length < 2) return;
 
+            // ÖNEMLİ: preset size slider'ı ezmesin diye size en sona yazılıyor
             const strokeOptions = {
-                size: this.size * CONFIG.STROKE_SIZE_MULTIPLIER, // kalınlaştırma
                 ...CONFIG.STROKE_OPTIONS,
-                ...this.brushPreset
+                ...this.brushPreset,
+                size: this.size * CONFIG.STROKE_SIZE_MULTIPLIER // kalınlaştırma
             };
 
             const outlinePoints = getStroke(this.currentPoints, strokeOptions);
@@ -1438,9 +1441,9 @@
                     CONFIG.BRUSH_PRESETS[0];
 
                 const strokeOptions = {
-                    size: strokeData.size * CONFIG.STROKE_SIZE_MULTIPLIER,
                     ...CONFIG.STROKE_OPTIONS,
-                    ...preset
+                    ...preset,
+                    size: strokeData.size * CONFIG.STROKE_SIZE_MULTIPLIER
                 };
 
                 const outlinePoints = getStroke(strokeData.points, strokeOptions);
@@ -1853,9 +1856,9 @@
             const preset = CONFIG.BRUSH_PRESETS.find(p => p.id === strokeData.brushPreset) || CONFIG.BRUSH_PRESETS[0];
 
             const strokeOptions = {
-                size: strokeData.size * CONFIG.STROKE_SIZE_MULTIPLIER,
                 ...CONFIG.STROKE_OPTIONS,
-                ...preset
+                ...preset,
+                size: strokeData.size * CONFIG.STROKE_SIZE_MULTIPLIER
             };
 
             const outlinePoints = getStroke(strokeData.points, strokeOptions);
